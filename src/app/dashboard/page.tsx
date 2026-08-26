@@ -7,6 +7,7 @@ import { Calendar, Users, Bell, Plus, CheckCircle, Clock, AlertTriangle } from '
 import { Header } from '@/components/Header';
 import { ScheduleWidget } from '@/components/ScheduleWidget';
 import { getScheduledTasks } from '@/actions/schedule';
+import { DashboardPlayer } from '@/components/game/DashboardPlayer';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -67,6 +68,11 @@ export default async function DashboardPage() {
               </Card>
             </Link>
           ))}
+        </div>
+
+        {/* プレイヤー情報（RPG） */}
+        <div className="mb-8">
+          <DashboardPlayer />
         </div>
 
         {/* スケジュールウィジェット */}
