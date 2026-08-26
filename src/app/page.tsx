@@ -21,11 +21,11 @@ export default async function HomePage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
               </span>
-              SchoolSync v0.2.0 — AI搭載・課題管理の新定番
+              SchoolSync v0.2.0 — AI搭載・賢者の書
             </div>
             
             <h1 className="text-4xl lg:text-6xl font-bold tracking-tight text-foreground mb-6 animate-slide-in">
-              課題を、<span className="text-primary">知的に</span>管理する。
+              課題を、<span className="text-primary">賢者の書</span>として。
             </h1>
             <p className="text-lg lg:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-slide-in" style={{animationDelay: '100ms'}}>
               自然言語でサッと入力、AIが最適な学習順序を提案。<br />
@@ -161,10 +161,10 @@ export default async function HomePage() {
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-2xl mx-auto relative z-10">
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4 animate-fade-in">
-              今すぐ、賢く課題管理を始めよう。
+              今すぐ、賢者の書を開こう。
             </h2>
             <p className="text-muted-foreground mb-8 text-lg animate-fade-in" style={{animationDelay: '100ms'}}>
-              登録は1分。Googleアカウントで即座に開始できます。
+              登録は1分。Googleで認めし賢者の仲間入り。
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{animationDelay: '200ms'}}>
               <Link 
