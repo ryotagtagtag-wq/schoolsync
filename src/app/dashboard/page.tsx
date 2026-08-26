@@ -5,11 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, Users, Bell, Plus, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import { Header } from '@/components/Header';
+import { ScheduleWidget } from '@/components/ScheduleWidget';
+import { getScheduledTasks } from '@/actions/schedule';
 
 export default async function DashboardPage() {
   const session = await auth();
   const statsResult = await getAssignmentStats();
   const stats = statsResult.success ? statsResult.data : { pending: 0, in_progress: 0, completed: 0, overdue: 0 };
+  
+  // スケジュール推奨を取得
+  const scheduleResult = await getScheduledTasks();
+  const scheduleData = scheduleResult.success ? scheduleResult.data : null;
 
   const statsData = [
     { label: '未着手', count: stats.pending, icon: Clock, color: 'text-yellow-500' },
@@ -34,6 +40,7 @@ export default async function DashboardPage() {
           <p className="text-muted-foreground mt-1">課題の進捗を一覧で確認できます</p>
         </div>
 
+        {/* 統計カード */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
           {statsData.map((stat) => (
             <Card key={stat.label}>
@@ -48,7 +55,8 @@ export default async function DashboardPage() {
           ))}
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* クイックアクション */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
           {quickActions.map((action) => (
             <Link key={action.href} href={action.href}>
               <Card className="hover:shadow-md transition-shadow cursor-pointer">
@@ -60,6 +68,9 @@ export default async function DashboardPage() {
             </Link>
           ))}
         </div>
+
+        {/* スケジュールウィジェット */}
+        <ScheduleWidget initialData={scheduleData} />
       </main>
     </div>
   );
