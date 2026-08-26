@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
 
-const publicPaths = ['/login', '/register', '/api/auth'];
+const publicPaths = ['/', '/login', '/register', '/api/auth'];
 
 export default auth((req) => {
   const isLoggedIn = !!req.auth;
