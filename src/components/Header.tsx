@@ -3,7 +3,7 @@
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Calendar, Users, Bell, LogOut, Plus, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { Calendar, Users, Bell, LogOut, Plus, CheckCircle, Clock, AlertTriangle, Settings } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface HeaderProps {
@@ -20,7 +20,12 @@ export function Header({ user }: HeaderProps) {
           </Link>
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            <span className="text-sm text-muted-foreground hidden sm:block">{user?.name || user?.email}</span>
+            <Link href="/profile" className="text-sm text-muted-foreground hidden sm:block hover:text-foreground transition-colors">
+              {user?.name || user?.email}
+            </Link>
+            <Link href="/settings" className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-lg" aria-label="設定">
+              <Settings className="h-5 w-5" />
+            </Link>
             <Button variant="ghost" size="sm" onClick={() => signOut({ callbackUrl: '/login' })}>
               <LogOut className="mr-2 h-4 w-4" />
               ログアウト

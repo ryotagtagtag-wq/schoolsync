@@ -10,10 +10,10 @@ import {
   userFacilities,
   facilities,
 } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { xpProgress } from '@/lib/game/xp';
 import { calculateStreak } from '@/lib/game/streak';
-import type { PlayerState } from '@/lib/game/types';
+import type { PlayerState, UserAchievementState } from '@/lib/game/types';
 
 /**
  * Get or create the player's profile.
@@ -93,8 +93,8 @@ export async function getPlayerProfile(): Promise<{
       .innerJoin(facilities, eq(userFacilities.facilityId, facilities.id))
       .where(eq(userFacilities.userId, userId));
 
-    // Get recent achievements
-    const recentAchs = await db
+    // Get all achievements
+    const userAchs = await db
       .select({
         achievementId: userAchievements.achievementId,
         name: achievements.name,
@@ -104,8 +104,7 @@ export async function getPlayerProfile(): Promise<{
       })
       .from(userAchievements)
       .innerJoin(achievements, eq(userAchievements.achievementId, achievements.id))
-      .where(eq(userAchievements.userId, userId))
-      .limit(5);
+      .where(eq(userAchievements.userId, userId));
 
     const xpInfo = xpProgress(profile.xp);
 
@@ -135,7 +134,7 @@ export async function getPlayerProfile(): Promise<{
         effectValue: f.effectPerLevel * f.level,
         upgradeCost: f.baseCost * (f.level + 1),
       })),
-      recentAchievements: recentAchs.map((a) => ({
+      achievements: userAchs.map((a) => ({
         achievementId: a.achievementId,
         name: a.name,
         icon: a.icon,
@@ -147,6 +146,156 @@ export async function getPlayerProfile(): Promise<{
     return { success: true, data: playerState };
   } catch (error) {
     console.error('getPlayerProfile error:', error);
+    return { success: false, error: 'プロフィール取得に失敗しました' };
+  }
+}
+
+/**
+ * Get full profile data for the profile page.
+ * Returns ALL achievements (locked + unlocked) via LEFT JOIN.
+ */
+export async function getProfilePageData(): Promise<{
+  success: boolean;
+  data?: PlayerState & { allAchievements: UserAchievementState[] };
+  error?: string;
+}> {
+  try {
+    const session = await auth();
+    const userId = (session?.user as any)?.id;
+    if (!userId) return { success: false, error: '未認証' };
+
+    // Get or create profile
+    let [profile] = await db
+      .select()
+      .from(userProfiles)
+      .where(eq(userProfiles.userId, userId))
+      .limit(1);
+    if (!profile) {
+      [profile] = await db
+        .insert(userProfiles)
+        .values({ userId })
+        .returning();
+    }
+
+    // Get or create stats
+    let [stats] = await db
+      .select()
+      .from(userStats)
+      .where(eq(userStats.userId, userId))
+      .limit(1);
+    if (!stats) {
+      [stats] = await db
+        .insert(userStats)
+        .values({ userId })
+        .returning();
+    }
+
+    // Update streak
+    const today = new Date().toISOString().slice(0, 10);
+    const streakResult = calculateStreak(
+      profile.streak,
+      profile.lastActiveDate,
+      today,
+    );
+    if (
+      streakResult.newStreak !== profile.streak ||
+      profile.lastActiveDate !== today
+    ) {
+      [profile] = await db
+        .update(userProfiles)
+        .set({
+          streak: streakResult.newStreak,
+          lastActiveDate: today,
+          updatedAt: new Date(),
+        })
+        .where(eq(userProfiles.userId, userId))
+        .returning();
+    }
+
+    // Get user's facilities
+    const userFacs = await db
+      .select({
+        facilityId: userFacilities.facilityId,
+        level: userFacilities.level,
+        name: facilities.name,
+        icon: facilities.icon,
+        maxLevel: facilities.maxLevel,
+        effectType: facilities.effectType,
+        effectPerLevel: facilities.effectPerLevel,
+        baseCost: facilities.baseCost,
+      })
+      .from(userFacilities)
+      .innerJoin(facilities, eq(userFacilities.facilityId, facilities.id))
+      .where(eq(userFacilities.userId, userId));
+
+    // Get ALL achievements (locked + unlocked) via LEFT JOIN
+    const allAchievements = await db
+      .select({
+        achievementId: achievements.id,
+        name: achievements.name,
+        icon: achievements.icon,
+        description: achievements.description,
+        unlockedAt: userAchievements.unlockedAt,
+      })
+      .from(achievements)
+      .leftJoin(
+        userAchievements,
+        and(
+          eq(userAchievements.achievementId, achievements.id),
+          eq(userAchievements.userId, userId)
+        )
+      );
+
+    const xpInfo = xpProgress(profile.xp);
+
+    const playerState: PlayerState = {
+      userId,
+      level: xpInfo.currentLevel,
+      xp: profile.xp,
+      xpToNext: xpInfo.xpToNext,
+      gold: profile.gold,
+      streak: profile.streak,
+      title: profile.title,
+      stats: {
+        int: stats.int,
+        wis: stats.wis,
+        str: stats.str,
+        end: stats.end,
+        cre: stats.cre,
+        soc: stats.soc,
+      },
+      facilities: userFacs.map((f) => ({
+        facilityId: f.facilityId,
+        name: f.name,
+        icon: f.icon,
+        level: f.level,
+        maxLevel: f.maxLevel,
+        effectType: f.effectType,
+        effectValue: f.effectPerLevel * f.level,
+        upgradeCost: f.baseCost * (f.level + 1),
+      })),
+      achievements: allAchievements
+        .filter((a) => a.unlockedAt !== null)
+        .map((a) => ({
+          achievementId: a.achievementId,
+          name: a.name,
+          icon: a.icon,
+          description: a.description,
+          unlockedAt: a.unlockedAt!,
+        })),
+    };
+
+    const allAchievementsState: UserAchievementState[] = allAchievements.map((a) => ({
+      achievementId: a.achievementId,
+      name: a.name,
+      icon: a.icon,
+      description: a.description,
+      unlockedAt: a.unlockedAt ?? undefined,
+    }));
+
+    return { success: true, data: { ...playerState, allAchievements: allAchievementsState } };
+  } catch (error) {
+    console.error('getProfilePageData error:', error);
     return { success: false, error: 'プロフィール取得に失敗しました' };
   }
 }

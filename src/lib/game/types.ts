@@ -10,7 +10,7 @@ export interface PlayerState {
   title: string;
   stats: SubjectStats;
   facilities: UserFacilityState[];
-  recentAchievements: UserAchievementState[];
+  achievements: UserAchievementState[];
 }
 
 export interface SubjectStats {
@@ -55,7 +55,7 @@ export interface UserAchievementState {
   name: string;
   icon: string;
   description: string;
-  unlockedAt: Date;
+  unlockedAt?: Date; // undefined = locked
 }
 
 export const SUBJECT_MAP: Record<string, { name: string; stat: keyof SubjectStats; monster: string; color: string }> = {
