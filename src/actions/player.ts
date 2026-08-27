@@ -146,7 +146,9 @@ export async function getPlayerProfile(): Promise<{
     return { success: true, data: playerState };
   } catch (error) {
     console.error('getPlayerProfile error:', error);
-    return { success: false, error: 'プロフィール取得に失敗しました' };
+    // 本番では詳細エラーを返さないが、開発時は詳細を返す
+    const message = error instanceof Error ? error.message : '不明なエラー';
+    return { success: false, error: `プロフィール取得に失敗しました: ${message}` };
   }
 }
 
@@ -296,7 +298,8 @@ export async function getProfilePageData(): Promise<{
     return { success: true, data: { ...playerState, allAchievements: allAchievementsState } };
   } catch (error) {
     console.error('getProfilePageData error:', error);
-    return { success: false, error: 'プロフィール取得に失敗しました' };
+    const message = error instanceof Error ? error.message : '不明なエラー';
+    return { success: false, error: `プロフィール取得に失敗しました: ${message}` };
   }
 }
 
@@ -369,6 +372,7 @@ export async function awardReward(params: {
     return { success: true, levelUp, newLevel };
   } catch (error) {
     console.error('awardReward error:', error);
-    return { success: false, error: '報酬付与に失敗しました' };
+    const message = error instanceof Error ? error.message : '不明なエラー';
+    return { success: false, error: `報酬付与に失敗しました: ${message}` };
   }
 }
