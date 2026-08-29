@@ -19,14 +19,16 @@ export function DashboardPlayer() {
         const res = await fetch('/api/player/profile');
         if (res.ok) {
           const data = await res.json();
-          setPlayer(data);
+          // API returns { success, data, error } — unwrap the payload
+          if (!data.success || !data.data) return;
+          setPlayer(data.data);
 
           // Check for level up
-          if (previousLevel > 0 && data.level > previousLevel) {
-            setNewLevel(data.level);
+          if (previousLevel > 0 && data.data.level > previousLevel) {
+            setNewLevel(data.data.level);
             setShowLevelUp(true);
           }
-          previousLevel = data.level;
+          previousLevel = data.data.level;
         }
       } catch (error) {
         console.error('Failed to fetch player profile:', error);
