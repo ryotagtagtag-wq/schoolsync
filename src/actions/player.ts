@@ -62,18 +62,19 @@ export async function getPlayerProfile(): Promise<{
   try {
     const session = await auth();
     const userId = (session?.user as any)?.id;
-    if (!userId) return { success: false, error: '未認証' };
-
     const email = (session?.user as any)?.email;
     const name = (session?.user as any)?.name;
     const image = (session?.user as any)?.image;
-    await getOrCreateUser(userId, email ?? '', name, image);
+    if (!userId) return { success: false, error: '未認証' };
+
+    const dbUser = await getOrCreateUser(userId, email ?? '', name, image);
+    const actualUserId = dbUser.id;
 
     // Get or create profile
     let [profile] = await db
       .select()
       .from(userProfiles)
-      .where(eq(userProfiles.userId, userId))
+      .where(eq(userProfiles.userId, actualUserId))
       .limit(1);
     if (!profile) {
       [profile] = await db
@@ -86,7 +87,7 @@ export async function getPlayerProfile(): Promise<{
     let [stats] = await db
       .select()
       .from(userStats)
-      .where(eq(userStats.userId, userId))
+      .where(eq(userStats.userId, actualUserId))
       .limit(1);
     if (!stats) {
       [stats] = await db
@@ -113,7 +114,7 @@ export async function getPlayerProfile(): Promise<{
           lastActiveDate: today,
           updatedAt: new Date(),
         })
-        .where(eq(userProfiles.userId, userId))
+        .where(eq(userProfiles.userId, actualUserId))
         .returning();
     }
 
@@ -131,7 +132,7 @@ export async function getPlayerProfile(): Promise<{
       })
       .from(userFacilities)
       .innerJoin(facilities, eq(userFacilities.facilityId, facilities.id))
-      .where(eq(userFacilities.userId, userId));
+      .where(eq(userFacilities.userId, actualUserId));
 
     // Get all achievements
     const userAchs = await db
@@ -203,18 +204,19 @@ export async function getProfilePageData(): Promise<{
   try {
     const session = await auth();
     const userId = (session?.user as any)?.id;
-    if (!userId) return { success: false, error: '未認証' };
-
     const email = (session?.user as any)?.email;
     const name = (session?.user as any)?.name;
     const image = (session?.user as any)?.image;
-    await getOrCreateUser(userId, email ?? '', name, image);
+    if (!userId) return { success: false, error: '未認証' };
+
+    const dbUser = await getOrCreateUser(userId, email ?? '', name, image);
+    const actualUserId = dbUser.id;
 
     // Get or create profile
     let [profile] = await db
       .select()
       .from(userProfiles)
-      .where(eq(userProfiles.userId, userId))
+      .where(eq(userProfiles.userId, actualUserId))
       .limit(1);
     if (!profile) {
       [profile] = await db
@@ -227,7 +229,7 @@ export async function getProfilePageData(): Promise<{
     let [stats] = await db
       .select()
       .from(userStats)
-      .where(eq(userStats.userId, userId))
+      .where(eq(userStats.userId, actualUserId))
       .limit(1);
     if (!stats) {
       [stats] = await db
@@ -254,7 +256,7 @@ export async function getProfilePageData(): Promise<{
           lastActiveDate: today,
           updatedAt: new Date(),
         })
-        .where(eq(userProfiles.userId, userId))
+        .where(eq(userProfiles.userId, actualUserId))
         .returning();
     }
 
@@ -272,7 +274,7 @@ export async function getProfilePageData(): Promise<{
       })
       .from(userFacilities)
       .innerJoin(facilities, eq(userFacilities.facilityId, facilities.id))
-      .where(eq(userFacilities.userId, userId));
+      .where(eq(userFacilities.userId, actualUserId));
 
     // Get ALL achievements (locked + unlocked) via LEFT JOIN
     const allAchievements = await db
@@ -288,7 +290,7 @@ export async function getProfilePageData(): Promise<{
         userAchievements,
         and(
           eq(userAchievements.achievementId, achievements.id),
-          eq(userAchievements.userId, userId)
+          eq(userAchievements.userId, actualUserId)
         )
       );
 
@@ -368,13 +370,14 @@ export async function awardReward(params: {
     const email = (session?.user as any)?.email;
     const name = (session?.user as any)?.name;
     const image = (session?.user as any)?.image;
-    await getOrCreateUser(userId, email ?? '', name, image);
+    const dbUser = await getOrCreateUser(userId, email ?? '', name, image);
+    const actualUserId = dbUser.id;
 
     // Get current profile (auto-create if missing)
     let [profile] = await db
       .select()
       .from(userProfiles)
-      .where(eq(userProfiles.userId, userId))
+      .where(eq(userProfiles.userId, actualUserId))
       .limit(1);
     if (!profile) {
       [profile] = await db
@@ -392,7 +395,7 @@ export async function awardReward(params: {
     await db
       .update(userProfiles)
       .set({ xp: newXp, gold: profile.gold + params.gold, updatedAt: new Date() })
-      .where(eq(userProfiles.userId, userId));
+      .where(eq(userProfiles.userId, actualUserId));
 
     // Update subject stats if provided
     if (params.subjectStat) {
@@ -402,7 +405,7 @@ export async function awardReward(params: {
         const currentStats = await db
           .select()
           .from(userStats)
-          .where(eq(userStats.userId, userId))
+          .where(eq(userStats.userId, actualUserId))
           .limit(1);
         if (currentStats[0]) {
           const currentValue =

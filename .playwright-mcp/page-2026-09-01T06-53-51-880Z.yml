@@ -1,0 +1,65 @@
+- generic [ref=f6e1]:
+  - generic [ref=f6e2]:
+    - generic [ref=f6e3]:
+      - banner [ref=f6e4]:
+        - generic [ref=f6e6]:
+          - link "SchoolSync" [ref=f6e7] [cursor=pointer]:
+            - /url: /dashboard
+          - generic [ref=f6e8]:
+            - generic [ref=f6e9]:
+              - button "ライトモード" [ref=f6e10]
+              - button "ダークモード" [ref=f6e11]
+              - button "システム設定に合わせる" [ref=f6e12]
+            - link "田口亮 共用" [ref=f6e13] [cursor=pointer]:
+              - /url: /profile
+            - link "設定" [ref=f6e14] [cursor=pointer]:
+              - /url: /settings
+            - button "ログアウト" [ref=f6e18]
+      - main [ref=f6e19]:
+        - generic [ref=f6e21]:
+          - generic [ref=f6e22]:
+            - heading "ダッシュボード" [level=1] [ref=f6e23]
+            - paragraph [ref=f6e24]: 田口亮 共用さん、今日も賢者の書を綴ろう
+          - generic [ref=f6e25]: 完了率 0%
+        - generic [ref=f6e35]:
+          - link [ref=f6e36] [cursor=pointer]:
+            - /url: /dashboard/assignments
+            - generic [ref=f6e40]:
+              - paragraph [ref=f6e41]: 未着手
+              - paragraph [ref=f6e42]: "0"
+          - link [ref=f6e47] [cursor=pointer]:
+            - /url: /dashboard/assignments
+            - generic [ref=f6e51]:
+              - paragraph [ref=f6e52]: 進行中
+              - paragraph [ref=f6e53]: "0"
+          - link [ref=f6e57] [cursor=pointer]:
+            - /url: /dashboard/assignments
+            - generic [ref=f6e61]:
+              - paragraph [ref=f6e62]: 完了
+              - paragraph [ref=f6e63]: "0"
+          - link [ref=f6e68] [cursor=pointer]:
+            - /url: /dashboard/assignments
+            - generic [ref=f6e72]:
+              - paragraph [ref=f6e73]: 期限切れ
+              - paragraph [ref=f6e74]: "0"
+        - generic [ref=f6e78]:
+          - link "課題を追加" [ref=f6e79] [cursor=pointer]:
+            - /url: /dashboard/assignments/new
+          - link "カレンダー" [ref=f6e86] [cursor=pointer]:
+            - /url: /calendar
+          - link "グループ" [ref=f6e94] [cursor=pointer]:
+            - /url: /groups
+          - link "通知" [ref=f6e105] [cursor=pointer]:
+            - /url: /notifications
+        - generic [ref=f6e115]:
+          - heading "賢者の書" [level=2] [ref=f6e116]
+          - link "詳細を見る" [ref=f6e120] [cursor=pointer]:
+            - /url: /profile
+        - generic [ref=f6e127]:
+          - heading "今日のおすすめスケジュール" [level=2] [ref=f6e129]
+          - generic [ref=f6e132]:
+            - paragraph [ref=f6e135]: 予定されている課題はありません
+            - paragraph [ref=f6e136]: 課題を追加してスケジュールを生成しましょう
+    - button "🔔" [ref=f6e137]
+  - region "Notifications alt+T"
+  - alert [ref=f6e138]
