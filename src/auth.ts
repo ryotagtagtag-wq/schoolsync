@@ -16,11 +16,32 @@ const credentialsSchema = z.object({
   password: z.string().min(8),
 });
 
-async function getOrCreateUser(email: string, name?: string | null, image?: string | null) {
-  const existing = await db.select().from(users).where(eq(users.email, email)).limit(1);
-  if (existing[0]) return existing[0];
+async function getOrCreateUser(userId: string, email: string, name?: string | null, image?: string | null) {
+  // First, try to find by email (Google OAuth may have different ID)
+  if (email) {
+    const existingByEmail = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    if (existingByEmail[0]) {
+      // User exists with this email, update their info if needed
+      const [updated] = await db
+        .update(users)
+        .set({
+          name: name ?? existingByEmail[0].name,
+          image: image ?? existingByEmail[0].image,
+          emailVerified: new Date(),
+        })
+        .where(eq(users.id, existingByEmail[0].id))
+        .returning();
+      return updated;
+    }
+  }
   
+  // Fallback: check by ID (for credentials users)
+  const existingById = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  if (existingById[0]) return existingById[0];
+  
+  // Create user if not exists
   const [newUser] = await db.insert(users).values({
+    id: userId,
     email,
     name: name ?? '',
     image: image ?? '',
@@ -69,8 +90,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async signIn({ user, account, profile }) {
       // Create user in database for Google OAuth if not exists
-      if (account?.provider === 'google' && user?.email) {
-        await getOrCreateUser(user.email, user.name, user.image);
+      if (account?.provider === 'google' && user?.email && user.id) {
+        await getOrCreateUser(user.id, user.email, user.name ?? '', user.image ?? '');
       }
       return true;
     },
