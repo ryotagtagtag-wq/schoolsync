@@ -17,9 +17,27 @@ import { calculateStreak } from '@/lib/game/streak';
 import type { PlayerState, UserAchievementState } from '@/lib/game/types';
 
 async function getOrCreateUser(userId: string, email: string, name?: string | null, image?: string | null) {
-  // Check if user exists
-  const existing = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-  if (existing[0]) return existing[0];
+  // First, try to find by email (Google OAuth may have different ID)
+  if (email) {
+    const existingByEmail = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    if (existingByEmail[0]) {
+      // User exists with this email, update their info if needed
+      const [updated] = await db
+        .update(users)
+        .set({
+          name: name ?? existingByEmail[0].name,
+          image: image ?? existingByEmail[0].image,
+          emailVerified: new Date(),
+        })
+        .where(eq(users.id, existingByEmail[0].id))
+        .returning();
+      return updated;
+    }
+  }
+  
+  // Fallback: check by ID (for credentials users)
+  const existingById = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  if (existingById[0]) return existingById[0];
   
   // Create user if not exists
   const [newUser] = await db.insert(users).values({

@@ -1,0 +1,4 @@
+- generic [ref=f3e1]:
+  - button "🔔" [ref=f3e5]
+  - region "Notifications alt+T"
+  - alert [ref=f3e6]
