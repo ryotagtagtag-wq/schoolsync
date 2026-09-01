@@ -93,7 +93,7 @@ export const userProfiles = pgTable('user_profiles', {
   xp: integer('xp').default(0).notNull(),
   gold: integer('gold').default(0).notNull(),
   streak: integer('streak').default(0).notNull(),
-  lastActiveDate: text('last_active_date'), // YYYY-MM-DD, for streak tracking
+  lastActiveDate: text('last_active_date').default(''), // YYYY-MM-DD, for streak tracking
   title: text('title').default('見習い賢者').notNull(), // unlocked title
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
