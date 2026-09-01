@@ -9,11 +9,28 @@ import {
   achievements,
   userFacilities,
   facilities,
+  users,
 } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { xpProgress } from '@/lib/game/xp';
 import { calculateStreak } from '@/lib/game/streak';
 import type { PlayerState, UserAchievementState } from '@/lib/game/types';
+
+async function getOrCreateUser(userId: string, email: string, name?: string | null, image?: string | null) {
+  // Check if user exists
+  const existing = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  if (existing[0]) return existing[0];
+  
+  // Create user if not exists
+  const [newUser] = await db.insert(users).values({
+    id: userId,
+    email,
+    name: name ?? '',
+    image: image ?? '',
+    emailVerified: new Date(),
+  }).returning();
+  return newUser;
+}
 
 /**
  * Get or create the player's profile.
@@ -28,6 +45,11 @@ export async function getPlayerProfile(): Promise<{
     const session = await auth();
     const userId = (session?.user as any)?.id;
     if (!userId) return { success: false, error: '未認証' };
+
+    const email = (session?.user as any)?.email;
+    const name = (session?.user as any)?.name;
+    const image = (session?.user as any)?.image;
+    await getOrCreateUser(userId, email ?? '', name, image);
 
     // Get or create profile
     let [profile] = await db
@@ -146,7 +168,6 @@ export async function getPlayerProfile(): Promise<{
     return { success: true, data: playerState };
   } catch (error) {
     console.error('getPlayerProfile error:', error);
-    // 本番では詳細エラーを返さないが、開発時は詳細を返す
     const message = error instanceof Error ? error.message : '不明なエラー';
     return { success: false, error: `プロフィール取得に失敗しました: ${message}` };
   }
@@ -165,6 +186,11 @@ export async function getProfilePageData(): Promise<{
     const session = await auth();
     const userId = (session?.user as any)?.id;
     if (!userId) return { success: false, error: '未認証' };
+
+    const email = (session?.user as any)?.email;
+    const name = (session?.user as any)?.name;
+    const image = (session?.user as any)?.image;
+    await getOrCreateUser(userId, email ?? '', name, image);
 
     // Get or create profile
     let [profile] = await db
@@ -320,6 +346,11 @@ export async function awardReward(params: {
     const session = await auth();
     const userId = (session?.user as any)?.id;
     if (!userId) return { success: false, error: '未認証' };
+
+    const email = (session?.user as any)?.email;
+    const name = (session?.user as any)?.name;
+    const image = (session?.user as any)?.image;
+    await getOrCreateUser(userId, email ?? '', name, image);
 
     // Get current profile (auto-create if missing)
     let [profile] = await db

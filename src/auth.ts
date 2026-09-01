@@ -16,6 +16,19 @@ const credentialsSchema = z.object({
   password: z.string().min(8),
 });
 
+async function getOrCreateUser(email: string, name?: string | null, image?: string | null) {
+  const existing = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  if (existing[0]) return existing[0];
+  
+  const [newUser] = await db.insert(users).values({
+    email,
+    name: name ?? '',
+    image: image ?? '',
+    emailVerified: new Date(),
+  }).returning();
+  return newUser;
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Google({
@@ -54,6 +67,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     error: '/login',
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // Create user in database for Google OAuth if not exists
+      if (account?.provider === 'google' && user?.email) {
+        await getOrCreateUser(user.email, user.name, user.image);
+      }
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) token.id = user.id;
       return token;
