@@ -115,7 +115,7 @@ export default async function HomePage() {
                   <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span> 月/週カレンダー・ドラッグ操作</li>
                   <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span> グループ共有・招待コード</li>
                   <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span> 期限リマインダー（毎朝9時）</li>
-                  <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span> NextAuth v5・Google OAuth</li>
+                  <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span> NextAuth v5 (メール/パスワード)</li>
                 </ul>
               </div>
             </article>
@@ -164,7 +164,7 @@ export default async function HomePage() {
               今すぐ、賢者の書を開こう。
             </h2>
             <p className="text-muted-foreground mb-8 text-lg animate-fade-in" style={{animationDelay: '100ms'}}>
-              登録は1分。Googleで認めし賢者の仲間入り。
+              登録は1分。賢者の仲間入り。
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{animationDelay: '200ms'}}>
               <Link 

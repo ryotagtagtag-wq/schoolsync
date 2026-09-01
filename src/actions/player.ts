@@ -17,7 +17,7 @@ import { calculateStreak } from '@/lib/game/streak';
 import type { PlayerState, UserAchievementState } from '@/lib/game/types';
 
 async function getOrCreateUser(userId: string, email: string, name?: string | null, image?: string | null) {
-  // First, try to find by email (Google OAuth may have different ID)
+  // First, try to find by email (email-based lookup)
   if (email) {
     const existingByEmail = await db.select().from(users).where(eq(users.email, email)).limit(1);
     if (existingByEmail[0]) {
