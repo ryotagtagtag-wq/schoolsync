@@ -4,14 +4,31 @@ vi.mock('@/auth', () => ({
   auth: vi.fn(),
 }));
 
+// Mock assignments data for stats test
+const mockAssignments = [
+  { id: '1', userId: 'user-1', status: 'pending', dueDate: new Date('2026-09-01') },
+  { id: '2', userId: 'user-1', status: 'in_progress', dueDate: new Date('2026-09-02') },
+  { id: '3', userId: 'user-1', status: 'completed', dueDate: new Date('2026-08-20') },
+  { id: '4', userId: 'user-1', status: 'pending', dueDate: new Date('2026-08-15') }, // overdue
+];
+
+// Create a thenable that also has orderBy/limit methods
+function createQueryMock(data) {
+  const promise = Promise.resolve(data);
+  const thenable = {
+    then: promise.then.bind(promise),
+    catch: promise.catch.bind(promise),
+    orderBy: vi.fn(() => Promise.resolve(data)),
+    limit: vi.fn(() => Promise.resolve(data)),
+  };
+  return thenable;
+}
+
 vi.mock('@/db', () => ({
   db: {
     select: vi.fn(() => ({
       from: vi.fn(() => ({
-        where: vi.fn(() => ({
-          orderBy: vi.fn(() => Promise.resolve([])),
-          limit: vi.fn(() => Promise.resolve([])),
-        })),
+        where: vi.fn(() => createQueryMock(mockAssignments)),
       })),
     })),
     insert: vi.fn(() => ({

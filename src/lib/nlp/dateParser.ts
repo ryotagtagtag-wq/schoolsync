@@ -1,142 +1,247 @@
-/**
- * Japanese Date Parser - 日本語相対日付パーサー
- * date-fns v4 + ja locale を使用
- */
-
 import { 
   parse, 
-  format, 
-  addDays, 
-  addWeeks, 
-  addMonths, 
-  startOfDay, 
-  startOfWeek, 
-  startOfMonth,
-  setDay,
   isValid,
-  getDay,
-  differenceInDays
+  addMonths,
+  startOfMonth
 } from 'date-fns';
 import { ja } from 'date-fns/locale/ja';
+import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
+
+const JST = 'Asia/Tokyo';
+
+/**
+ * Japanese Date Parser - 日本語相対日付パーサー
+ * date-fns v4 + ja locale + date-fns-tz を使用（JST固定で処理）
+ */
+
+/**
+ * baseDate を JST として解釈し、その日の 0:00 JST を UTC の Date として返す
+ */
+function getJSTToday(baseDate: Date = new Date()): Date {
+  const jst = toZonedTime(baseDate, JST);
+  const year = jst.getFullYear();
+  const month = jst.getMonth();
+  return new Date(Date.UTC(year, month, jst.getDate() - 1, 15, 0, 0));
+}
+
+/**
+ * JSTでの週初め（月曜日0:00）を取得
+ */
+function getJSTStartOfWeek(date: Date): Date {
+  const jst = toZonedTime(date, JST);
+  const year = jst.getFullYear();
+  const month = jst.getMonth();
+  const dayOfMonth = jst.getDate();
+  
+  let m = month + 1;
+  let y = year;
+  if (m < 3) { m += 12; y -= 1; }
+  const dayOfWeek = (dayOfMonth + Math.floor(13 * (m + 1) / 5) + y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400)) % 7;
+  const mondayBased = (dayOfWeek + 5) % 7;
+  const diff = -mondayBased;
+  
+  return new Date(Date.UTC(year, month, dayOfMonth + diff - 1, 15, 0, 0));
+}
+
+/**
+ * JSTでの週内の指定曜日を取得（月曜日=1基準）
+ */
+function getJSTWeekday(weekStart: Date, targetDay: number): Date {
+  const jst = toZonedTime(weekStart, JST);
+  const year = jst.getFullYear();
+  const month = jst.getMonth();
+  const day = jst.getDate() + (targetDay === 0 ? 6 : targetDay - 1);
+  return new Date(Date.UTC(year, month, day - 1, 15, 0, 0));
+}
+
+/**
+ * JST基準のヘルパー関数
+ */
+function addDaysJST(date: Date, days: number): Date {
+  return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+}
+
+function addWeeksJST(date: Date, weeks: number): Date {
+  return new Date(date.getTime() + weeks * 7 * 24 * 60 * 60 * 1000);
+}
+
+function addMonthsJST(date: Date, months: number): Date {
+  const jst = toZonedTime(date, JST);
+  const year = jst.getFullYear();
+  const month = jst.getMonth() + months;
+  return new Date(Date.UTC(year, month, 0, 15, 0, 0));
+}
+
+function getJSTStartOfMonth(date: Date): Date {
+  const jst = toZonedTime(date, JST);
+  const year = jst.getFullYear();
+  const month = jst.getMonth();
+  return new Date(Date.UTC(year, month, 0, 15, 0, 0));
+}
+
+function differenceInDaysJST(a: Date, b: Date): number {
+  return Math.floor((a.getTime() - b.getTime()) / (24 * 60 * 60 * 1000));
+}
+
+function weekdayToNumber(weekday: string): number | null {
+  const map: Record<string, number> = {
+    '月曜日': 1, '火曜日': 2, '水曜日': 3, '木曜日': 4,
+    '金曜日': 5, '土曜日': 6, '日曜日': 0,
+    '月': 1, '火': 2, '水': 3, '木': 4, '金': 5, '土': 6, '日': 0,
+  };
+  return map[weekday] ?? null;
+}
 
 /**
  * 現在日時を基準にした相対日付表現をパース
  * @param expression 日本語の日付表現（例: "明日", "来週金曜日", "9/15"）
- * @param baseDate 基準日（デフォルト: 今日）
+ * @param baseDate 基準日（デフォルト: 今日）。任意のタイムゾーンの Date で渡せる。内部で JST に変換して処理。
  * @returns ISO 8601 形式の日付文字列 (YYYY-MM-DD)、パース失敗時は null
  */
 export function parseJapaneseDate(expression: string, baseDate: Date = new Date()): string | null {
-  const normalized = expression.trim().replace(/[\s\u3000]/g, '');
-  const today = startOfDay(baseDate);
+  const normalized = expression.trim().replace(/[\s　]/g, '');
+  const today = getJSTToday(baseDate);
+  const baseYear = toZonedTime(baseDate, JST).getFullYear();
   
   // 1. 相対日付キーワード
-  const relativePatterns: Array<{ pattern: RegExp; handler: (match: RegExpMatchArray) => Date | null }> = [
-    // 今日・明日・明後日・明明後日
-    { pattern: /^今日$/, handler: () => today },
-    { pattern: /^明日$/, handler: () => addDays(today, 1) },
-    { pattern: /^明後日$|^あさって$/, handler: () => addDays(today, 2) },
-    { pattern: /^明明後日$|^しあさって$/, handler: () => addDays(today, 3) },
+  const relativePatterns: Array<{ pattern: RegExp; handler: (match: RegExpMatchArray, today: Date) => Date | null }> = [
+    { pattern: /^今日$/, handler: (_, today) => today },
+    { pattern: /^明日$/, handler: (_, today) => addDaysJST(today, 1) },
+    { pattern: /^明後日$|^あさって$/, handler: (_, today) => addDaysJST(today, 2) },
+    { pattern: /^明明後日$|^しあさって$/, handler: (_, today) => addDaysJST(today, 3) },
+    { pattern: /^(\d+)日後$/, handler: (m, today) => addDaysJST(today, parseInt(m[1], 10)) },
+    { pattern: /^(\d+)日前$/, handler: (m, today) => addDaysJST(today, -parseInt(m[1], 10)) },
+    { pattern: /^今週$/, handler: (_, today) => getJSTStartOfWeek(today) },
+    { pattern: /^来週$/, handler: (_, today) => addWeeksJST(getJSTStartOfWeek(today), 1) },
+    { pattern: /^再来週$/, handler: (_, today) => addWeeksJST(getJSTStartOfWeek(today), 2) },
+    { pattern: /^今月$/, handler: (_, today) => getJSTStartOfMonth(today) },
+    { pattern: /^来月$/, handler: (_, today) => addMonthsJST(getJSTStartOfMonth(today), 1) },
     
-    // N日後・N日前
-    { pattern: /^(\d+)日後$/, handler: (m) => addDays(today, parseInt(m[1], 10)) },
-    { pattern: /^(\d+)日前$/, handler: (m) => addDays(today, -parseInt(m[1], 10)) },
-    
-    // 今週・来週・再来週
-    { pattern: /^今週$/, handler: () => startOfWeek(today, { weekStartsOn: 1 }) },
-    { pattern: /^来週$/, handler: () => addWeeks(startOfWeek(today, { weekStartsOn: 1 }), 1) },
-    { pattern: /^再来週$/, handler: () => addWeeks(startOfWeek(today, { weekStartsOn: 1 }), 2) },
-    
-    // 今月・来月
-    { pattern: /^今月$/, handler: () => startOfMonth(today) },
-    { pattern: /^来月$/, handler: () => addMonths(startOfMonth(today), 1) },
-    
-    // 曜日指定: 「月曜日」「来週火曜日」「今週金曜日」
-    { pattern: /^(今週|来週|再来週)?(月曜日|火曜日|水曜日|木曜日|金曜日|土曜日|日曜日)$/, handler: (m) => {
+    // 曜日指定: 過去調整なし
+    { pattern: /^(今週|来週|再来週)?(月曜日|火曜日|水曜日|木曜日|金曜日|土曜日|日曜日|月|火|水|木|金|土|日)$/, handler: (m, today) => {
       const weekOffset = m[1] === '来週' ? 1 : m[1] === '再来週' ? 2 : 0;
       const targetDay = weekdayToNumber(m[2]);
       if (targetDay === null) return null;
-      
-      const weekStart = addWeeks(startOfWeek(today, { weekStartsOn: 1 }), weekOffset);
-      const result = setDay(weekStart, targetDay, { weekStartsOn: 1 });
-      
-      // 過去の日付にならないよう調整
-      if (differenceInDays(result, today) < 0) {
-        return addWeeks(result, 1);
-      }
-      return result;
+      const weekStart = addWeeksJST(getJSTStartOfWeek(today), weekOffset);
+      return getJSTWeekday(weekStart, targetDay);
     }},
     
-    // 「来月の○日」
-    { pattern: /^来月(\d{1,2})日?$/, handler: (m) => {
+    { pattern: /^来月(\d{1,2})日?$/, handler: (m, today) => {
       const day = parseInt(m[1], 10);
       if (day < 1 || day > 31) return null;
-      const nextMonth = addMonths(startOfMonth(today), 1);
-      return new Date(nextMonth.getFullYear(), nextMonth.getMonth(), day);
+      const jst = toZonedTime(today, JST);
+      const nextMonth = addMonths(startOfMonth(jst), 1);
+      const year = nextMonth.getFullYear();
+      const month = nextMonth.getMonth();
+      return new Date(Date.UTC(year, month, day - 1, 15, 0, 0));
     }},
-    
-    // 「今月の○日」
-    { pattern: /^今月(\d{1,2})日?$/, handler: (m) => {
+    { pattern: /^今月(\d{1,2})日?$/, handler: (m, today) => {
       const day = parseInt(m[1], 10);
       if (day < 1 || day > 31) return null;
-      return new Date(today.getFullYear(), today.getMonth(), day);
+      const jst = toZonedTime(today, JST);
+      const year = jst.getFullYear();
+      const month = jst.getMonth();
+      return new Date(Date.UTC(year, month, day - 1, 15, 0, 0));
     }},
   ];
   
-  // 相対パターンマッチング
+  
+  // 1. 相対パターン
   for (const { pattern, handler } of relativePatterns) {
     const match = normalized.match(pattern);
     if (match) {
-      const result = handler(match);
+      const result = handler(match, today);
       if (result && isValid(result)) {
-        return format(startOfDay(result), 'yyyy-MM-dd');
+        return formatInTimeZone(result, JST, 'yyyy-MM-dd');
       }
     }
   }
   
   // 2. 明示的な日付フォーマット
-  const explicitPatterns: Array<{ pattern: RegExp; formatStr: string }> = [
-    { pattern: /^(\d{4})[\/\-年](\d{1,2})[\/\-月](\d{1,2})日?$/, formatStr: 'yyyy-MM-dd' },
-    { pattern: /^(\d{1,2})[\/\-月](\d{1,2})日?$/, formatStr: 'MM-dd' }, // 年なし → 今年または来年
-    { pattern: /^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/, formatStr: 'yyyy-MM-dd' },
-    { pattern: /^(\d{1,2})[\/\-](\d{1,2})$/, formatStr: 'MM-dd' },
-  ];
-  
-  for (const { pattern, formatStr } of explicitPatterns) {
-    const match = normalized.match(pattern);
-    if (match) {
-      try {
-        let year = today.getFullYear();
-        let month: number;
-        let day: number;
-        
-        if (formatStr === 'yyyy-MM-dd') {
-          year = parseInt(match[1], 10);
-          month = parseInt(match[2], 10);
-          day = parseInt(match[3], 10);
-        } else { // MM-dd
-          month = parseInt(match[1], 10);
-          day = parseInt(match[2], 10);
-          
-          // 過去の日付なら来年とする
-          const candidate = new Date(year, month - 1, day);
-          if (candidate < today) {
-            year += 1;
+  const explicitPatterns: Array<{ pattern: RegExp; handler: (match: RegExpMatchArray) => string | null }> = [
+    { 
+      pattern: /^(\d{4})[/年\-](\d{1,2})[/月\-](\d{1,2})日?$/, 
+      handler: (m) => {
+        const year = parseInt(m[1], 10);
+        const month = parseInt(m[2], 10);
+        const day = parseInt(m[3], 10);
+        if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+        const result = new Date(Date.UTC(year, month - 1, day - 1, 15, 0, 0));
+        const check = toZonedTime(result, JST);
+        if (check.getFullYear() !== year || check.getMonth() !== month - 1 || check.getDate() !== day) return null;
+        return formatInTimeZone(result, JST, 'yyyy-MM-dd');
+      }
+    },
+    { 
+      pattern: /^(\d{1,2})[/月\-](\d{1,2})日?$/, 
+      handler: (m) => {
+        const month = parseInt(m[1], 10);
+        const day = parseInt(m[2], 10);
+        if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+        let year = baseYear;
+        const result = new Date(Date.UTC(year, month - 1, day - 1, 15, 0, 0));
+        const check = toZonedTime(result, JST);
+        if (check.getFullYear() !== year || check.getMonth() !== month - 1 || check.getDate() !== day) return null;
+        // 過去の日付なら来年へ
+        if (result < today) {
+          year += 1;
+          const resultNext = new Date(Date.UTC(year, month - 1, day - 1, 15, 0, 0));
+          const checkNext = toZonedTime(resultNext, JST);
+          if (checkNext.getFullYear() === year && checkNext.getMonth() === month - 1 && checkNext.getDate() === day) {
+            return formatInTimeZone(resultNext, JST, 'yyyy-MM-dd');
           }
         }
-        
-        if (month < 1 || month > 12 || day < 1 || day > 31) continue;
-        
-        const result = new Date(year, month - 1, day);
-        if (isValid(result)) {
-          return format(startOfDay(result), 'yyyy-MM-dd');
-        }
-      } catch {
-        continue;
+        return formatInTimeZone(result, JST, 'yyyy-MM-dd');
       }
+    },
+    { 
+      pattern: /^(\d{4})[/\-](\d{1,2})[/\-](\d{1,2})$/, 
+      handler: (m) => {
+        const year = parseInt(m[1], 10);
+        const month = parseInt(m[2], 10);
+        const day = parseInt(m[3], 10);
+        if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+        const result = new Date(Date.UTC(year, month - 1, day - 1, 15, 0, 0));
+        const check = toZonedTime(result, JST);
+        if (check.getFullYear() !== year || check.getMonth() !== month - 1 || check.getDate() !== day) return null;
+        return formatInTimeZone(result, JST, 'yyyy-MM-dd');
+      }
+    },
+    { 
+      pattern: /^(\d{1,2})[/\-](\d{1,2})$/, 
+      handler: (m) => {
+        const month = parseInt(m[1], 10);
+        const day = parseInt(m[2], 10);
+        if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+        let year = baseYear;
+        const result = new Date(Date.UTC(year, month - 1, day - 1, 15, 0, 0));
+        const check = toZonedTime(result, JST);
+        if (check.getFullYear() !== year || check.getMonth() !== month - 1 || check.getDate() !== day) return null;
+        // 過去の日付なら来年へ
+        if (result < today) {
+          year += 1;
+          const resultNext = new Date(Date.UTC(year, month - 1, day - 1, 15, 0, 0));
+          const checkNext = toZonedTime(resultNext, JST);
+          if (checkNext.getFullYear() === year && checkNext.getMonth() === month - 1 && checkNext.getDate() === day) {
+            return formatInTimeZone(resultNext, JST, 'yyyy-MM-dd');
+          }
+        }
+        return formatInTimeZone(result, JST, 'yyyy-MM-dd');
+      }
+    },
+  ];
+  
+  // 明示的フォーマット
+  for (const { pattern, handler } of explicitPatterns) {
+    const match = normalized.match(pattern);
+    if (match) {
+      const result = handler(match);
+      if (result) return result;
     }
   }
   
   // 3. date-fns parse で日本語ロケールでのパースを試行
+  const todayForParse = getJSTToday(baseDate);
   const jaPatterns = [
     'yyyy年M月d日',
     'yyyy/M/d',
@@ -149,12 +254,17 @@ export function parseJapaneseDate(expression: string, baseDate: Date = new Date(
     try {
       const parsed = parse(normalized, pattern, today, { locale: ja });
       if (isValid(parsed)) {
-        // 年が指定されていないパターンの場合、過去なら来年扱い
-        if (!normalized.match(/^\d{4}/) && parsed < today) {
-          const nextYear = new Date(parsed.getFullYear() + 1, parsed.getMonth(), parsed.getDate());
-          return format(startOfDay(nextYear), 'yyyy-MM-dd');
+        if (!normalized.match(/^\d{4}/) && parsed < getJSTToday(baseDate)) {
+          const nextYear = new Date(parsed.getFullYear() + 1, parsed.getMonth(), parsed.getDate(), 15, 0, 0);
+          return formatInTimeZone(nextYear, JST, 'yyyy-MM-dd');
         }
-        return format(startOfDay(parsed), 'yyyy-MM-dd');
+        const check = toZonedTime(parsed, JST);
+        const expectedMonth = parsed.getMonth();
+        const expectedDate = parsed.getDate();
+        if (check.getUTCMonth() !== expectedMonth || check.getUTCDate() !== expectedDate) {
+          continue;
+        }
+        return formatInTimeZone(parsed, JST, 'yyyy-MM-dd');
       }
     } catch {
       continue;
@@ -167,21 +277,6 @@ export function parseJapaneseDate(expression: string, baseDate: Date = new Date(
 /**
  * 日本語曜日を数値に変換 (月=1, ..., 日=0)
  */
-function weekdayToNumber(weekday: string): number | null {
-  const map: Record<string, number> = {
-    '月曜日': 1, '火曜日': 2, '水曜日': 3, '木曜日': 4,
-    '金曜日': 5, '土曜日': 6, '日曜日': 0,
-    '月': 1, '火': 2, '水': 3, '木': 4, '金': 5, '土': 6, '日': 0,
-  };
-  return map[weekday] ?? null;
-}
-
-/**
- * 複数の日付表現から最も早い有効な日付を抽出
- * @param expressions 日付表現の配列
- * @param baseDate 基準日
- * @returns 最初に見つかった有効な日付、なければ null
- */
 export function extractFirstDate(expressions: string[], baseDate: Date = new Date()): string | null {
   for (const expr of expressions) {
     const parsed = parseJapaneseDate(expr, baseDate);
@@ -192,19 +287,15 @@ export function extractFirstDate(expressions: string[], baseDate: Date = new Dat
 
 /**
  * テキストから日付らしい部分を抽出してパースを試行
- * @param text 入力テキスト
- * @param baseDate 基準日
- * @returns パースされた日付、なければ null
  */
 export function extractDateFromText(text: string, baseDate: Date = new Date()): string | null {
-  // 日付らしきパターンを抽出
   const datePatterns = [
-    /\d{4}[\/\-年]\d{1,2}[\/\-月]\d{1,2}日?/g,
-    /\d{1,2}[\/\-月]\d{1,2}日?/g,
+    /\d{4}[/年\-]\d{1,2}[/月\-]\d{1,2}日?/g,
+    /\d{1,2}[/月\-]\d{1,2}日?/g,
     /\d{1,2}日後/g,
     /\d{1,2}日前/g,
     /(今日|明日|明後日|明明後日|あさって|しあさって)/g,
-    /(今週|来週|再来週)?(月曜日|火曜日|水曜日|木曜日|金曜日|土曜日|日曜日)/g,
+    /(今週|来週|再来週)?(月曜日|火曜日|水曜日|木曜日|金曜日|土曜日|日曜日|月|火|水|木|金|土|日)/g,
     /(今月|来月)\d{1,2}日?/g,
     /(今週|来週|再来週|今月|来月)/g,
   ];

@@ -163,7 +163,13 @@ export function regexParseWithValidation(
     const data = regexParse(input, currentDate);
     
     // 必須フィールドの検証
-    if (!data.title || data.title === `${data.subject}の課題`) {
+    // フォールバックタイトル（"教科の課題")は、教科が入力から抽出された場合のみ許可
+    // 教科も日付も特定できない曖昧な入力は失敗とする
+    const extractedSubjects = extractSubjects(input);
+    const isFallbackTitle = data.title === `${data.subject}の課題`;
+    const hasExtractedSubject = extractedSubjects.length > 0;
+    
+    if (!data.title || (isFallbackTitle && !hasExtractedSubject)) {
       return {
         success: false,
         error: {

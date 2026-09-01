@@ -8,11 +8,19 @@ vi.mock('@/db', () => ({
   db: {
     select: vi.fn(() => ({
       from: vi.fn(() => ({
-        where: vi.fn(() => ({
-          orderBy: vi.fn(() => ({
-            limit: vi.fn(() => Promise.resolve([])),
-          })),
-        })),
+        where: vi.fn(() => {
+          // Return a thenable that resolves to an array for getUnreadCount
+          // and has orderBy/limit for getNotifications
+          const data = [];
+          const promise = Promise.resolve(data);
+          return {
+            then: promise.then.bind(promise),
+            catch: promise.catch.bind(promise),
+            orderBy: vi.fn(() => ({
+              limit: vi.fn(() => Promise.resolve(data)),
+            })),
+          };
+        }),
       })),
     })),
     insert: vi.fn(() => ({
