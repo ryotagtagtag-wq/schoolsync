@@ -39,11 +39,11 @@
       <tr><th>項目</th><th>内容</th></tr>
       <tr><td>プロジェクト名</td><td>SchoolSync</td></tr>
       <tr><td>説明</td><td>学校の課題管理ツール - 期限管理、進捗追跡、カレンダー、グループ共有、通知リマインダー、<strong>自然言語入力、認知負荷適応スケジューラ</strong></td></tr>
-      <tr><td>バージョン</td><td>0.2.0</td></tr>
+      <tr><td>バージョン</td><td>0.2.1</td></tr>
       <tr><td>本番URL</td><td><a class="url" href="https://schoolsync-seven.vercel.app" target="_blank">https://schoolsync-seven.vercel.app</a> / <a class="url" href="https://task.ryopc.org" target="_blank">https://task.ryopc.org</a></td></tr>
       <tr><td>GitHub</td><td><a class="url" href="https://github.com/ryotagtagtag-wq/schoolsync" target="_blank">https://github.com/ryotagtagtag-wq/schoolsync</a></td></tr>
       <tr><td>ステータス</td><td><span class="badge badge-complete">本番稼働中</span> <span class="badge badge-prod">Production Ready</span> <span class="badge badge-new">新機能追加</span></td></tr>
-      <tr><td>最終更新</td><td>2026-08-26</td></tr>
+      <tr><td>最終更新</td><td>2026-09-02</td></tr>
     </table>
   </div>
 
@@ -131,7 +131,7 @@
       <tr><td>フレームワーク</td><td>Next.js</td><td>16.3.2 (App Router, Server Actions)</td></tr>
       <tr><td>言語</td><td>TypeScript</td><td>5.x</td></tr>
       <tr><td>データベース</td><td>Neon Postgres + Drizzle ORM</td><td>PostgreSQL 16 / Drizzle 0.45</td></tr>
-      <tr><td>認証</td><td>NextAuth.js</td><td>v5 (Beta) - Credentials + Google OAuth</td></tr>
+      <tr><td>認証</td><td>NextAuth.js</td><td>v5 (Beta) - Credentials (メール/パスワード)</td></tr>
       <tr><td>スタイリング</td><td>Tailwind CSS + shadcn/ui</td><td>Tailwind 4 / Base UI</td></tr>
       <tr><td>状態管理</td><td>Server Components + Client Components</td><td>-</td></tr>
       <tr><td>テスト</td><td>Vitest + React Testing Library</td><td>19/23 pass</td></tr>
@@ -171,7 +171,6 @@
       <tr><th>Method</th><th>Path</th><th>説明</th></tr>
       <tr><td>GET/POST</td><td>/api/auth/[...nextauth]</td><td>NextAuth.js ハンドラ</td></tr>
       <tr><td>POST</td><td>/api/auth/register</td><td>ユーザー登録（Credentials）</td></tr>
-      <tr><td>GET</td><td>/api/auth/callback/google</td><td>Google OAuth コールバック</td></tr>
     </table>
 
     <h3>課題管理</h3>
@@ -224,8 +223,7 @@
       <tr><td>AUTH_SECRET</td><td>✅</td><td>NextAuth 署名用秘密鍵（32文字以上）</td><td><code>openssl rand -base64 32</code></td></tr>
       <tr><td>NEXTAUTH_URL</td><td>✅</td><td>本番URL</td><td><code>https://schoolsync-seven.vercel.app</code></td></tr>
       <tr><td>CRON_SECRET</td><td>✅</td><td>Cron ジョブ認証用</td><td><code>openssl rand -base64 32</code></td></tr>
-      <tr><td>GOOGLE_CLIENT_ID</td><td>任意</td><td>Google OAuth Client ID</td><td>-</td></tr>
-      <tr><td>GOOGLE_CLIENT_SECRET</td><td>任意</td><td>Google OAuth Client Secret</td><td>-</td></tr>
+
       <tr><td><strong>NVIDIA_API_KEY</strong></td><td><strong>✅ (新機能用)</strong></td><td><strong>NVIDIA Build API キー</strong></td><td><code>https://build.nvidia.com で取得</code></td></tr>
     </table>
   </div>
@@ -235,7 +233,7 @@
     <table>
       <tr><th>Path</th><th>説明</th><th>認証</th></tr>
       <tr><td>/</td><td>ランディング → /dashboard または /login へリダイレクト</td><td>-</td></tr>
-      <tr><td>/login</td><td>ログイン（Credentials / Google OAuth）</td><td>Public</td></tr>
+      <tr><td>/login</td><td>ログイン（Credentials）</td><td>Public</td></tr>
       <tr><td>/register</td><td>新規登録</td><td>Public</td></tr>
       <tr><td>/dashboard</td><td>ダッシュボード（統計・クイックアクション・スケジュールウィジェット）</td><td>Protected</td></tr>
       <tr><td>/dashboard/assignments</td><td>課題一覧（フィルタ・ソート）</td><td>Protected</td></tr>
@@ -264,7 +262,7 @@ vercel --prod --yes</code></pre>
 
     <h3>本番確認項目</h3>
     <ul>
-      <li>✅ ログイン/登録（Credentials + Google OAuth）</li>
+      <li>✅ ログイン/登録（Credentials）</li>
       <li>✅ 課題 CRUD + ステータス管理</li>
       <li>✅ カレンダー表示（色分け・詳細）</li>
       <li>✅ グループ作成/参加/メンバー管理</li>
@@ -323,7 +321,7 @@ vercel --prod --yes</code></pre>
   </div>
 
   <footer>
-    <p>SchoolSync 仕様書 v0.2.0 | Generated: 2026-08-26 | <a class="url" href="https://github.com/ryotagtagtag-wq/schoolsync" target="_blank">GitHub Repository</a></p>
+    <p>SchoolSync 仕様書 v0.2.1 | Generated: 2026-09-02 | <a class="url" href="https://github.com/ryotagtagtag-wq/schoolsync" target="_blank">GitHub Repository</a></p>
   </footer>
 </body>
 </html>
