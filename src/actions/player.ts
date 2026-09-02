@@ -9,50 +9,16 @@ import {
   achievements,
   userFacilities,
   facilities,
-  users,
 } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { xpProgress } from '@/lib/game/xp';
 import { calculateStreak } from '@/lib/game/streak';
 import type { PlayerState, UserAchievementState } from '@/lib/game/types';
 
-async function getOrCreateUser(userId: string, email: string, name?: string | null, image?: string | null) {
-  // First, try to find by email (email-based lookup)
-  if (email) {
-    const existingByEmail = await db.select().from(users).where(eq(users.email, email)).limit(1);
-    if (existingByEmail[0]) {
-      // User exists with this email, update their info if needed
-      const [updated] = await db
-        .update(users)
-        .set({
-          name: name ?? existingByEmail[0].name,
-          image: image ?? existingByEmail[0].image,
-          emailVerified: new Date(),
-        })
-        .where(eq(users.id, existingByEmail[0].id))
-        .returning();
-      return updated;
-    }
-  }
-  
-  // Fallback: check by ID (for credentials users)
-  const existingById = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-  if (existingById[0]) return existingById[0];
-  
-  // Create user if not exists
-  const [newUser] = await db.insert(users).values({
-    id: userId,
-    email,
-    name: name ?? '',
-    image: image ?? '',
-    emailVerified: new Date(),
-  }).returning();
-  return newUser;
-}
-
 /**
  * Get or create the player's profile.
  * Auto-creates profile + stats on first access.
+ * Uses session userId directly (credentials auth guarantees it matches the database).
  */
 export async function getPlayerProfile(): Promise<{
   success: boolean;
@@ -62,13 +28,9 @@ export async function getPlayerProfile(): Promise<{
   try {
     const session = await auth();
     const userId = (session?.user as any)?.id;
-    const email = (session?.user as any)?.email;
-    const name = (session?.user as any)?.name;
-    const image = (session?.user as any)?.image;
     if (!userId) return { success: false, error: '未認証' };
 
-    const dbUser = await getOrCreateUser(userId, email ?? '', name, image);
-    const actualUserId = dbUser.id;
+    const actualUserId = userId;
 
     // Get or create profile
     let [profile] = await db
@@ -204,13 +166,9 @@ export async function getProfilePageData(): Promise<{
   try {
     const session = await auth();
     const userId = (session?.user as any)?.id;
-    const email = (session?.user as any)?.email;
-    const name = (session?.user as any)?.name;
-    const image = (session?.user as any)?.image;
     if (!userId) return { success: false, error: '未認証' };
 
-    const dbUser = await getOrCreateUser(userId, email ?? '', name, image);
-    const actualUserId = dbUser.id;
+    const actualUserId = userId;
 
     // Get or create profile
     let [profile] = await db
@@ -367,11 +325,7 @@ export async function awardReward(params: {
     const userId = (session?.user as any)?.id;
     if (!userId) return { success: false, error: '未認証' };
 
-    const email = (session?.user as any)?.email;
-    const name = (session?.user as any)?.name;
-    const image = (session?.user as any)?.image;
-    const dbUser = await getOrCreateUser(userId, email ?? '', name, image);
-    const actualUserId = dbUser.id;
+    const actualUserId = userId;
 
     // Get current profile (auto-create if missing)
     let [profile] = await db
@@ -382,7 +336,7 @@ export async function awardReward(params: {
     if (!profile) {
       [profile] = await db
         .insert(userProfiles)
-        .values({ userId })
+        .values({ userId: actualUserId })
         .returning();
     }
 
@@ -416,7 +370,7 @@ export async function awardReward(params: {
               [statField]: currentValue + params.subjectStat.value,
               updatedAt: new Date(),
             })
-            .where(eq(userStats.userId, userId));
+            .where(eq(userStats.userId, actualUserId));
         }
       }
     }

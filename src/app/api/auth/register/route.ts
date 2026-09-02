@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
-import { users } from '@/db/schema';
+import { users, userProfiles, userStats } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
@@ -33,11 +33,15 @@ export async function POST(request: NextRequest) {
 
     const passwordHash = await bcrypt.hash(password, 12);
 
-    await db.insert(users).values({
+    const [newUser] = await db.insert(users).values({
       name,
       email,
       passwordHash,
-    });
+    }).returning();
+
+    // Create game profile and stats for the new user
+    await db.insert(userProfiles).values({ userId: newUser.id });
+    await db.insert(userStats).values({ userId: newUser.id });
 
     return NextResponse.json({ success: true });
   } catch (error) {
