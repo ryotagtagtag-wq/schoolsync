@@ -39,7 +39,7 @@
       <tr><th>項目</th><th>内容</th></tr>
       <tr><td>プロジェクト名</td><td>SchoolSync</td></tr>
       <tr><td>説明</td><td>学校の課題管理ツール - 期限管理、進捗追跡、カレンダー、グループ共有、通知リマインダー、<strong>自然言語入力、認知負荷適応スケジューラ</strong></td></tr>
-      <tr><td>バージョン</td><td>0.2.1</td></tr>
+      <tr><td>バージョン</td><td>0.2.2</td></tr>
       <tr><td>本番URL</td><td><a class="url" href="https://schoolsync-seven.vercel.app" target="_blank">https://schoolsync-seven.vercel.app</a> / <a class="url" href="https://task.ryopc.org" target="_blank">https://task.ryopc.org</a></td></tr>
       <tr><td>GitHub</td><td><a class="url" href="https://github.com/ryotagtagtag-wq/schoolsync" target="_blank">https://github.com/ryotagtagtag-wq/schoolsync</a></td></tr>
       <tr><td>ステータス</td><td><span class="badge badge-complete">本番稼働中</span> <span class="badge badge-prod">Production Ready</span> <span class="badge badge-new">新機能追加</span></td></tr>
@@ -290,6 +290,60 @@ vercel --prod --yes</code></pre>
   </div>
 
   <div class="section">
+    <h2>🎮 RPG/ゲーミフィケーション機能</h2>
+    <p>学習を「賢者の書」として体験できるRPG要素を実装。学習の継続をゲーム的に楽しめる設計。</p>
+    
+    <div class="grid">
+      <div class="card">
+        <h4>📊 プレイヤープロファイル</h4>
+        <ul>
+          <li>レベルシステム（XPベース、レベルアップで称号獲得）</li>
+          <li>ゴールド（通貨、施設建設・アップグレードに使用）</li>
+          <li>ストリーク（連続ログイン日数、火災保険で守護可能）</li>
+          <li>称号システム（レベルに応じた称号：「見習い賢者」→「大賢者」等）</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>📈 6属性ステータス</h4>
+        <ul>
+          <li><strong>INT（知力）</strong> - 数学</li>
+          <li><strong>WIS（知恵）</strong> - 英語</li>
+          <li><strong>STR（筋力）</strong> - 体育</li>
+          <li><strong>END（耐久）</strong> - 理科</li>
+          <li><strong>CRE（創造）</strong> - 芸術</li>
+          <li><strong>SOC（社交）</strong> - 社会</li>
+          <li>課題完了で対応する属性にXP加算</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>🏆 実績システム</h4>
+        <ul>
+          <li>条件達成で自動解放（初回クリア、7日ストリーク、全教科制覇等）</li>
+          <li>報酬：XP、ゴールド、称号</li>
+          <li>カテゴリ：初歩、熟練、継続、社交、建設</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>🏰 施設建設・アップグレード</h4>
+        <ul>
+          <li>ゴールドで建設・レベルアップ（最大Lv.5）</li>
+          <li>効果：XPボーナス、ゴールドボーナス、ストリーク保護</li>
+          <li>段階的アンロック（レベル制限あり）</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>🏰 ギルドクエスト（グループ協力）</h4>
+        <ul>
+          <li>グループメンバーで協力してクエスト達成</li>
+          <li>進行度共有、全員で報酬獲得</li>
+          <li>週次・月次クエストで継続促進</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section">
     <h2>新機能実装ファイル構成</h2>
     <h3>自然言語入力 (Phase 1)</h3>
     <table>
@@ -321,7 +375,7 @@ vercel --prod --yes</code></pre>
   </div>
 
   <footer>
-    <p>SchoolSync 仕様書 v0.2.1 | Generated: 2026-09-02 | <a class="url" href="https://github.com/ryotagtagtag-wq/schoolsync" target="_blank">GitHub Repository</a></p>
+    <p>SchoolSync 仕様書 v0.2.2 | Generated: 2026-09-02 | <a class="url" href="https://github.com/ryotagtagtag-wq/schoolsync" target="_blank">GitHub Repository</a></p>
   </footer>
 </body>
 </html>
