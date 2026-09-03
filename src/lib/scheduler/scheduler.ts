@@ -4,6 +4,7 @@
  */
 
 import { differenceInDays, parseISO, isPast } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 import type { 
   ScheduledTask, 
   ScheduleRecommendation, 
@@ -15,21 +16,57 @@ import { DEFAULT_CONFIG } from './types';
 import { mergeSubjectLoads } from './cognitiveLoad';
 import { scoreAndRankTasks, estimateTaskMinutes, calculateRecommendedPomodoro } from './scoringEngine';
 
+const JST = 'Asia/Tokyo';
+
+/**
+ * JSTでの現在時刻を取得
+ */
+function getJSTNow(): Date {
+  return toZonedTime(new Date(), JST);
+}
+
+/**
+ * JSTでの今日の0:00を取得（Dateオブジェクトとして返す）
+ */
+function getJSTToday(): Date {
+  const now = getJSTNow();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
+import type { Assignment } from '@/db/schema';
+
 /**
  * DB課題データをスケジューラ入力形式に変換
  */
-export function convertToSchedulerInput(assignments: any[]): SchedulerInputTask[] {
+/**
+ * Date値をISO文字列に変換
+ */
+function toISOStringOrUndefined(date: Date | string | null | undefined): string | undefined {
+  if (!date) return undefined;
+  return date instanceof Date ? date.toISOString() : date;
+}
+
+/**
+ * Date値をYYYY-MM-DD形式に変換
+ */
+function toDateString(date: Date | string | null | undefined): string {
+  if (!date) return new Date().toISOString().split('T')[0];
+  const d = date instanceof Date ? date : new Date(date);
+  return d.toISOString().split('T')[0];
+}
+
+export function convertToSchedulerInput(assignments: Assignment[]): SchedulerInputTask[] {
   return assignments
     .filter(a => a.status !== 'completed') // 完了済みは除外
     .map(a => ({
       id: a.id,
       title: a.title,
-      subject: a.subject,
-      dueDate: a.dueDate.split('T')[0], // YYYY-MM-DD のみ
+      subject: a.subject ?? '数学',
+      dueDate: toDateString(a.dueDate),
       priority: priorityNumberToString(a.priority),
       status: a.status,
-      completedAt: a.completedAt,
-      createdAt: a.createdAt,
+      completedAt: toISOStringOrUndefined(a.completedAt),
+      createdAt: toISOStringOrUndefined(a.createdAt) ?? new Date().toISOString(),
     }));
 }
 
@@ -45,20 +82,20 @@ function priorityNumberToString(priority: number): 'low' | 'medium' | 'high' {
 /**
  * 完了履歴を生成
  */
-export function generateCompletionHistory(assignments: any[]): CompletionHistory[] {
+export function generateCompletionHistory(assignments: Assignment[]): CompletionHistory[] {
   return assignments
     .filter(a => a.status === 'completed' && a.completedAt)
     .map(a => {
-      const due = parseISO(a.dueDate);
-      const completed = parseISO(a.completedAt!);
+      const due = parseISO(toISOStringOrUndefined(a.dueDate) ?? new Date().toISOString());
+      const completed = parseISO(toISOStringOrUndefined(a.completedAt)!);
       const wasOverdue = isPast(due) && differenceInDays(completed, due) > 0;
       const delayDays = wasOverdue ? differenceInDays(completed, due) : 0;
       
       return {
         taskId: a.id,
-        subject: a.subject,
-        dueDate: a.dueDate.split('T')[0],
-        completedAt: a.completedAt!,
+        subject: a.subject ?? '数学',
+        dueDate: toDateString(a.dueDate),
+        completedAt: toISOStringOrUndefined(a.completedAt)!,
         wasOverdue,
         delayDays,
       };
@@ -72,7 +109,7 @@ export function generateCompletionHistory(assignments: any[]): CompletionHistory
  * @returns スケジュール推奨結果
  */
 export function generateScheduleRecommendation(
-  assignments: any[],
+  assignments: Assignment[],
   config: Partial<SchedulerConfig> = {}
 ): ScheduleRecommendation {
   // 設定マージ
@@ -98,7 +135,7 @@ export function generateScheduleRecommendation(
   
   return {
     tasks: dailyTasks,
-    generatedAt: new Date().toISOString(),
+    generatedAt: getJSTNow().toISOString(),
     totalEstimatedMinutes,
     totalPomodoroCount,
     summary,
@@ -156,7 +193,8 @@ function generateSummary(tasks: ScheduledTask[], history: CompletionHistory[]): 
   summary += `。教科: ${subjects.join('、')}`;
   
   // 遅延傾向があれば追記
-  const recentDelays = history.filter(h => h.wasOverdue && differenceInDays(new Date(), parseISO(h.completedAt)) <= 7).length;
+  const today = getJSTToday();
+  const recentDelays = history.filter(h => h.wasOverdue && differenceInDays(today, parseISO(h.completedAt)) <= 7).length;
   if (recentDelays > 0) {
     summary += `。直近${recentDelays}件の遅延あり、早めの着手を推奨`;
   }
@@ -169,7 +207,7 @@ function generateSummary(tasks: ScheduledTask[], history: CompletionHistory[]): 
  * より詳細な推奨理由とポモドーロ計画を含む
  */
 export function generateLLMScheduleInput(
-  assignments: any[],
+  assignments: Assignment[],
   config: Partial<SchedulerConfig> = {}
 ): {
   tasks: Array<{
@@ -228,7 +266,7 @@ export function generateLLMScheduleInput(
       estimatedMinutes: t.estimatedMinutes,
       recommendedPomodoro: t.recommendedPomodoro,
     })),
-    currentTime: new Date().toISOString(),
+    currentTime: getJSTNow().toISOString(),
     completionHistory,
   };
 }

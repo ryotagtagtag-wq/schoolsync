@@ -103,21 +103,82 @@ export const POMODORO_SETTINGS = {
   sessionsBeforeLongBreak: 4,
 } as const;
 
+export type PomodoroSettings = typeof POMODORO_SETTINGS;
+
 /**
- * スケジューラ設定
+ * Scheduler Config
+ * Environment variables can override defaults:
+ * - SCHEDULER_MAX_TASKS_PER_DAY
+ * - SCHEDULER_WORK_HOURS_PER_DAY
+ * - SCHEDULER_POMODORO_WORK_MINUTES
+ * - SCHEDULER_POMODORO_SHORT_BREAK_MINUTES
+ * - SCHEDULER_POMODORO_LONG_BREAK_MINUTES
+ * - SCHEDULER_POMODORO_SESSIONS_BEFORE_LONG_BREAK
+ * Weights (sum must equal 1.0):
+ * - SCHEDULER_WEIGHT_DEADLINE_PRESSURE
+ * - SCHEDULER_WEIGHT_COGNITIVE_LOAD
+ * - SCHEDULER_WEIGHT_COMPLETION_HISTORY
+ * - SCHEDULER_WEIGHT_SUBJECT_DIVERSITY
+ * - SCHEDULER_WEIGHT_OVERDUE_AUTO_PRIORITY
  */
 export interface SchedulerConfig {
   weights: ScoringWeights;
   maxTasksPerDay: number;
   workHoursPerDay: number; // 時間
-  pomodoro: typeof POMODORO_SETTINGS;
+  pomodoro: {
+    workMinutes: number;
+    shortBreakMinutes: number;
+    longBreakMinutes: number;
+    sessionsBeforeLongBreak: number;
+  };
   subjectLoads: SubjectCognitiveLoad[];
 }
 
-export const DEFAULT_CONFIG: SchedulerConfig = {
-  weights: DEFAULT_WEIGHTS,
-  maxTasksPerDay: 8,
-  workHoursPerDay: 4,
-  pomodoro: POMODORO_SETTINGS,
-  subjectLoads: [],
-};
+function getEnvNumber(key: string, fallback: number): number {
+  const val = process.env[key];
+  if (val === undefined) return fallback;
+  const parsed = Number(val);
+  return Number.isNaN(parsed) ? fallback : parsed;
+}
+
+function getEnvWeights(): ScoringWeights {
+  return {
+    deadlinePressure: getEnvNumber('SCHEDULER_WEIGHT_DEADLINE_PRESSURE', DEFAULT_WEIGHTS.deadlinePressure),
+    cognitiveLoad: getEnvNumber('SCHEDULER_WEIGHT_COGNITIVE_LOAD', DEFAULT_WEIGHTS.cognitiveLoad),
+    completionHistory: getEnvNumber('SCHEDULER_WEIGHT_COMPLETION_HISTORY', DEFAULT_WEIGHTS.completionHistory),
+    subjectDiversity: getEnvNumber('SCHEDULER_WEIGHT_SUBJECT_DIVERSITY', DEFAULT_WEIGHTS.subjectDiversity),
+    overdueAutoPriority: getEnvNumber('SCHEDULER_WEIGHT_OVERDUE_AUTO_PRIORITY', DEFAULT_WEIGHTS.overdueAutoPriority),
+  };
+}
+
+export function getSchedulerConfig(): SchedulerConfig {
+  const weights = getEnvWeights();
+  
+  // Validate weights sum to 1.0 (with small epsilon for floating point)
+  const weightSum = Object.values(weights).reduce((sum, w) => sum + w, 0);
+  const validatedWeights = Math.abs(weightSum - 1.0) < 0.001 ? weights : DEFAULT_WEIGHTS;
+
+  return {
+    weights: validatedWeights,
+    maxTasksPerDay: getEnvNumber('SCHEDULER_MAX_TASKS_PER_DAY', 8),
+    workHoursPerDay: getEnvNumber('SCHEDULER_WORK_HOURS_PER_DAY', 4),
+    pomodoro: {
+      workMinutes: getEnvNumber('SCHEDULER_POMODORO_WORK_MINUTES', POMODORO_SETTINGS.workMinutes),
+      shortBreakMinutes: getEnvNumber('SCHEDULER_POMODORO_SHORT_BREAK_MINUTES', POMODORO_SETTINGS.shortBreakMinutes),
+      longBreakMinutes: getEnvNumber('SCHEDULER_POMODORO_LONG_BREAK_MINUTES', POMODORO_SETTINGS.longBreakMinutes),
+      sessionsBeforeLongBreak: getEnvNumber('SCHEDULER_POMODORO_SESSIONS_BEFORE_LONG_BREAK', POMODORO_SETTINGS.sessionsBeforeLongBreak),
+    },
+    subjectLoads: [],
+  };
+}
+
+// Backward compatibility - lazy init
+let cachedConfig: SchedulerConfig | null = null;
+export const DEFAULT_CONFIG: SchedulerConfig = new Proxy({} as SchedulerConfig, {
+  get(_, prop) {
+    if (!cachedConfig) {
+      cachedConfig = getSchedulerConfig();
+    }
+    return cachedConfig[prop as keyof SchedulerConfig];
+  },
+});

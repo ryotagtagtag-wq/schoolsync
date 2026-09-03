@@ -36,8 +36,22 @@ export function NaturalLanguageInput({ onSubmit, onCancel }: NaturalLanguageInpu
   const handleParse = useCallback(async (e: FormEvent) => {
     e.preventDefault();
     
-    if (!input.trim()) {
+    const trimmedInput = input.trim();
+    
+    if (!trimmedInput) {
       toast.error('入力してください');
+      return;
+    }
+
+    // クライアント側バリデーション
+    if (trimmedInput.length > 5000) {
+      toast.error('入力が長すぎます（最大5000文字）');
+      return;
+    }
+
+    // 制御文字チェック
+    if (/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/.test(trimmedInput)) {
+      toast.error('無効な文字が含まれています');
       return;
     }
 
@@ -45,10 +59,10 @@ export function NaturalLanguageInput({ onSubmit, onCancel }: NaturalLanguageInpu
     setError(null);
 
     try {
-      const response = await fetch('/api/ai/parse-assignment', {
+      const response = await fetch('/api/v1/ai/parse-assignment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input: input.trim() }),
+        body: JSON.stringify({ input: trimmedInput }),
       });
 
       const result: NLInputResult = await response.json();
@@ -59,7 +73,7 @@ export function NaturalLanguageInput({ onSubmit, onCancel }: NaturalLanguageInpu
 
       setPreview({
         parsed: result.data,
-        originalInput: input.trim(),
+        originalInput: trimmedInput,
         source: result.source,
       });
       setState('preview');

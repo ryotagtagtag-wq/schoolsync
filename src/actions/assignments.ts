@@ -2,7 +2,7 @@
 
 import { auth } from '@/auth';
 import { db } from '@/db';
-import { assignments } from '@/db/schema';
+import { assignments, type Assignment } from '@/db/schema';
 import { eq, desc, and, gte, lte } from 'drizzle-orm';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
@@ -18,8 +18,8 @@ const assignmentSchema = z.object({
 });
 
 export type AssignmentFormData = z.infer<typeof assignmentSchema>;
-export type AssignmentActionResult = 
-  | { success: true; data: any }
+export type AssignmentActionResult<T = Assignment> = 
+  | { success: true; data: T }
   | { success: false; error: string };
 
 async function getUserId(): Promise<string> {
@@ -57,7 +57,7 @@ export async function getAssignments(filters?: {
   subject?: string;
   startDate?: string;
   endDate?: string;
-}): Promise<AssignmentActionResult> {
+}): Promise<AssignmentActionResult<Assignment[]>> {
   try {
     const userId = await getUserId();
 
@@ -89,7 +89,7 @@ export async function getAssignments(filters?: {
   }
 }
 
-export async function getAssignment(id: string): Promise<AssignmentActionResult> {
+export async function getAssignment(id: string): Promise<AssignmentActionResult<Assignment>> {
   try {
     const userId = await getUserId();
     const [assignment] = await db
@@ -109,12 +109,12 @@ export async function getAssignment(id: string): Promise<AssignmentActionResult>
   }
 }
 
-export async function updateAssignment(id: string, data: Partial<AssignmentFormData>): Promise<AssignmentActionResult> {
+export async function updateAssignment(id: string, data: Partial<AssignmentFormData>): Promise<AssignmentActionResult<Assignment>> {
   try {
     const userId = await getUserId();
     const validated = assignmentSchema.partial().parse(data);
 
-    const updateData: any = { ...validated };
+    const updateData: Record<string, unknown> = { ...validated };
     if (validated.dueDate) {
       updateData.dueDate = new Date(validated.dueDate);
     }
@@ -143,7 +143,7 @@ export async function updateAssignment(id: string, data: Partial<AssignmentFormD
   }
 }
 
-export async function deleteAssignment(id: string): Promise<AssignmentActionResult> {
+export async function deleteAssignment(id: string): Promise<AssignmentActionResult<unknown>> {
   try {
     const userId = await getUserId();
     const result = await db
@@ -158,7 +158,12 @@ export async function deleteAssignment(id: string): Promise<AssignmentActionResu
   }
 }
 
-export async function getAssignmentStats(): Promise<AssignmentActionResult> {
+export async function getAssignmentStats(): Promise<AssignmentActionResult<{
+  pending: number;
+  in_progress: number;
+  completed: number;
+  overdue: number;
+}>> {
   try {
     const userId = await getUserId();
     const all = await db.select().from(assignments).where(eq(assignments.userId, userId));

@@ -4,6 +4,7 @@
  */
 
 import { differenceInDays, isPast, parseISO } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 import type { 
   ScheduledTask, 
   SchedulerInputTask, 
@@ -13,10 +14,19 @@ import type {
 } from './types';
 import { getSubjectCognitiveLoad, calculateContextSwitchCost } from './cognitiveLoad';
 
+const JST = 'Asia/Tokyo';
+
+/**
+ * JSTでの現在時刻を取得
+ */
+function getJSTNow(): Date {
+  return toZonedTime(new Date(), JST);
+}
+
 /**
  * 現在時刻を基準にした日数差分を取得
  */
-function daysUntilDue(dueDate: string, now: Date = new Date()): number {
+function daysUntilDue(dueDate: string, now: Date = getJSTNow()): number {
   const due = parseISO(dueDate);
   const diff = differenceInDays(due, now);
   return Math.max(0, diff); // 過去は0として扱う
@@ -31,7 +41,7 @@ function daysUntilDue(dueDate: string, now: Date = new Date()): number {
  * - 2週間以内: 40
  * - それ以上: 20
  */
-export function calculateDeadlinePressureScore(task: SchedulerInputTask, now: Date = new Date()): number {
+export function calculateDeadlinePressureScore(task: SchedulerInputTask, now: Date = getJSTNow()): number {
   const daysLeft = daysUntilDue(task.dueDate, now);
   
   if (daysLeft <= 1) return 100;
@@ -100,7 +110,7 @@ export function calculateSubjectDiversityScore(
  * 期限超過自動優先スコア (0-100)
  * 既に期限超過しているタスクは最優先
  */
-export function calculateOverdueAutoPriorityScore(task: SchedulerInputTask, now: Date = new Date()): number {
+export function calculateOverdueAutoPriorityScore(task: SchedulerInputTask, now: Date = getJSTNow()): number {
   const due = parseISO(task.dueDate);
   if (isPast(due) && task.status !== 'completed') {
     const daysOverdue = differenceInDays(now, due);
@@ -176,7 +186,7 @@ export function scoreAndRankTasks(
   history: CompletionHistory[],
   config: SchedulerConfig
 ): ScheduledTask[] {
-  const now = new Date();
+  const now = getJSTNow();
   let previousSubject: string | null = null;
   
   // スコア計算

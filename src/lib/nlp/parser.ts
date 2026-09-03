@@ -10,6 +10,54 @@ import type { ParsedAssignment, NLInputResult, ParseError, LLMParseRequest, LLMP
 // NVIDIA Build API クライアント（サーバーサイドのみで初期化）
 let openaiClient: OpenAI | null = null;
 
+/**
+ * 指数バックオフ付きリトライ関数
+ * @param fn 実行する非同期関数
+ * @param maxRetries 最大リトライ回数
+ * @param baseDelay 基底遅延（ミリ秒）
+ */
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelay: number = 1000
+): Promise<T> {
+  let lastError: Error;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      
+      // リトライ可能なエラーか判定
+      const isRetryable = 
+        lastError.name === 'TypeError' && lastError.message.includes('fetch') ||
+        lastError.message.includes('timeout') ||
+        lastError.message.includes('ETIMEDOUT') ||
+        lastError.message.includes('429') ||
+        lastError.message.includes('rate limit') ||
+        lastError.message.includes('500') ||
+        lastError.message.includes('502') ||
+        lastError.message.includes('503') ||
+        lastError.message.includes('504');
+      
+      if (!isRetryable || attempt === maxRetries) {
+        throw lastError;
+      }
+      
+      // 指数バックオフ: 1000ms, 2000ms, 4000ms, ...
+      const delay = baseDelay * Math.pow(2, attempt);
+      // 最大30秒まで
+      const cappedDelay = Math.min(delay, 30000);
+      // ジッター追加（±10%）
+      const jitter = cappedDelay * 0.1 * (Math.random() * 2 - 1);
+      await new Promise(resolve => setTimeout(resolve, cappedDelay + jitter));
+    }
+  }
+  
+  throw lastError!;
+}
+
 function getOpenAIClient(): OpenAI {
   if (!openaiClient) {
     const apiKey = process.env.NVIDIA_API_KEY;
@@ -21,7 +69,7 @@ function getOpenAIClient(): OpenAI {
       apiKey,
       // タイムアウト設定（10秒）
       timeout: 10000,
-      maxRetries: 2,
+      maxRetries: 0, // 独自のリトライロジックを使用
     });
   }
   return openaiClient;
@@ -59,41 +107,44 @@ export async function llmParse(input: string, currentDate: string): Promise<LLMP
   
   const systemPrompt = SYSTEM_PROMPT_TEMPLATE.replace('{currentDate}', currentDate);
   
-  const response = await client.chat.completions.create({
-    model: 'openai/gpt-oss-120b',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: input },
-    ],
-    temperature: 0.1,
-    max_tokens: 500,
-    response_format: { type: 'json_object' },
-  });
-  
-  const content = response.choices[0]?.message?.content;
-  if (!content) {
-    throw new Error('LLM returned empty response');
-  }
-  
-  const parsed = JSON.parse(content) as LLMParseResponse;
-  
-  // バリデーション
-  if (!parsed.title || !parsed.subject || !parsed.dueDate || !parsed.priority) {
-    throw new Error('LLM response missing required fields');
-  }
-  
-  // 優先度の正規化
-  const validPriorities = ['low', 'medium', 'high'] as const;
-  if (!validPriorities.includes(parsed.priority)) {
-    parsed.priority = 'medium';
-  }
-  
-  // 日付形式の検証
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(parsed.dueDate)) {
-    throw new Error('Invalid date format from LLM');
-  }
-  
-  return parsed;
+  // 指数バックオフ付きリトライで実行
+  return withRetry(async () => {
+    const response = await client.chat.completions.create({
+      model: 'openai/gpt-oss-120b',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: input },
+      ],
+      temperature: 0.1,
+      max_tokens: 500,
+      response_format: { type: 'json_object' },
+    });
+    
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('LLM returned empty response');
+    }
+    
+    const parsed = JSON.parse(content) as LLMParseResponse;
+    
+    // バリデーション
+    if (!parsed.title || !parsed.subject || !parsed.dueDate || !parsed.priority) {
+      throw new Error('LLM response missing required fields');
+    }
+    
+    // 優先度の正規化
+    const validPriorities = ['low', 'medium', 'high'] as const;
+    if (!validPriorities.includes(parsed.priority)) {
+      parsed.priority = 'medium';
+    }
+    
+    // 日付形式の検証
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(parsed.dueDate)) {
+      throw new Error('Invalid date format from LLM');
+    }
+    
+    return parsed;
+  }, 3, 1000); // 最大3回リトライ、基底遅延1秒
 }
 
 /**

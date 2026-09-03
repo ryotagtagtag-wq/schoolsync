@@ -184,6 +184,18 @@ export const guildQuestProgress = pgTable('guild_quest_progress', {
   pk: uniqueIndex('guild_quest_progress_pk').on(table.groupId, table.questId),
 }));
 
+// Rate limiting table (sliding window log)
+export const rateLimits = pgTable('rate_limits', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  identifier: text('identifier').notNull(), // user_id:endpoint or ip:endpoint
+  endpoint: text('endpoint').notNull(), // 'parse-assignment' | 'schedule-recommendation'
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  identifierIdx: index('rate_limits_identifier_idx').on(table.identifier),
+  endpointIdx: index('rate_limits_endpoint_idx').on(table.endpoint),
+  createdAtIdx: index('rate_limits_created_at_idx').on(table.createdAt),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   assignments: many(assignments),
@@ -277,3 +289,5 @@ export type Facility = typeof facilities.$inferSelect;
 export type UserFacility = typeof userFacilities.$inferSelect;
 export type GuildQuest = typeof guildQuests.$inferSelect;
 export type GuildQuestProgress = typeof guildQuestProgress.$inferSelect;
+export type RateLimit = typeof rateLimits.$inferSelect;
+export type NewRateLimit = typeof rateLimits.$inferInsert;
