@@ -13,7 +13,14 @@ const assignmentSchema = z.object({
   subject: z.string().optional(),
   status: z.enum(['pending', 'in_progress', 'completed']).default('pending'),
   priority: z.number().min(1).max(3).default(1),
-  dueDate: z.string().datetime(),
+  // datetime-local (2026-09-10T23:59) と ISO 8601 両対応
+  dueDate: z.string().refine((val) => {
+    // datetime-local format: YYYY-MM-DDTHH:mm
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(val)) return true;
+    // ISO 8601 with timezone
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/.test(val)) return true;
+    return false;
+  }, '無効な日時形式です'),
   groupId: z.string().uuid().optional(),
 });
 
