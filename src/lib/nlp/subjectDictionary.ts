@@ -1,6 +1,8 @@
 /**
  * Subject Dictionary - 教科辞書
  * 自然言語入力から教科を抽出するためのマッピング
+ * 
+ * 注意: すべての日付計算は JST (Asia/Tokyo) 基準で行う
  */
 
 import type { SupportedSubject } from './types';

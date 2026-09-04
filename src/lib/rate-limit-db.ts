@@ -1,6 +1,8 @@
 /**
  * Database-based Rate Limiter using Neon PostgreSQL (Drizzle ORM)
  * Sliding Window Log algorithm - no external dependencies
+ * 
+ * 注意: すべての日付計算は JST (Asia/Tokyo) 基準で行う
  */
 
 import { db } from '@/db';
@@ -150,9 +152,10 @@ export function getClientIdentifier(request: Request, userId?: string): string {
 /**
  * レート制限ヘッダーを生成
  */
-export function createRateLimitHeaders(result: RateLimitResult): HeadersInit {
+export function createRateLimitHeaders(result: RateLimitResult, endpoint: string = 'parse-assignment'): HeadersInit {
+  const preset = RATE_LIMIT_PRESETS[endpoint];
   const headers: Record<string, string> = {
-    'X-RateLimit-Limit': RATE_LIMIT_PRESETS[Object.keys(RATE_LIMIT_PRESETS).find(k => RATE_LIMIT_PRESETS[k].endpoint === 'parse-assignment') || 'parse-assignment']?.maxRequests.toString() || '10',
+    'X-RateLimit-Limit': preset?.maxRequests.toString() || '10',
     'X-RateLimit-Remaining': result.remaining.toString(),
     'X-RateLimit-Reset': Math.ceil(result.resetAt / 1000).toString(), // Unix秒
   };

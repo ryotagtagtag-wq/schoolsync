@@ -70,7 +70,7 @@ import { createAssignment, getAssignments, updateAssignment, deleteAssignment, g
 describe('Assignments Actions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (auth as any).mockResolvedValue({
+    auth.mockResolvedValue({
       user: { id: 'user-1', email: 'test@test.com', name: 'Test User' },
     });
   });

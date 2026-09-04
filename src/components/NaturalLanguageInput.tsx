@@ -15,6 +15,29 @@ interface NaturalLanguageInputProps {
   onCancel?: () => void;
 }
 
+// 優先度バッジ (defined outside component to avoid re-creation)
+const PriorityBadge = ({ priority }: { priority: ParsedAssignment['priority'] }) => {
+  const labels = { low: '低', medium: '中', high: '高' };
+  const colors = {
+    low: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+    medium: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    high: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  };
+  return (
+    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colors[priority]}`}>
+      優先度: {labels[priority]}
+    </span>
+  );
+};
+
+// ソースバッジ (defined outside component to avoid re-creation)
+const SourceBadge = ({ source }: { source: 'llm' | 'regex' }) => (
+  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+    {source === 'llm' ? <Zap className="mr-1 h-3 w-3" /> : ''}
+    {source === 'llm' ? 'AI解析' : 'パターン解析'}
+  </span>
+);
+
 export function NaturalLanguageInput({ onSubmit, onCancel }: NaturalLanguageInputProps) {
   // 5状態ステートマシン
   const [state, setState] = useState<NLInputState>('idle');
@@ -120,29 +143,6 @@ export function NaturalLanguageInput({ onSubmit, onCancel }: NaturalLanguageInpu
     setState('idle');
     setPreview(null);
   }, []);
-
-  // 優先度バッジ
-  const PriorityBadge = ({ priority }: { priority: ParsedAssignment['priority'] }) => {
-    const labels = { low: '低', medium: '中', high: '高' };
-    const colors = {
-      low: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
-      medium: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-      high: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-    };
-    return (
-      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colors[priority]}`}>
-        優先度: {labels[priority]}
-      </span>
-    );
-  };
-
-  // ソースバッジ
-  const SourceBadge = ({ source }: { source: 'llm' | 'regex' }) => (
-    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
-      {source === 'llm' ? <Zap className="mr-1 h-3 w-3" /> : ''}
-      {source === 'llm' ? 'AI解析' : 'パターン解析'}
-    </span>
-  );
 
   return (
     <div className="space-y-4">

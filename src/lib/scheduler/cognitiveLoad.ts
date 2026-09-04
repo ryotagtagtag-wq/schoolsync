@@ -1,5 +1,7 @@
 /**
  * Cognitive Load - 教科認知負荷定数と計算関数
+ * 
+ * 注意: すべての日付計算は JST (Asia/Tokyo) 基準で行う
  */
 
 import type { SubjectCognitiveLoad, SchedulerConfig } from './types';

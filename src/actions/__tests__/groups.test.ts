@@ -83,7 +83,7 @@ import { createGroup, getGroups, joinGroup, getGroupByInviteCode } from '@/actio
 describe('Groups Actions', function() {
   beforeEach(function() {
     vi.clearAllMocks();
-    (auth as any).mockResolvedValue({
+    auth.mockResolvedValue({
       user: { id: 'user-1', email: 'test@test.com', name: 'Test User' },
     });
   });

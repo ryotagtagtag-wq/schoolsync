@@ -48,8 +48,9 @@ export function Calendar({ assignments, onDateClick, onNewAssignment }: Calendar
     const dayAssignments = getAssignmentsForDay(date);
     if (dayAssignments.length === 0) return '';
     
-    const hasOverdue = dayAssignments.some(a => a.status !== 'completed' && isPast(new Date(a.dueDate)));
-    const hasToday = dayAssignments.some(a => isToday(new Date(a.dueDate)));
+    // dueDate を JST 0:00 として解釈
+    const hasOverdue = dayAssignments.some(a => a.status !== 'completed' && isPast(new Date(a.dueDate + 'T00:00:00+09:00')));
+    const hasToday = dayAssignments.some(a => isToday(new Date(a.dueDate + 'T00:00:00+09:00')));
     const hasCompleted = dayAssignments.some(a => a.status === 'completed');
     const hasInProgress = dayAssignments.some(a => a.status === 'in_progress');
 

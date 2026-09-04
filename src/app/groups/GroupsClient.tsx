@@ -26,8 +26,8 @@ export function GroupsClient() {
       toast.success('グループを作成しました');
       setCreateForm({ name: '', description: '' });
       window.location.reload();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'エラーが発生しました');
     } finally {
       setIsCreating(false);
     }
@@ -47,8 +47,8 @@ export function GroupsClient() {
       toast.success('グループに参加しました');
       setJoinCode('');
       window.location.reload();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'エラーが発生しました');
     } finally {
       setIsJoining(false);
     }

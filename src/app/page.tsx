@@ -29,7 +29,7 @@ export default async function HomePage() {
             </h1>
             <p className="text-lg lg:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-slide-in" style={{animationDelay: '100ms'}}>
               自然言語でサッと入力、AIが最適な学習順序を提案。<br />
-              认知負荷を考慮したスケジューラで、無理なく着実に進められる。
+              認知負荷を考慮したスケジューラで、無理なく着実に進められる。
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-in" style={{animationDelay: '200ms'}}>

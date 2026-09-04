@@ -128,7 +128,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         },
         { 
           status: 429,
-          headers: createRateLimitHeaders(rateLimitResult)
+          headers: createRateLimitHeaders(rateLimitResult, 'schedule-recommendation')
         }
       );
     }
@@ -173,7 +173,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       success: true,
       data: recommendation,
     }, {
-      headers: createRateLimitHeaders(rateLimitResult)
+      headers: createRateLimitHeaders(rateLimitResult, 'schedule-recommendation')
     });
   } catch (error) {
     console.error('[AI Schedule Recommendation] Error:', error);

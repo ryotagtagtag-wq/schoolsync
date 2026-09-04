@@ -1,4 +1,6 @@
 // Gold calculations
+// 
+// 注意: すべての日付計算は JST (Asia/Tokyo) 基準で行う
 
 /**
  * Calculate gold reward for completing a task
@@ -26,6 +28,9 @@ export function calculateGoldReward(params: {
 
   // Facility bonus: 菜園
   multiplier += params.facilityBonusPercent / 100;
+
+  // マルチプライヤーが負にならないように
+  multiplier = Math.max(0.1, multiplier);
 
   return Math.floor(base * multiplier);
 }

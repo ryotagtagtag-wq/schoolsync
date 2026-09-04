@@ -1,4 +1,6 @@
 // Monster generation for assignments
+// 
+// 注意: すべての日付計算は JST (Asia/Tokyo) 基準で行う
 
 import { Monster, SUBJECT_MAP, MONSTER_EMOJIS } from './types';
 import { Assignment } from '@/db/schema';

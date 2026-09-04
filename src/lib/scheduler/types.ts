@@ -1,6 +1,8 @@
 /**
  * Cognitive Load Adaptive Scheduler - 型定義
  * 認知負荷適応スケジューラの型定義
+ * 
+ * 注意: すべての日付計算は JST (Asia/Tokyo) 基準で行う
  */
 
 import type { ParsedAssignment } from '@/lib/nlp/types';

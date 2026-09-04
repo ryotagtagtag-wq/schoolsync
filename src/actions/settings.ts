@@ -25,7 +25,7 @@ export async function updateProfile(params: {
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const session = await auth();
-    const userId = (session?.user as any)?.id;
+    const userId = session?.user?.id;
     if (!userId) return { success: false, error: '未認証' };
 
     const validated = updateProfileSchema.safeParse(params);
@@ -79,7 +79,7 @@ export async function updatePassword(params: {
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const session = await auth();
-    const userId = (session?.user as any)?.id;
+    const userId = session?.user?.id;
     if (!userId) return { success: false, error: '未認証' };
 
     const validated = updatePasswordSchema.safeParse(params);
@@ -120,7 +120,7 @@ export async function updatePassword(params: {
 export async function deleteAccount(): Promise<{ success: boolean; error?: string }> {
   try {
     const session = await auth();
-    const userId = (session?.user as any)?.id;
+    const userId = session?.user?.id;
     if (!userId) return { success: false, error: '未認証' };
 
     // Delete user (cascades to all related tables)

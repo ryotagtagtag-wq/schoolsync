@@ -160,7 +160,7 @@ export default function EditAssignmentPage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="status">進捗状況</Label>
-                  <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as any })} required>
+                  <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as 'pending' | 'in_progress' | 'completed' })} required>
                     <SelectTrigger>
                       <SelectValue placeholder="進捗を選択" />
                     </SelectTrigger>

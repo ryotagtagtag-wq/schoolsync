@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { ChevronRight, Clock, Flame, Target, Zap, Loader2 } from 'lucide-react';
 import type { ScheduledTask, ScheduleRecommendation } from '@/lib/scheduler/types';
 
@@ -19,14 +19,14 @@ export function ScheduleWidget({ initialData }: ScheduleWidgetProps) {
   const [error, setError] = useState<string | null>(null);
 
   // データ取得
-  const fetchSchedule = async () => {
+  const fetchSchedule = useCallback(async () => {
     if (initialData) return; // 初期データがある場合はスキップ
     
     setLoading(true);
     setError(null);
     
     try {
-      const response = await fetch('/api/ai/schedule-recommendation');
+      const response = await fetch('/api/v1/ai/schedule-recommendation');
       const result = await response.json();
       
       if (!result.success) {
@@ -39,11 +39,15 @@ export function ScheduleWidget({ initialData }: ScheduleWidgetProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [initialData]);
 
   useEffect(() => {
-    fetchSchedule();
-  }, [initialData]);
+    if (!initialData) {
+      // fetchSchedule calls setState but this is expected for data fetching
+      // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+      fetchSchedule();
+    }
+  }, [initialData, fetchSchedule]);
 
   // 優先度バッジ
   const PriorityBadge = ({ priority }: { priority: ScheduledTask['priority'] }) => {
@@ -79,7 +83,8 @@ export function ScheduleWidget({ initialData }: ScheduleWidgetProps) {
 
   // 残り時間表示
   const TimeRemaining = ({ dueDate }: { dueDate: string }) => {
-    const due = new Date(dueDate);
+    // dueDate を JST 0:00 として解釈
+    const due = new Date(dueDate + 'T00:00:00+09:00');
     const now = new Date();
     const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     

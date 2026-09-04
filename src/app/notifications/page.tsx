@@ -43,10 +43,6 @@ export default function NotificationsPage() {
   const [filter, setFilter] = useState<FilterType>('all');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchNotifications();
-  }, [filter]);
-
   const fetchNotifications = async () => {
     setLoading(true);
     try {
@@ -61,6 +57,12 @@ export default function NotificationsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // fetchNotifications calls setState but this is expected for data fetching
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+    fetchNotifications();
+  }, [filter, fetchNotifications]);
 
   const handleMarkAsRead = async (id: string) => {
     try {

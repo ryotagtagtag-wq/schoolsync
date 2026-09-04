@@ -1,6 +1,8 @@
 /**
  * Natural Language Assignment Input - Type Definitions
  * 自然言語課題入力の型定義
+ * 
+ * 注意: すべての日付計算は JST (Asia/Tokyo) 基準で行う
  */
 
 // パース結果の基本型

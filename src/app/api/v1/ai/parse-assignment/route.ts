@@ -50,7 +50,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<NLInputRe
         } as NLInputResult,
         { 
           status: 429,
-          headers: createRateLimitHeaders(rateLimitResult)
+          headers: createRateLimitHeaders(rateLimitResult, 'parse-assignment')
         }
       );
     }
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<NLInputRe
       data: parsed,
       source: 'llm',
     } as NLInputResult, {
-      headers: createRateLimitHeaders(rateLimitResult)
+      headers: createRateLimitHeaders(rateLimitResult, 'parse-assignment')
     });
   } catch (error) {
     console.error('[AI Parse Assignment] Error:', error);

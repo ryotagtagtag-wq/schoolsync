@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, boolean, integer, pgEnum, index, uniqueIndex } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, boolean, integer, pgEnum, index, uniqueIndex, foreignKey } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // Enums
@@ -22,7 +22,7 @@ export const users = pgTable('users', {
 // Assignments table
 export const assignments = pgTable('assignments', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  userId: uuid('user_id').notNull(),
   groupId: uuid('group_id'),
   title: text('title').notNull(),
   description: text('description'),
@@ -38,6 +38,8 @@ export const assignments = pgTable('assignments', {
   groupIdIdx: index('assignments_group_id_idx').on(table.groupId),
   dueDateIdx: index('assignments_due_date_idx').on(table.dueDate),
   statusIdx: index('assignments_status_idx').on(table.status),
+  userIdFk: foreignKey({ columns: [table.userId], foreignColumns: [users.id] }).onDelete('cascade'),
+  groupIdFk: foreignKey({ columns: [table.groupId], foreignColumns: [groups.id] }).onDelete('set null'),
 }));
 
 // Groups table
@@ -46,49 +48,55 @@ export const groups = pgTable('groups', {
   name: text('name').notNull(),
   description: text('description'),
   inviteCode: text('invite_code').notNull().unique(),
-  ownerId: uuid('owner_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  ownerId: uuid('owner_id').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => ({
   inviteCodeIdx: uniqueIndex('groups_invite_code_idx').on(table.inviteCode),
   ownerIdIdx: index('groups_owner_id_idx').on(table.ownerId),
+  ownerIdFk: foreignKey({ columns: [table.ownerId], foreignColumns: [users.id] }).onDelete('cascade'),
 }));
 
 // Group members table
 export const groupMembers = pgTable('group_members', {
   id: uuid('id').primaryKey().defaultRandom(),
-  groupId: uuid('group_id').references(() => groups.id, { onDelete: 'cascade' }).notNull(),
-  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  groupId: uuid('group_id').notNull(),
+  userId: uuid('user_id').notNull(),
   role: text('role').default('member').notNull(), // owner, admin, member
   joinedAt: timestamp('joined_at').defaultNow().notNull(),
 }, (table) => ({
   groupIdIdx: index('group_members_group_id_idx').on(table.groupId),
   userIdIdx: index('group_members_user_id_idx').on(table.userId),
   uniqueGroupUser: uniqueIndex('group_members_group_user_idx').on(table.groupId, table.userId),
+  groupIdFk: foreignKey({ columns: [table.groupId], foreignColumns: [groups.id] }).onDelete('cascade'),
+  userIdFk: foreignKey({ columns: [table.userId], foreignColumns: [users.id] }).onDelete('cascade'),
 }));
 
 // Notifications table
 export const notifications = pgTable('notifications', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  userId: uuid('user_id').notNull(),
   type: notificationTypeEnum('type').notNull(),
   title: text('title').notNull(),
   message: text('message'),
-  assignmentId: uuid('assignment_id').references(() => assignments.id, { onDelete: 'set null' }),
-  groupId: uuid('group_id').references(() => groups.id, { onDelete: 'set null' }),
+  assignmentId: uuid('assignment_id'),
+  groupId: uuid('group_id'),
   read: boolean('read').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => ({
   userIdIdx: index('notifications_user_id_idx').on(table.userId),
   readIdx: index('notifications_read_idx').on(table.read),
   createdAtIdx: index('notifications_created_at_idx').on(table.createdAt),
+  userIdFk: foreignKey({ columns: [table.userId], foreignColumns: [users.id] }).onDelete('cascade'),
+  assignmentIdFk: foreignKey({ columns: [table.assignmentId], foreignColumns: [assignments.id] }).onDelete('set null'),
+  groupIdFk: foreignKey({ columns: [table.groupId], foreignColumns: [groups.id] }).onDelete('set null'),
 }));
 
 // ===== RPG「賢者の書」Game Tables =====
 
 // Player profiles - one per user
 export const userProfiles = pgTable('user_profiles', {
-  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).primaryKey(),
+  userId: uuid('user_id').primaryKey(),
   level: integer('level').default(1).notNull(),
   xp: integer('xp').default(0).notNull(),
   gold: integer('gold').default(0).notNull(),
@@ -97,11 +105,13 @@ export const userProfiles = pgTable('user_profiles', {
   title: text('title').default('見習い賢者').notNull(), // unlocked title
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+}, (table) => ({
+  userIdFk: foreignKey({ columns: [table.userId], foreignColumns: [users.id] }).onDelete('cascade'),
+}));
 
 // Player subject stats
 export const userStats = pgTable('user_stats', {
-  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).primaryKey(),
+  userId: uuid('user_id').primaryKey(),
   int: integer('int').default(0).notNull(), // 数学
   wis: integer('wis').default(0).notNull(), // 英語
   str: integer('str').default(0).notNull(), // 体育
@@ -109,7 +119,9 @@ export const userStats = pgTable('user_stats', {
   cre: integer('cre').default(0).notNull(), // 芸術
   soc: integer('soc').default(0).notNull(), // 社会
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+}, (table) => ({
+  userIdFk: foreignKey({ columns: [table.userId], foreignColumns: [users.id] }).onDelete('cascade'),
+}));
 
 // Achievement definitions
 export const achievements = pgTable('achievements', {
@@ -127,11 +139,13 @@ export const achievements = pgTable('achievements', {
 
 // User achievements junction
 export const userAchievements = pgTable('user_achievements', {
-  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
-  achievementId: text('achievement_id').references(() => achievements.id, { onDelete: 'cascade' }).notNull(),
+  userId: uuid('user_id').notNull(),
+  achievementId: text('achievement_id').notNull(),
   unlockedAt: timestamp('unlocked_at').defaultNow().notNull(),
 }, (table) => ({
   pk: uniqueIndex('user_achievements_pk').on(table.userId, table.achievementId),
+  userIdFk: foreignKey({ columns: [table.userId], foreignColumns: [users.id] }).onDelete('cascade'),
+  achievementIdFk: foreignKey({ columns: [table.achievementId], foreignColumns: [achievements.id] }).onDelete('cascade'),
 }));
 
 // Facility definitions
@@ -149,18 +163,20 @@ export const facilities = pgTable('facilities', {
 
 // User facilities - built/leveled
 export const userFacilities = pgTable('user_facilities', {
-  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
-  facilityId: text('facility_id').references(() => facilities.id, { onDelete: 'cascade' }).notNull(),
+  userId: uuid('user_id').notNull(),
+  facilityId: text('facility_id').notNull(),
   level: integer('level').default(1).notNull(),
   builtAt: timestamp('built_at').defaultNow().notNull(),
 }, (table) => ({
   pk: uniqueIndex('user_facilities_pk').on(table.userId, table.facilityId),
+  userIdFk: foreignKey({ columns: [table.userId], foreignColumns: [users.id] }).onDelete('cascade'),
+  facilityIdFk: foreignKey({ columns: [table.facilityId], foreignColumns: [facilities.id] }).onDelete('cascade'),
 }));
 
 // Guild quests
 export const guildQuests = pgTable('guild_quests', {
   id: uuid('id').primaryKey().defaultRandom(),
-  groupId: uuid('group_id').references(() => groups.id, { onDelete: 'cascade' }).notNull(),
+  groupId: uuid('group_id').notNull(),
   title: text('title').notNull(),
   description: text('description'),
   targetCount: integer('target_count').default(10).notNull(),
@@ -171,17 +187,20 @@ export const guildQuests = pgTable('guild_quests', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => ({
   groupIdIdx: index('guild_quests_group_id_idx').on(table.groupId),
+  groupIdFk: foreignKey({ columns: [table.groupId], foreignColumns: [groups.id] }).onDelete('cascade'),
 }));
 
 // Guild quest progress
 export const guildQuestProgress = pgTable('guild_quest_progress', {
-  groupId: uuid('group_id').references(() => groups.id, { onDelete: 'cascade' }).notNull(),
-  questId: uuid('quest_id').references(() => guildQuests.id, { onDelete: 'cascade' }).notNull(),
+  groupId: uuid('group_id').notNull(),
+  questId: uuid('quest_id').notNull(),
   currentCount: integer('current_count').default(0).notNull(),
   completed: boolean('completed').default(false).notNull(),
   completedAt: timestamp('completed_at'),
 }, (table) => ({
   pk: uniqueIndex('guild_quest_progress_pk').on(table.groupId, table.questId),
+  groupIdFk: foreignKey({ columns: [table.groupId], foreignColumns: [groups.id] }).onDelete('cascade'),
+  questIdFk: foreignKey({ columns: [table.questId], foreignColumns: [guildQuests.id] }).onDelete('cascade'),
 }));
 
 // Rate limiting table (sliding window log)

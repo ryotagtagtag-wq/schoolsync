@@ -1,6 +1,8 @@
 /**
  * Regex Fallback Parser - 正規表現フォールバックパーサー
  * LLM API が失敗した際のフォールバック用
+ * 
+ * 注意: すべての日付計算は JST (Asia/Tokyo) 基準で行う
  */
 
 import { parseJapaneseDate, extractDateFromText } from './dateParser';
@@ -9,22 +11,41 @@ import type { ParsedAssignment, ParseError } from './types';
 
 /**
  * 優先度キーワードマッピング
+ * 長いキーワードを優先してマッチングするため、配列で順序を制御
  */
-const PRIORITY_KEYWORDS: Record<string, 'low' | 'medium' | 'high'> = {
-  '高': 'high', '重要': 'high', '急ぎ': 'high', '至急': 'high', '緊急': 'high',
-  'high': 'high', 'urgent': 'high', 'important': 'high',
-  '低': 'low', 'あとで': 'low', '余裕': 'low', 'いつでも': 'low',
-  'low': 'low', 'later': 'low',
-  '中': 'medium', '普通': 'medium', '通常': 'medium',
-  'medium': 'medium', 'normal': 'medium',
-};
+const PRIORITY_KEYWORDS: Array<{ keyword: string; priority: 'low' | 'medium' | 'high' }> = [
+  // 高優先度（長い順）
+  { keyword: '至急', priority: 'high' },
+  { keyword: '緊急', priority: 'high' },
+  { keyword: '重要', priority: 'high' },
+  { keyword: '急ぎ', priority: 'high' },
+  { keyword: '高', priority: 'high' },
+  { keyword: 'urgent', priority: 'high' },
+  { keyword: 'important', priority: 'high' },
+  { keyword: 'high', priority: 'high' },
+  // 低優先度（長い順）
+  { keyword: 'いつでも', priority: 'low' },
+  { keyword: '余裕', priority: 'low' },
+  { keyword: 'あとで', priority: 'low' },
+  { keyword: '低', priority: 'low' },
+  { keyword: 'later', priority: 'low' },
+  { keyword: 'low', priority: 'low' },
+  // 中優先度（長い順）
+  { keyword: '通常', priority: 'medium' },
+  { keyword: '普通', priority: 'medium' },
+  { keyword: '中', priority: 'medium' },
+  { keyword: 'normal', priority: 'medium' },
+  { keyword: 'medium', priority: 'medium' },
+];
 
 /**
  * タイトル抽出用パターン（教科・日付・優先度以外の部分）
+ * 重複を削除
  */
 const TITLE_STOP_WORDS = [
-  'の課題', 'の宿題', 'のレポート', 'の課題', 'の宿題', 'のレポート',
-  '課題', '宿題', 'レポート', '課題を', '宿題を', 'レポートを',
+  'の課題', 'の宿題', 'のレポート',
+  '課題', '宿題', 'レポート',
+  '課題を', '宿題を', 'レポートを',
   '提出', 'やる', 'やること', 'タスク', 'task',
 ];
 
@@ -74,11 +95,12 @@ function formatDefaultDueDate(baseDate: Date): string {
 
 /**
  * 優先度を抽出
+ * 長いキーワードから順にマッチング
  */
 function extractPriority(text: string): 'low' | 'medium' | 'high' {
   const lowerText = text.toLowerCase();
   
-  for (const [keyword, priority] of Object.entries(PRIORITY_KEYWORDS)) {
+  for (const { keyword, priority } of PRIORITY_KEYWORDS) {
     if (lowerText.includes(keyword.toLowerCase())) {
       return priority;
     }
@@ -121,9 +143,9 @@ function extractTitle(text: string, subject: string, priority: 'low' | 'medium' 
     title = title.replace(pattern, '');
   }
   
-  // 優先度キーワードを除去
-  for (const kw of Object.keys(PRIORITY_KEYWORDS)) {
-    title = title.replace(new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '');
+  // 優先度キーワードを除去（長い順）
+  for (const { keyword } of PRIORITY_KEYWORDS) {
+    title = title.replace(new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '');
   }
   
   // ストップワードを除去

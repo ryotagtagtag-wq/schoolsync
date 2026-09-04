@@ -168,7 +168,7 @@ const FACILITY_DATA = [
   {
     id: 'garden',
     name: '菜園',
-    description: '金币を育てる。Gold獲得量が増える。',
+    description: 'ゴールドを育てる。Gold獲得量が増える。',
     icon: '🌿',
     unlockLevel: 15,
     maxLevel: 5,

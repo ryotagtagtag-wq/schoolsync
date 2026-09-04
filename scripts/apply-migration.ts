@@ -84,14 +84,15 @@ async function main() {
       try {
         await direct.unsafe(idem);
         console.log('  ✓', summarize(stmt));
-      } catch (e: any) {
-        if (ALREADY_EXISTS.test(e?.message || '')) {
+      } catch (e: unknown) {
+        const errMsg = e instanceof Error ? e.message : String(e);
+        if (ALREADY_EXISTS.test(errMsg)) {
           skipped.push(`${tag}: ${summarize(stmt)}`);
           console.log('  ⊘ already exists:', summarize(stmt));
         } else {
-          failed.push(`${tag}: ${summarize(stmt)}\n   -> ${e?.message}`);
+          failed.push(`${tag}: ${summarize(stmt)}\\n   -> ${errMsg}`);
           console.error('  ✗', summarize(stmt));
-          console.error('    ', e?.message);
+          console.error('    ', errMsg);
           await direct.end();
           process.exitCode = 1;
           return;
@@ -122,7 +123,7 @@ function summarize(stmt: string): string {
   return one.length > 70 ? one.slice(0, 67) + '...' : one;
 }
 
-main().catch((e) => {
-  console.error('fatal:', e?.message || e);
+main().catch((e: unknown) => {
+  console.error('fatal:', e instanceof Error ? e.message : String(e));
   process.exit(1);
 });

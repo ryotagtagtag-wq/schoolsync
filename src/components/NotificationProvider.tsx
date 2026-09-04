@@ -10,6 +10,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
+      // Initial permission check - safe to set synchronously during mount
+      // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
       setPermission(Notification.permission);
     }
   }, []);
@@ -48,16 +50,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     return 'denied';
   };
 
+  // 通知許可ボタンは不要（ブラウザのプロンプトで十分）
   return (
     <div>
       {children}
-      <button
-        onClick={requestPermission}
-        className="fixed bottom-4 right-4 z-50 p-2 bg-primary text-primary-foreground rounded-full shadow-lg"
-        title="通知許可をリクエスト"
-      >
-        {permission === 'granted' ? '🔔' : '🔕'}
-      </button>
     </div>
   );
 }

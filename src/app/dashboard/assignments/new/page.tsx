@@ -40,7 +40,7 @@ export default function NewAssignmentPage() {
     subject: '',
     status: 'pending' as 'pending' | 'in_progress' | 'completed',
     priority: 1,
-    dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().slice(0, 16),
   });
   const [naturalParsed, setNaturalParsed] = useState<ParsedAssignment | null>(null);
 
@@ -211,7 +211,7 @@ export default function NewAssignmentPage() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="status">進捗状況</Label>
-                    <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as any })} required>
+                    <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as 'pending' | 'in_progress' | 'completed' })} required>
                       <SelectTrigger>
                         <SelectValue placeholder="進捗を選択" />
                       </SelectTrigger>

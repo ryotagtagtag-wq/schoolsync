@@ -1,6 +1,8 @@
 /**
  * Unified Parser - LLM + フォールバック統合パーサー
  * NVIDIA Build API (GPT-OSS-120B) を使用し、失敗時は正規表現パーサーにフォールバック
+ * 
+ * 注意: すべての日付計算は JST (Asia/Tokyo) 基準で行う
  */
 
 import OpenAI from 'openai';
@@ -125,7 +127,12 @@ export async function llmParse(input: string, currentDate: string): Promise<LLMP
       throw new Error('LLM returned empty response');
     }
     
-    const parsed = JSON.parse(content) as LLMParseResponse;
+    let parsed: LLMParseResponse;
+    try {
+      parsed = JSON.parse(content) as LLMParseResponse;
+    } catch (e) {
+      throw new Error(`Failed to parse LLM response as JSON: ${e instanceof Error ? e.message : String(e)}`);
+    }
     
     // バリデーション
     if (!parsed.title || !parsed.subject || !parsed.dueDate || !parsed.priority) {
@@ -141,6 +148,15 @@ export async function llmParse(input: string, currentDate: string): Promise<LLMP
     // 日付形式の検証
     if (!/^\d{4}-\d{2}-\d{2}$/.test(parsed.dueDate)) {
       throw new Error('Invalid date format from LLM');
+    }
+    
+    // 日付が過去でないか検証
+    const today = currentDate;
+    if (parsed.dueDate < today) {
+      // 過去の日付は翌年に調整
+      const [year, month, day] = parsed.dueDate.split('-').map(Number);
+      const nextYear = year + 1;
+      parsed.dueDate = `${nextYear}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     }
     
     return parsed;
@@ -171,9 +187,23 @@ export async function parseNaturalLanguage(
     };
   }
   
+  // 入力サニタイズ（制御文字除去）
+  const sanitizedInput = input.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim();
+  if (!sanitizedInput) {
+    return {
+      success: false,
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: '入力が無効です。',
+        retryable: false,
+      },
+      source: 'regex',
+    };
+  }
+  
   // 1. LLM パースを試行
   try {
-    const llmResult = await llmParse(input, currentDate);
+    const llmResult = await llmParse(sanitizedInput, currentDate);
     
     return {
       success: true,
@@ -182,7 +212,7 @@ export async function parseNaturalLanguage(
         subject: llmResult.subject,
         dueDate: llmResult.dueDate,
         priority: llmResult.priority,
-        description: llmResult.description || input,
+        description: llmResult.description || sanitizedInput,
       },
       source: 'llm',
     };
@@ -191,7 +221,7 @@ export async function parseNaturalLanguage(
     const errorCode = categorizeLLMError(llmError);
     
     // 2. 正規表現フォールバック
-    const regexResult = regexParseWithValidation(input, currentDate);
+    const regexResult = regexParseWithValidation(sanitizedInput, currentDate);
     
     if (regexResult.success) {
       return {
@@ -222,8 +252,10 @@ export async function parseNaturalLanguage(
  * LLM エラーを分類
  */
 function categorizeLLMError(error: unknown): ParseError['code'] {
-  if (error instanceof OpenAI.APIError) {
-    switch (error.status) {
+  // OpenAI API エラーの場合
+  if (error && typeof error === 'object' && 'status' in error) {
+    const apiError = error as { status: number; message?: string };
+    switch (apiError.status) {
       case 401:
         return 'UNAUTHORIZED';
       case 429:
@@ -251,6 +283,10 @@ function categorizeLLMError(error: unknown): ParseError['code'] {
     }
     if (error.message.includes('401') || error.message.includes('unauthorized')) {
       return 'UNAUTHORIZED';
+    }
+    // JSON パースエラー
+    if (error.message.includes('JSON') || error.message.includes('parse')) {
+      return 'LLM_ERROR';
     }
   }
   

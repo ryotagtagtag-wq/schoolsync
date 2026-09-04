@@ -1,4 +1,6 @@
 // RPG「賢者の書」Game Types
+// 
+// 注意: すべての日付計算は JST (Asia/Tokyo) 基準で行う
 
 export interface PlayerState {
   userId: string;

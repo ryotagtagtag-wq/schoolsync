@@ -33,11 +33,18 @@ function getJSTStartOfWeek(date: Date): Date {
   const month = jst.getMonth();
   const dayOfMonth = jst.getDate();
   
+  // Zellerの合同式（グレゴリオ暦）
+  // h = (q + [13(m+1)/5] + K + [K/4] + [J/4] + 5J) mod 7
+  // h: 0=土曜日, 1=日曜日, 2=月曜日, ..., 6=金曜日
   let m = month + 1;
   let y = year;
   if (m < 3) { m += 12; y -= 1; }
-  const dayOfWeek = (dayOfMonth + Math.floor(13 * (m + 1) / 5) + y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400)) % 7;
-  const mondayBased = (dayOfWeek + 5) % 7;
+  const q = dayOfMonth;
+  const K = y % 100;
+  const J = Math.floor(y / 100);
+  const h = (q + Math.floor(13 * (m + 1) / 5) + K + Math.floor(K / 4) + Math.floor(J / 4) + 5 * J) % 7;
+  // 月曜日=0基準に変換: h=2(月曜日) -> 0, h=3(火曜日) -> 1, ...
+  const mondayBased = (h + 5) % 7;
   const diff = -mondayBased;
   
   return new Date(Date.UTC(year, month, dayOfMonth + diff - 1, 15, 0, 0));

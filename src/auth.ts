@@ -54,10 +54,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      if (session.user) (session.user as any).id = token.id;
+      if (session.user && typeof token.id === 'string') {
+        (session.user as { id?: string }).id = token.id;
+      }
       return session;
     },
   },
   session: { strategy: 'jwt' },
   secret: process.env.AUTH_SECRET,
+  // セキュリティ設定
+  trustHost: true,
+  useSecureCookies: process.env.NODE_ENV === 'production',
 });

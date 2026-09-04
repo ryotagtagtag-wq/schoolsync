@@ -71,7 +71,7 @@ export async function getAssignments(filters?: {
     const conditions = [eq(assignments.userId, userId)];
     
     if (filters?.status) {
-      conditions.push(eq(assignments.status, filters.status as any));
+      conditions.push(eq(assignments.status, filters.status as 'pending' | 'in_progress' | 'completed'));
     }
     if (filters?.subject) {
       conditions.push(eq(assignments.subject, filters.subject));

@@ -1,6 +1,8 @@
 /**
  * Main Scheduler - メインスケジューラロジック
  * 課題リスト + 完了履歴 → 推奨スケジュール生成
+ * 
+ * 注意: すべての日付計算は JST (Asia/Tokyo) 基準で行う
  */
 
 import { differenceInDays, parseISO, isPast } from 'date-fns';
@@ -37,9 +39,6 @@ import type { Assignment } from '@/db/schema';
 
 /**
  * DB課題データをスケジューラ入力形式に変換
- */
-/**
- * Date値をISO文字列に変換
  */
 function toISOStringOrUndefined(date: Date | string | null | undefined): string | undefined {
   if (!date) return undefined;
@@ -86,7 +85,8 @@ export function generateCompletionHistory(assignments: Assignment[]): Completion
   return assignments
     .filter(a => a.status === 'completed' && a.completedAt)
     .map(a => {
-      const due = parseISO(toISOStringOrUndefined(a.dueDate) ?? new Date().toISOString());
+      // dueDate を JST 0:00 として解釈
+      const due = parseISO(toDateString(a.dueDate) + 'T00:00:00+09:00');
       const completed = parseISO(toISOStringOrUndefined(a.completedAt)!);
       const wasOverdue = isPast(due) && differenceInDays(completed, due) > 0;
       const delayDays = wasOverdue ? differenceInDays(completed, due) : 0;

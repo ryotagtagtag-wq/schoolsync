@@ -1,4 +1,6 @@
 // Streak tracking
+// 
+// 注意: すべての日付計算は JST (Asia/Tokyo) 基準で行う
 
 /**
  * Check if the user's streak should be updated
@@ -19,8 +21,8 @@ export function calculateStreak(
   }
 
   // Calculate days difference
-  const lastDate = new Date(lastActiveDate + 'T00:00:00Z');
-  const todayDate = new Date(today + 'T00:00:00Z');
+  const lastDate = new Date(lastActiveDate + 'T00:00:00+09:00');
+  const todayDate = new Date(today + 'T00:00:00+09:00');
   const diffDays = Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
 
   if (diffDays === 1) {

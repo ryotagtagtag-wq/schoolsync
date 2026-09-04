@@ -32,13 +32,15 @@ async function check(label: string, url: string): Promise<void> {
 
     const mig = await sql`select id, hash, created_at from __drizzle_migrations order by id`;
 
-    console.log(`\n[${label}]`);
+    console.log(`
+[${label}]`);
     console.log('migration tables missing:', missing.length ? missing.join(', ') : '(none — all 13 present)');
     console.log('extra tables (scratch/probes):', extra.length ? extra.join(', ') : '(none)');
     console.log('row counts:', JSON.stringify(counts));
     console.log('__drizzle_migrations:', mig.length, mig.map((m) => `#${m.id} created_at=${m.created_at}`).join(', '));
-  } catch (e: any) {
-    console.log(`\n[${label}] ERROR:`, e?.message || e);
+  } catch (e: unknown) {
+    console.log(`
+[${label}] ERROR:`, e instanceof Error ? e.message : String(e));
   } finally {
     await sql.end();
   }
@@ -49,7 +51,7 @@ async function main(): Promise<void> {
   await check('DIRECT (migrate)', DIRECT_URL);
 }
 
-main().catch((e: any) => {
-  console.error('fatal:', e?.message || e);
+main().catch((e: unknown) => {
+  console.error('fatal:', e instanceof Error ? e.message : String(e));
   process.exit(1);
 });

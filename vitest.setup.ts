@@ -76,9 +76,9 @@ vi.mock('date-fns', () => ({
 
 vi.mock('lucide-react', () => {
   const icons = ['Calendar', 'Users', 'Bell', 'LogOut', 'Plus', 'CheckCircle', 'Clock', 'AlertTriangle', 'Sun', 'Moon', 'Monitor', 'ChevronLeft', 'ChevronRight', 'ArrowLeft', 'ArrowRight', 'Copy', 'Check', 'CheckCheck', 'Share2', 'Edit', 'Trash2', 'Filter', 'X', 'Zap', 'ArrowRight', 'Loader2', 'CheckCircle', 'AlertCircle'];
-  const mockIcons: Record<string, any> = {};
+  const mockIcons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {};
   for (const icon of icons) {
-    mockIcons[icon] = function MockIcon(props: any) {
+    mockIcons[icon] = function MockIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
       return null;
     };
   }

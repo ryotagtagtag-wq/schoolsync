@@ -1,10 +1,13 @@
 // XP and Level calculations
+// 
+// 注意: すべての日付計算は JST (Asia/Tokyo) 基準で行う
 
 /**
  * XP required to reach level N from level N-1
  * Formula: 100 * (N ^ 1.5)
  */
 export function xpForLevel(level: number): number {
+  if (level < 1) return 0;
   return Math.floor(100 * Math.pow(level, 1.5));
 }
 
@@ -12,6 +15,7 @@ export function xpForLevel(level: number): number {
  * Total XP required to reach a specific level from level 1
  */
 export function totalXpForLevel(level: number): number {
+  if (level <= 1) return 0;
   let total = 0;
   for (let i = 1; i < level; i++) {
     total += xpForLevel(i + 1);
@@ -23,6 +27,7 @@ export function totalXpForLevel(level: number): number {
  * Calculate level from total XP
  */
 export function levelFromXp(totalXp: number): number {
+  if (totalXp < 0) return 1;
   let level = 1;
   let accumulated = 0;
   while (accumulated <= totalXp) {

@@ -27,7 +27,7 @@ export async function getPlayerProfile(): Promise<{
 }> {
   try {
     const session = await auth();
-    const userId = (session?.user as any)?.id;
+    const userId = session?.user?.id;
     if (!userId) return { success: false, error: '未認証' };
 
     const actualUserId = userId;
@@ -165,7 +165,7 @@ export async function getProfilePageData(): Promise<{
 }> {
   try {
     const session = await auth();
-    const userId = (session?.user as any)?.id;
+    const userId = session?.user?.id;
     if (!userId) return { success: false, error: '未認証' };
 
     const actualUserId = userId;
@@ -323,7 +323,7 @@ export async function awardReward(params: {
 }> {
   try {
     const session = await auth();
-    const userId = (session?.user as any)?.id;
+    const userId = session?.user?.id;
     if (!userId) return { success: false, error: '未認証' };
 
     const actualUserId = userId;

@@ -1,6 +1,8 @@
 /**
  * Scoring Engine - 5ヒューリスティック加重スコアリングエンジン
  * 締切圧力(40%) + 認知負荷(20%) + 完了履歴/遅延率(15%) + 教科多様性/クラスタリング防止(10%) + 期限超過自動優先(15%)
+ * 
+ * 注意: すべての日付計算は JST (Asia/Tokyo) 基準で行う
  */
 
 import { differenceInDays, isPast, parseISO } from 'date-fns';
@@ -25,9 +27,12 @@ function getJSTNow(): Date {
 
 /**
  * 現在時刻を基準にした日数差分を取得
+ * dueDate は YYYY-MM-DD 形式（JST 0:00 を想定）
+ * now は JST 時刻
  */
 function daysUntilDue(dueDate: string, now: Date = getJSTNow()): number {
-  const due = parseISO(dueDate);
+  // dueDate を JST 0:00 として解釈
+  const due = parseISO(dueDate + 'T00:00:00+09:00');
   const diff = differenceInDays(due, now);
   return Math.max(0, diff); // 過去は0として扱う
 }
@@ -111,7 +116,8 @@ export function calculateSubjectDiversityScore(
  * 既に期限超過しているタスクは最優先
  */
 export function calculateOverdueAutoPriorityScore(task: SchedulerInputTask, now: Date = getJSTNow()): number {
-  const due = parseISO(task.dueDate);
+  // dueDate を JST 0:00 として解釈
+  const due = parseISO(task.dueDate + 'T00:00:00+09:00');
   if (isPast(due) && task.status !== 'completed') {
     const daysOverdue = differenceInDays(now, due);
     // 超過日数に応じて最大100まで上昇
@@ -173,8 +179,10 @@ export function estimateTaskMinutes(task: SchedulerInputTask): number {
 /**
  * 推奨ポモドーロ回数を計算
  */
+import { POMODORO_SETTINGS } from './types';
+
 export function calculateRecommendedPomodoro(minutes: number): number {
-  const { workMinutes } = require('./types').POMODORO_SETTINGS;
+  const { workMinutes } = POMODORO_SETTINGS;
   return Math.max(1, Math.ceil(minutes / workMinutes));
 }
 
