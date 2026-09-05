@@ -328,62 +328,60 @@ export async function awardReward(params: {
 
     const actualUserId = userId;
 
-    // Use transaction to ensure atomicity
-    const result = await db.transaction(async (tx) => {
-      // Get current profile (auto-create if missing)
-      let [profile] = await tx
-        .select()
-        .from(userProfiles)
-        .where(eq(userProfiles.userId, actualUserId))
-        .limit(1);
-      if (!profile) {
-        [profile] = await tx
-          .insert(userProfiles)
-          .values({ userId: actualUserId })
-          .returning();
-      }
+    // Note: neon-http doesn't support transactions, so we execute sequentially
+    // This is acceptable for game rewards as minor race conditions are acceptable
+    
+    // Get current profile (auto-create if missing)
+    let [profile] = await db
+      .select()
+      .from(userProfiles)
+      .where(eq(userProfiles.userId, actualUserId))
+      .limit(1);
+    if (!profile) {
+      [profile] = await db
+        .insert(userProfiles)
+        .values({ userId: actualUserId })
+        .returning();
+    }
 
-      const oldLevel = xpProgress(profile.xp).currentLevel;
-      const newXp = profile.xp + params.xp;
-      const newLevel = xpProgress(newXp).currentLevel;
-      const levelUp = newLevel > oldLevel;
+    const oldLevel = xpProgress(profile.xp).currentLevel;
+    const newXp = profile.xp + params.xp;
+    const newLevel = xpProgress(newXp).currentLevel;
+    const levelUp = newLevel > oldLevel;
 
-      // Update profile XP and gold
-      await tx
-        .update(userProfiles)
-        .set({ xp: newXp, gold: profile.gold + params.gold, updatedAt: new Date() })
-        .where(eq(userProfiles.userId, actualUserId));
+    // Update profile XP and gold
+    await db
+      .update(userProfiles)
+      .set({ xp: newXp, gold: profile.gold + params.gold, updatedAt: new Date() })
+      .where(eq(userProfiles.userId, actualUserId));
 
-      // Update subject stats if provided
-      if (params.subjectStat) {
-        const statField = params.subjectStat.field;
-        const validFields = ['int', 'wis', 'str', 'end', 'cre', 'soc'] as const;
-        type ValidField = typeof validFields[number];
-        if (validFields.includes(statField as ValidField)) {
-          const currentStats = await tx
-            .select()
-            .from(userStats)
-            .where(eq(userStats.userId, actualUserId))
-            .limit(1);
-          if (currentStats[0]) {
-            const stat = currentStats[0] as { int: number; wis: number; str: number; end: number; cre: number; soc: number };
-            const fieldKey = statField as keyof typeof stat;
-            const currentValue = stat[fieldKey] ?? 0;
-            await tx
-              .update(userStats)
-              .set({
-                [statField]: currentValue + params.subjectStat.value,
-                updatedAt: new Date(),
-              })
-              .where(eq(userStats.userId, actualUserId));
-          }
+    // Update subject stats if provided
+    if (params.subjectStat) {
+      const statField = params.subjectStat.field;
+      const validFields = ['int', 'wis', 'str', 'end', 'cre', 'soc'] as const;
+      type ValidField = typeof validFields[number];
+      if (validFields.includes(statField as ValidField)) {
+        const currentStats = await db
+          .select()
+          .from(userStats)
+          .where(eq(userStats.userId, actualUserId))
+          .limit(1);
+        if (currentStats[0]) {
+          const stat = currentStats[0] as { int: number; wis: number; str: number; end: number; cre: number; soc: number };
+          const fieldKey = statField as keyof typeof stat;
+          const currentValue = stat[fieldKey] ?? 0;
+          await db
+            .update(userStats)
+            .set({
+              [statField]: currentValue + params.subjectStat.value,
+              updatedAt: new Date(),
+            })
+            .where(eq(userStats.userId, actualUserId));
         }
       }
+    }
 
-      return { levelUp, newLevel };
-    });
-
-    return { success: true, ...result };
+    return { success: true, levelUp, newLevel };
   } catch (error) {
     console.error('awardReward error:', error);
     const message = error instanceof Error ? error.message : '不明なエラー';

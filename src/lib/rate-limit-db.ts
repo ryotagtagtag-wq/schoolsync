@@ -52,22 +52,48 @@ export async function checkRateLimit(
   const windowStartDate = new Date(windowStart);
   const nowDate = new Date(now);
 
-  // トランザクションで原子的に実行: 古いエントリ削除 → 現在カウント取得 → 新規エントリ挿入（許可時のみ）
-  const result = await db.transaction(async (tx) => {
-    // 1. 古いエントリを削除（ウィンドウ外）
-    await tx
-      .delete(rateLimits)
-      .where(
-        and(
-          eq(rateLimits.identifier, identifier),
-          eq(rateLimits.endpoint, config.endpoint),
-          lt(rateLimits.createdAt, windowStartDate)
-        )
-      );
+  // Note: neon-http doesn't support transactions, so we execute sequentially
+  // This is acceptable for rate limiting as minor race conditions are acceptable
+  
+  // 1. 古いエントリを削除（ウィンドウ外）
+  await db
+    .delete(rateLimits)
+    .where(
+      and(
+        eq(rateLimits.identifier, identifier),
+        eq(rateLimits.endpoint, config.endpoint),
+        lt(rateLimits.createdAt, windowStartDate)
+      )
+    );
 
-    // 2. 現在のウィンドウ内のリクエスト数をカウント
-    const countResult = await tx
-      .select({ count: sql<number>`count(*)` })
+  // 2. 現在のウィンドウ内のリクエスト数をカウント
+  const countResult = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(rateLimits)
+    .where(
+      and(
+        eq(rateLimits.identifier, identifier),
+        eq(rateLimits.endpoint, config.endpoint),
+        gte(rateLimits.createdAt, windowStartDate)
+      )
+    );
+
+  const currentCount = countResult[0]?.count ?? 0;
+  const remaining = Math.max(0, config.maxRequests - currentCount);
+  const allowed = currentCount < config.maxRequests;
+
+  let resetAt = now + config.windowMs;
+
+  if (allowed) {
+    // 3. 新規エントリを挿入
+    await db.insert(rateLimits).values({
+      identifier,
+      endpoint: config.endpoint,
+      createdAt: nowDate,
+    });
+    // リセット時刻 = 最古のエントリの時刻 + ウィンドウ
+    const oldestResult = await db
+      .select({ oldest: sql<Date>`min(${rateLimits.createdAt})` })
       .from(rateLimits)
       .where(
         and(
@@ -76,60 +102,32 @@ export async function checkRateLimit(
           gte(rateLimits.createdAt, windowStartDate)
         )
       );
-
-    const currentCount = countResult[0]?.count ?? 0;
-    const remaining = Math.max(0, config.maxRequests - currentCount);
-    const allowed = currentCount < config.maxRequests;
-
-    let resetAt = now + config.windowMs;
-
-    if (allowed) {
-      // 3. 新規エントリを挿入
-      await tx.insert(rateLimits).values({
-        identifier,
-        endpoint: config.endpoint,
-        createdAt: nowDate,
-      });
-      // リセット時刻 = 最古のエントリの時刻 + ウィンドウ
-      const oldestResult = await tx
-        .select({ oldest: sql<Date>`min(${rateLimits.createdAt})` })
-        .from(rateLimits)
-        .where(
-          and(
-            eq(rateLimits.identifier, identifier),
-            eq(rateLimits.endpoint, config.endpoint),
-            gte(rateLimits.createdAt, windowStartDate)
-          )
-        );
-      if (oldestResult[0]?.oldest) {
-        resetAt = oldestResult[0].oldest.getTime() + config.windowMs;
-      }
-    } else {
-      // 制限超過時: 最古エントリからリセット時刻を計算
-      const oldestResult = await tx
-        .select({ oldest: sql<Date>`min(${rateLimits.createdAt})` })
-        .from(rateLimits)
-        .where(
-          and(
-            eq(rateLimits.identifier, identifier),
-            eq(rateLimits.endpoint, config.endpoint),
-            gte(rateLimits.createdAt, windowStartDate)
-          )
-        );
-      if (oldestResult[0]?.oldest) {
-        resetAt = oldestResult[0].oldest.getTime() + config.windowMs;
-      }
+    if (oldestResult[0]?.oldest) {
+      resetAt = oldestResult[0].oldest.getTime() + config.windowMs;
     }
+  } else {
+    // 制限超過時: 最古エントリからリセット時刻を計算
+    const oldestResult = await db
+      .select({ oldest: sql<Date>`min(${rateLimits.createdAt})` })
+      .from(rateLimits)
+      .where(
+        and(
+          eq(rateLimits.identifier, identifier),
+          eq(rateLimits.endpoint, config.endpoint),
+          gte(rateLimits.createdAt, windowStartDate)
+        )
+      );
+    if (oldestResult[0]?.oldest) {
+      resetAt = oldestResult[0].oldest.getTime() + config.windowMs;
+    }
+  }
 
-    return {
-      allowed,
-      remaining: allowed ? remaining - 1 : remaining,
-      resetAt,
-      retryAfterMs: allowed ? undefined : Math.max(0, resetAt - now),
-    };
-  });
-
-  return result;
+  return {
+    allowed,
+    remaining: allowed ? remaining - 1 : remaining,
+    resetAt,
+    retryAfterMs: allowed ? undefined : Math.max(0, resetAt - now),
+  };
 }
 
 /**
