@@ -16,7 +16,7 @@ interface PlayGameClientProps {
 
 export default function PlayGameClient({ playerData, assignments = [] }: PlayGameClientProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const startTransition = useTransition();
 
   const handleFacilityInteract = (facilityId: string) => {
     // 施設UIが閉じられた後に呼ばれる（従来のナビゲーション用フォールバック）
@@ -35,7 +35,7 @@ export default function PlayGameClient({ playerData, assignments = [] }: PlayGam
     }
   };
 
-  const handleFacilityAction = (action: string, data?: any) => {
+  const handleFacilityAction = (action: string, data?: unknown) => {
     // 施設内アクションの処理
     switch (action) {
       case 'create_assignment':
@@ -66,7 +66,7 @@ export default function PlayGameClient({ playerData, assignments = [] }: PlayGam
     }
   };
 
-  const handleBattleEnd = (result: 'victory' | 'defeat' | 'flee', assignmentId?: string, reward?: any) => {
+  const handleBattleEnd = (result: 'victory' | 'defeat' | 'flee', assignmentId?: string, reward?: unknown) => {
     if (result !== 'victory' || !assignmentId || !reward) return;
 
     startTransition(async () => {
