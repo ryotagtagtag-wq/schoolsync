@@ -25,18 +25,29 @@ export interface SubjectStats {
 }
 
 export interface Monster {
-  id: string;
-  name: string;
-  emoji: string;
-  color: string; // tailwind color class
-  subject: string;
-  difficulty: 1 | 2 | 3;
-  stars: string; // ★☆☆ etc
+  id: string
+  name: string
+  emoji: string
+  color: string
+  subject: string
+  difficulty: 1 | 2 | 3
+  stars: string
+  hp: number
+  maxHp: number
+  xpReward: number
+  goldReward: number
+  spawnPeriod: string
+}
+
+export interface ItemDrop {
+  itemId: string;
+  quantity: number;
 }
 
 export interface QuestReward {
   xp: number;
   gold: number;
+  items: ItemDrop[];
   streakBonus: number; // multiplier
   earlyBonus: boolean;
 }
@@ -74,4 +85,37 @@ export const MONSTER_EMOJIS: Record<number, string[]> = {
   1: ['🗿', '🐍', '🍄', '🦇', '🕷️'],
   2: ['🐉', '👻', '🧟', '🐺', '🐗'],
   3: ['💀', '👹', '🤖', '🦹', '👾'],
+};
+
+// 科目の相性表（攻撃側 → 弱い相手）
+export const SUBJECT_ADVANTAGE: Record<string, string[]> = {
+  数学: ['理科'],      // 数学 → 理科に強い
+  英語: ['社会'],      // 英語 → 社会に強い
+  国語: ['数学'],      // 国語 → 数学に強い
+  理科: ['芸術'],      // 理科 → 芸術に強い
+  社会: ['体育'],      // 社会 → 体育に強い
+  体育: ['理科'],      // 体育 → 理科に強い（※重複修正）
+  芸術: ['英語'],      // 芸術 → 英語に強い
+};
+
+// 科目別モンスター必殺技
+export const MONSTER_SPECIAL_MOVES: Record<string, { name: string; description: string; damageMultiplier: number; effect?: string }> = {
+  数学: { name: '📐 方程式爆破', description: '高精度な攻撃', damageMultiplier: 1.5 },
+  英語: { name: '📚 翻訳の呪い', description: '防御力低下', damageMultiplier: 1.3, effect: 'defense_down' },
+  国語: { name: '📖 暗誦連撃', description: '2-3回連続攻撃', damageMultiplier: 0.7 }, // per hit, hits 2-3 times
+  理科: { name: '🔬 実験爆炸', description: '大ダメージ（命中率80%）', damageMultiplier: 2.0, effect: 'miss_chance' },
+  社会: { name: '📜 歴史の重み', description: '次のターン行動不能', damageMultiplier: 1.0, effect: 'stun' },
+  体育: { name: '🏃 体育祭突撃', description: '攻撃しつつHP回復', damageMultiplier: 1.2, effect: 'self_heal' },
+  芸術: { name: '🎨 色彩操作', description: 'ランダムダメージ', damageMultiplier: 1.0 }, // random variance
+};
+
+// 科目別プレイヤースキル
+export const SUBJECT_PLAYER_SKILLS: Record<string, { name: string; description: string; effect: string }> = {
+  数学: { name: '🧮 閃き', description: '次の攻撃がクリティカル確率50%UP', effect: 'crit_boost' },
+  英語: { name: '📝 集中', description: '次の攻撃ダメージ+30%', effect: 'damage_boost' },
+  国語: { name: '💪 気合', description: 'HP30回復+次の攻撃+20%', effect: 'heal_and_boost' },
+  理科: { name: '🧪 実験', description: '固定ダメージ+確率で毒（3ターン継続ダメージ）', effect: 'fixed_damage_poison' },
+  社会: { name: '👥 指揮', description: '防御力UP（ダメージ半減1ターン）', effect: 'defense_up' },
+  体育: { name: '⚡ 突撃', description: '大ダメージだが反動15', effect: 'heavy_attack_recoil' },
+  芸術: { name: '🌈 変幻', description: 'ランダム効果（回復/攻撃UP/防御UP）', effect: 'random_buff' },
 };

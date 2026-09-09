@@ -21,7 +21,7 @@ export default async function HomePage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
               </span>
-              SchoolSync v0.2.0 — AI搭載・賢者の書
+              Questra v0.2.0 — AI搭載・賢者の書
             </div>
             
             <h1 className="text-4xl lg:text-6xl font-bold tracking-tight text-foreground mb-6 animate-slide-in">
@@ -175,7 +175,7 @@ export default async function HomePage() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
               </Link>
               <Link 
-                href="https://github.com/ryotagtagtag-wq/schoolsync" 
+                href="https://github.com/ryotagtagtag-wq/questra" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-8 py-3 text-base font-semibold rounded-lg border border-input bg-background text-foreground hover:bg-accent transition-colors"
@@ -191,9 +191,9 @@ export default async function HomePage() {
       {/* Footer */}
       <footer className="border-t py-8 bg-background">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>SchoolSync v0.2.0 — Built with Next.js 16, Drizzle, Neon, Vercel</p>
+          <p>Questra v0.2.0 — Built with Next.js 16, Drizzle, Neon, Vercel</p>
           <p className="mt-1">
-            <a href="https://github.com/ryotagtagtag-wq/schoolsync" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">GitHub</a> •
+            <a href="https://github.com/ryotagtagtag-wq/questra" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">GitHub</a> •
             <a href="https://build.nvidia.com/openai/gpt-oss-120b" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors ml-2">NVIDIA GPT-OSS-120B</a>
           </p>
         </div>

@@ -60,7 +60,7 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">SchoolSync</CardTitle>
+          <CardTitle className="text-2xl">Questra</CardTitle>
           <CardDescription>新しいアカウントを作成</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

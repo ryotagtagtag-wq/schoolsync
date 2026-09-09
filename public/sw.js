@@ -1,4 +1,4 @@
-const CACHE_NAME = 'schoolsync-v1';
+const CACHE_NAME = 'questra-v1';
 const STATIC_ASSETS = [
   '/',
   '/dashboard',

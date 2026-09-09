@@ -12,7 +12,7 @@ import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 
 export const metadata: Metadata = {
-  title: '課題一覧 - SchoolSync',
+  title: '課題一覧 - Questra',
 };
 
 async function getAssignments() {

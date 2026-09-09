@@ -7,7 +7,7 @@ import { Calendar } from '@/components/calendar/Calendar';
 import { Assignment } from '@/db/schema';
 
 export const metadata: Metadata = {
-  title: 'カレンダー - SchoolSync',
+  title: 'カレンダー - Questra',
 };
 
 async function getAssignments(): Promise<Assignment[]> {

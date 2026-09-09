@@ -6,14 +6,14 @@ import { Providers } from '@/components/providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'SchoolSync - 学校の課題管理ツール',
+  title: 'Questra - 学校の課題管理ツール',
   description: '期限管理、進捗追跡、カレンダー、グループ共有、通知リマインダー',
   manifest: '/manifest.json',
   themeColor: '#111827',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'SchoolSync',
+    title: 'Questra',
   },
 };
 

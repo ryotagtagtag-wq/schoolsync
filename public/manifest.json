@@ -1,6 +1,6 @@
 {
-  "name": "SchoolSync - 学校の課題管理ツール",
-  "short_name": "SchoolSync",
+  "name": "Questra - 学校の課題管理ツール",
+  "short_name": "Questra",
   "description": "期限管理、進捗追跡、カレンダー、グループ共有、通知リマインダー",
   "start_url": "/dashboard",
   "display": "standalone",

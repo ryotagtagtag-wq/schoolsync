@@ -173,6 +173,36 @@ export const userFacilities = pgTable('user_facilities', {
   facilityIdFk: foreignKey({ columns: [table.facilityId], foreignColumns: [facilities.id] }).onDelete('cascade'),
 }));
 
+// Item definitions (static data)
+export const items = pgTable('items', {
+  id: text('id').primaryKey(), // e.g. 'hp_potion', 'sword_rusty'
+  name: text('name').notNull(),
+  description: text('description').notNull(),
+  icon: text('icon').notNull(), // emoji
+  rarity: text('rarity').notNull(), // 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
+  category: text('category').notNull(), // 'consumable' | 'weapon' | 'armor' | 'accessory'
+  effectType: text('effect_type'), // 'heal' | 'xp_boost' | 'gold_boost' | 'stat_boost'
+  effectValue: integer('effect_value').default(0).notNull(),
+  price: integer('price').default(0).notNull(), // shop price in gold (0 = not purchasable)
+  statBonuses: text('stat_bonuses'), // JSON: { int: 1, wis: 0, ... }
+  subject: text('subject'), // null = all subjects, otherwise drops in this subject
+});
+
+// User inventory
+export const userItems = pgTable('user_items', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull(),
+  itemId: text('item_id').notNull(),
+  quantity: integer('quantity').default(1).notNull(),
+  acquiredAt: timestamp('acquired_at').defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index('user_items_user_id_idx').on(table.userId),
+  itemIdIdx: index('user_items_item_id_idx').on(table.itemId),
+  uniqueUserItem: uniqueIndex('user_items_user_item_idx').on(table.userId, table.itemId),
+  userIdFk: foreignKey({ columns: [table.userId], foreignColumns: [users.id] }).onDelete('cascade'),
+  itemIdFk: foreignKey({ columns: [table.itemId], foreignColumns: [items.id] }).onDelete('cascade'),
+}));
+
 // Guild quests
 export const guildQuests = pgTable('guild_quests', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -225,6 +255,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   stats: one(userStats),
   achievements: many(userAchievements),
   facilities: many(userFacilities),
+  items: many(userItems),
 }));
 
 export const assignmentsRelations = relations(assignments, ({ one }) => ({
@@ -276,6 +307,15 @@ export const userFacilitiesRelations = relations(userFacilities, ({ one }) => ({
   facility: one(facilities, { fields: [userFacilities.facilityId], references: [facilities.id] }),
 }));
 
+export const itemsRelations = relations(items, ({ many }) => ({
+  heldBy: many(userItems),
+}));
+
+export const userItemsRelations = relations(userItems, ({ one }) => ({
+  user: one(users, { fields: [userItems.userId], references: [users.id] }),
+  item: one(items, { fields: [userItems.itemId], references: [items.id] }),
+}));
+
 export const guildQuestsRelations = relations(guildQuests, ({ one }) => ({
   group: one(groups, { fields: [guildQuests.groupId], references: [groups.id] }),
 }));
@@ -308,5 +348,9 @@ export type Facility = typeof facilities.$inferSelect;
 export type UserFacility = typeof userFacilities.$inferSelect;
 export type GuildQuest = typeof guildQuests.$inferSelect;
 export type GuildQuestProgress = typeof guildQuestProgress.$inferSelect;
+export type Item = typeof items.$inferSelect;
+export type NewItem = typeof items.$inferInsert;
+export type UserItem = typeof userItems.$inferSelect;
+export type NewUserItem = typeof userItems.$inferInsert;
 export type RateLimit = typeof rateLimits.$inferSelect;
 export type NewRateLimit = typeof rateLimits.$inferInsert;
