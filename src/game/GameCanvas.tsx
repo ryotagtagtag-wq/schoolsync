@@ -114,6 +114,7 @@ export function GameCanvas({
         parent: containerRef.current,
       });
 
+      // Add all scenes, but only BootScene auto-starts
       game.scene.add('BootScene', BootScene, true);
       game.scene.add('WorldScene', WorldScene, false);
       game.scene.add('BattleScene', BattleScene, false);
@@ -122,32 +123,29 @@ export function GameCanvas({
 
       gameRef.current = game;
 
-      game.events.on('ready', () => {
-        setTimeout(() => {
+      // Wait for BootScene to complete and start WorldScene
+      // BootScene.create() calls this.scene.start('WorldScene') after generating assets
+      game.events.once('ready', () => {
+        // Give BootScene time to start WorldScene
+        const checkWorldScene = () => {
           const worldScene = game.scene.getScene('WorldScene');
-          if (worldScene) {
-            worldScene.events.on('facility-interact', (facility: FacilityData) => {
-              launchFacilityUI(facility);
-            });
-            worldScene.events.on('battle-start', (data: unknown) => {
-              callbacksRef.current.onBattleStart?.(data);
-            });
-            worldScene.events.on('battle-end', (result: { type: 'victory' | 'defeat' | 'flee'; assignmentId?: string; reward?: unknown }) => {
-              callbacksRef.current.onBattleEnd?.(result.type, result.assignmentId, result.reward);
-            });
+          if (worldScene && worldScene.scene.isActive()) {
+            setupWorldSceneListeners(worldScene);
+            const uiScene = game.scene.getScene('UIScene');
+            if (uiScene) {
+              uiScene.events.on('level-up', (level: number) => {
+                callbacksRef.current.onLevelUp?.(level);
+              });
+            }
+            setIsLoaded(true);
+            setError(null);
+          } else {
+            // WorldScene not started yet, check again
+            setTimeout(checkWorldScene, 50);
           }
-          const uiScene = game.scene.getScene('UIScene');
-          if (uiScene) {
-            uiScene.events.on('level-up', (level: number) => {
-              callbacksRef.current.onLevelUp?.(level);
-            });
-          }
-        }, 100);
+        };
+        checkWorldScene();
       });
-
-      // Set loaded state after game is created
-      setIsLoaded(true);
-      setError(null);
 
     } catch (err) {
       console.error('Failed to initialize Phaser game:', err);
@@ -161,6 +159,18 @@ export function GameCanvas({
       }
     };
   }, [assignments, launchFacilityUI]);
+
+  const setupWorldSceneListeners = (worldScene: Phaser.Scene) => {
+    worldScene.events.on('facility-interact', (facility: FacilityData) => {
+      launchFacilityUI(facility);
+    });
+    worldScene.events.on('battle-start', (data: unknown) => {
+      callbacksRef.current.onBattleStart?.(data);
+    });
+    worldScene.events.on('battle-end', (result: { type: 'victory' | 'defeat' | 'flee'; assignmentId?: string; reward?: unknown }) => {
+      callbacksRef.current.onBattleEnd?.(result.type, result.assignmentId, result.reward);
+    });
+  };
 
   // プレイヤーデータ更新
   useEffect(() => {
