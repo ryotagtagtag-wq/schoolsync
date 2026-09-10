@@ -1,161 +1,116 @@
-import Phaser from 'phaser';
+import { Container, Graphics, Text, TextStyle, Application } from 'pixi.js';
+import { Scene, SceneManager } from '../SceneManager';
 import { generateAllAssets } from '../generateAssets';
+import { GAME_WIDTH, GAME_HEIGHT } from '../config';
 
-export class BootScene extends Phaser.Scene {
-  constructor() {
-    super('BootScene');
+export class BootScene implements Scene {
+  name: 'boot' = 'boot';
+  container = new Container();
+  private app: Application;
+  private sceneManager: SceneManager;
+  private progressBar!: Graphics;
+  private progressBox!: Graphics;
+  private loadingText!: Text;
+  private percentText!: Text;
+  private tipText!: Text;
+
+  constructor(app: Application, sceneManager: SceneManager) {
+    this.app = app;
+    this.sceneManager = sceneManager;
   }
 
-  preload(): void {
-    // ローディングバー表示
-    const width = this.cameras.main.width;
-    const height = this.cameras.main.height;
-    
-    const progressBar = this.add.graphics();
-    const progressBox = this.add.graphics();
-    progressBox.fillStyle(0x1a1a2e, 0.9);
-    progressBox.fillRect(width / 2 - 160, height / 2 - 30, 320, 60);
-    progressBox.lineStyle(2, 0x6B46C1, 1);
-    progressBox.strokeRect(width / 2 - 160, height / 2 - 30, 320, 60);
-    
-    const loadingText = this.add.text(width / 2, height / 2 - 55, 'Questra', {
-      font: 'bold 28px Noto Sans JP',
-      color: '#F59E0B',
-      stroke: '#1a1a2e',
-      strokeThickness: 4,
-    }).setOrigin(0.5, 0.5);
-    
-    const subtitleText = this.add.text(width / 2, height / 2 - 20, '見習い賢者の冒険録', {
-      font: '14px Noto Sans JP',
-      color: '#A78BFA',
-    }).setOrigin(0.5, 0.5);
-    
-    const percentText = this.add.text(width / 2, height / 2 + 10, '0%', {
-      font: '16px Noto Sans JP',
-      color: '#ffffff',
-    }).setOrigin(0.5, 0.5);
-    
-    const tipText = this.add.text(width / 2, height / 2 + 45, 'アセットを生成中...', {
-      font: '12px Noto Sans JP',
-      color: '#6B7280',
-    }).setOrigin(0.5, 0.5);
-    
-    this.load.on('progress', (value: number) => {
-      progressBar.clear();
-      progressBar.fillStyle(0x6B46C1, 1);
-      progressBar.fillRect(width / 2 - 150, height / 2 - 10, 300 * value, 20);
-      percentText.setText(`${Math.floor(value * 100)}%`);
-    });
-    
-    this.load.on('complete', () => {
-      progressBar.destroy();
-      progressBox.destroy();
-      loadingText.destroy();
-      subtitleText.destroy();
-      percentText.destroy();
-      tipText.destroy();
-    });
-
-    // ダミーのロード（プログレスバー表示用）
-    this.load.on('progress', () => {});
-    this.load.start();
-    
-    // 即座に完了させる（アセットは生成で作るため）
-    this.load.emit('complete');
+  init(): void {
+    this.createUI();
   }
 
   create(): void {
-    // プログラム的に全アセットを生成
-    generateAllAssets(this);
-    
-    // アニメーション定義
-    this.createAnimations();
-    
-    // 次のシーンへ
-    this.scene.start('WorldScene', { map: 'town' });
+    this.generateAssetsWithProgress();
   }
-  
-  private createAnimations(): void {
-    // プレイヤーアニメーション（生成したスプライトシート使用）
-    // アイドル
-    ['down', 'up', 'left', 'right'].forEach((dir, row) => {
-      this.anims.create({
-        key: `player-idle-${dir}`,
-        frames: this.anims.generateFrameNumbers('player', { start: row * 9, end: row * 9 + 2 }),
-        frameRate: 6,
-        repeat: -1,
-      });
-      this.anims.create({
-        key: `player-walk-${dir}`,
-        frames: this.anims.generateFrameNumbers('player', { start: row * 9 + 3, end: row * 9 + 8 }),
-        frameRate: 10,
-        repeat: -1,
-      });
+
+  private createUI(): void {
+    const width = GAME_WIDTH;
+    const height = GAME_HEIGHT;
+
+    this.progressBox = new Graphics();
+    this.progressBox.roundRect(width / 2 - 160, height / 2 - 30, 320, 60, 10)
+      .fill({ color: 0x1a1a2e, alpha: 0.9 })
+      .stroke({ width: 2, color: 0x6B46C1 });
+    this.container.addChild(this.progressBox);
+
+    this.progressBar = new Graphics();
+    this.container.addChild(this.progressBar);
+
+    const titleStyle = new TextStyle({
+      fontFamily: 'Noto Sans JP',
+      fontSize: 28,
+      fontWeight: 'bold',
+      fill: 0xF59E0B,
+      stroke: { color: 0x1a1a2e, width: 4 },
     });
-    
-    // 攻撃
-    this.anims.create({
-      key: 'player-attack',
-      frames: this.anims.generateFrameNumbers('player', { start: 36, end: 39 }),
-      frameRate: 12,
-      repeat: 0,
+    this.loadingText = new Text('Questra', titleStyle);
+    this.loadingText.anchor.set(0.5);
+    this.loadingText.position.set(width / 2, height / 2 - 55);
+    this.container.addChild(this.loadingText);
+
+    const subtitleStyle = new TextStyle({
+      fontFamily: 'Noto Sans JP',
+      fontSize: 14,
+      fill: 0xA78BFA,
     });
-    
-    // モンスター共通アニメーション
-    const monsters = ['golem', 'dragon', 'mage', 'phoenix', 'titan', 'berserker', 'nekomata'];
-    monsters.forEach(monster => {
-      this.anims.create({
-        key: `monster-${monster}-idle`,
-        frames: this.anims.generateFrameNumbers(`monster-${monster}`, { start: 0, end: 9 }),
-        frameRate: 6,
-        repeat: -1,
-      });
-      this.anims.create({
-        key: `monster-${monster}-hit`,
-        frames: this.anims.generateFrameNumbers(`monster-${monster}`, { start: 10, end: 11 }),
-        frameRate: 10,
-        repeat: 0,
-      });
-      this.anims.create({
-        key: `monster-${monster}-death`,
-        frames: this.anims.generateFrameNumbers(`monster-${monster}`, { start: 20, end: 29 }),
-        frameRate: 8,
-        repeat: 0,
-      });
-      
-      // 後方互換用のエイリアス
-      this.anims.create({
-        key: 'monster-idle',
-        frames: this.anims.generateFrameNumbers(`monster-${monster}`, { start: 0, end: 9 }),
-        frameRate: 6,
-        repeat: -1,
-      });
-      this.anims.create({
-        key: 'monster-hit',
-        frames: this.anims.generateFrameNumbers(`monster-${monster}`, { start: 10, end: 11 }),
-        frameRate: 10,
-        repeat: 0,
-      });
-      this.anims.create({
-        key: 'monster-death',
-        frames: this.anims.generateFrameNumbers(`monster-${monster}`, { start: 20, end: 29 }),
-        frameRate: 8,
-        repeat: 0,
-      });
+    const subtitleText = new Text('見習い賢者の冒険録', subtitleStyle);
+    subtitleText.anchor.set(0.5);
+    subtitleText.position.set(width / 2, height / 2 - 20);
+    this.container.addChild(subtitleText);
+
+    const percentStyle = new TextStyle({
+      fontFamily: 'Noto Sans JP',
+      fontSize: 16,
+      fill: 0xFFFFFF,
     });
-    
-    // エフェクトアニメーション
-    this.anims.create({
-      key: 'explosion',
-      frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 15 }),
-      frameRate: 20,
-      repeat: 0,
+    this.percentText = new Text('0%', percentStyle);
+    this.percentText.anchor.set(0.5);
+    this.percentText.position.set(width / 2, height / 2 + 10);
+    this.container.addChild(this.percentText);
+
+    const tipStyle = new TextStyle({
+      fontFamily: 'Noto Sans JP',
+      fontSize: 12,
+      fill: 0x6B7280,
     });
-    this.anims.create({
-      key: 'hit-effect',
-      frames: this.anims.generateFrameNumbers('hit-effect', { start: 0, end: 7 }),
-      frameRate: 15,
-      repeat: 0,
-    });
+    this.tipText = new Text('アセットを生成中...', tipStyle);
+    this.tipText.anchor.set(0.5);
+    this.tipText.position.set(width / 2, height / 2 + 45);
+    this.container.addChild(this.tipText);
+  }
+
+  private async generateAssetsWithProgress(): Promise<void> {
+    for (let i = 0; i <= 100; i += 10) {
+      this.updateProgress(i / 100);
+      await new Promise(r => setTimeout(r, 30));
+    }
+
+    this.tipText.text = 'アセットを生成中...';
+    generateAllAssets(this.app);
+
+    this.updateProgress(1);
+    this.percentText.text = '100%';
+    this.tipText.text = '完了！';
+
+    await new Promise(r => setTimeout(r, 300));
+
+    this.sceneManager.start('world', { map: 'town' });
+  }
+
+  private updateProgress(value: number): void {
+    this.progressBar.clear();
+    this.progressBar.rect(GAME_WIDTH / 2 - 150, GAME_HEIGHT / 2 - 10, 300 * value, 20)
+      .fill(0x6B46C1);
+    this.percentText.text = `${Math.floor(value * 100)}%`;
+  }
+
+  update(): void {}
+
+  destroy(): void {
+    this.container.destroy({ children: true });
   }
 }

@@ -1,14 +1,16 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import Phaser from 'phaser';
-import { gameConfig } from './config';
+import { Application } from 'pixi.js';
+import { gameConfig, type PixiApp } from './config';
+import { SceneManager, SceneName } from './SceneManager';
 import { BootScene } from './scenes/BootScene';
-import { WorldScene, setPendingAssignments, type AssignmentData } from './scenes/WorldScene';
+import { WorldScene } from './scenes/WorldScene';
 import { BattleScene } from './scenes/BattleScene';
 import { UIScene } from './scenes/UIScene';
 import { FacilityUIScene } from './scenes/FacilityUIScene';
 import type { FacilityData } from './map/tilemap';
+import { setPendingAssignments, type AssignmentData } from './scenes/WorldScene';
 
 interface GameCanvasProps {
   playerData?: {
@@ -19,14 +21,7 @@ interface GameCanvasProps {
     gold: number;
     streak: number;
     title: string;
-    stats?: {
-      int: number;
-      wis: number;
-      str: number;
-      end: number;
-      cre: number;
-      soc: number;
-    };
+    stats?: { int: number; wis: number; str: number; end: number; cre: number; soc: number };
     facilities?: Array<{ facilityId: string; level: number }>;
   };
   assignments?: AssignmentData[];
@@ -56,19 +51,20 @@ export function GameCanvas({
   onFacilityAction,
   className = '',
 }: GameCanvasProps) {
-  const gameRef = useRef<Phaser.Game | null>(null);
+  const appRef = useRef<PixiApp | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const sceneManagerRef = useRef<SceneManager | null>(null);
   const callbacksRef = useRef<Callbacks>({});
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Update callbacks ref
-  useEffect(() => {
+  useEffect(async () => {
     callbacksRef.current = { onFacilityInteract, onBattleStart, onBattleEnd, onLevelUp, onFacilityAction };
   }, [onFacilityInteract, onBattleStart, onBattleEnd, onLevelUp, onFacilityAction]);
 
   const launchFacilityUI = useCallback((facility: FacilityData) => {
-    if (!gameRef.current || !playerData) return;
+    if (!sceneManagerRef.current || !playerData) return;
     
     const facilityData = {
       facility,
@@ -99,86 +95,96 @@ export function GameCanvas({
       },
     };
 
-    gameRef.current.scene.pause('WorldScene');
-    gameRef.current.scene.launch('FacilityUIScene', facilityData);
+    sceneManagerRef.current.pause('world');
+    sceneManagerRef.current.launch('facility', facilityData);
   }, [playerData, assignments]);
 
-  useEffect(() => {
-    if (gameRef.current || !containerRef.current) return;
+  useEffect(async () => {
+    if (appRef.current || !containerRef.current) return;
 
     try {
       setPendingAssignments(assignments);
 
-      const game = new Phaser.Game({
+      // Create PixiJS Application
+      const app = new Application();
+      await app.init({
         ...gameConfig,
         parent: containerRef.current,
       });
 
-      // Add all scenes, but only BootScene auto-starts
-      game.scene.add('BootScene', BootScene, true);
-      game.scene.add('WorldScene', WorldScene, false);
-      game.scene.add('BattleScene', BattleScene, false);
-      game.scene.add('UIScene', UIScene, false);
-      game.scene.add('FacilityUIScene', FacilityUIScene, false);
+      appRef.current = app;
 
-      gameRef.current = game;
+      // Create scene manager
+      const sceneManager = new SceneManager(app);
+      sceneManagerRef.current = sceneManager;
 
-      // Wait for BootScene to complete and start WorldScene
-      // BootScene.create() calls this.scene.start('WorldScene') after generating assets
-      game.events.once('ready', () => {
-        // Give BootScene time to start WorldScene
-        const checkWorldScene = () => {
-          const worldScene = game.scene.getScene('WorldScene');
-          if (worldScene && worldScene.scene.isActive()) {
-            setupWorldSceneListeners(worldScene);
-            const uiScene = game.scene.getScene('UIScene');
-            if (uiScene) {
-              uiScene.events.on('level-up', (level: number) => {
-                callbacksRef.current.onLevelUp?.(level);
-              });
-            }
-            setIsLoaded(true);
-            setError(null);
-          } else {
-            // WorldScene not started yet, check again
-            setTimeout(checkWorldScene, 50);
-          }
-        };
-        checkWorldScene();
+      // Register all scenes
+      const bootScene = new BootScene(app, sceneManager);
+      sceneManager.register(bootScene);
+
+      const worldScene = new WorldScene();
+      worldScene.setSceneManager(sceneManager);
+      worldScene.setCallbacks({
+        onFacilityInteract: (facility: FacilityData) => {
+          callbacksRef.current.onFacilityInteract?.(facility.id);
+        },
+        onBattleStart: (data: any) => {
+          callbacksRef.current.onBattleStart?.(data);
+        },
+        onBattleEnd: (result: any) => {
+          callbacksRef.current.onBattleEnd?.(result.type, result.assignmentId, result.reward);
+        },
+      });
+      sceneManager.register(worldScene);
+
+      const battleScene = new BattleScene(app);
+      sceneManager.register(battleScene);
+
+      const uiScene = new UIScene();
+      sceneManager.register(uiScene);
+
+      const facilityScene = new FacilityUIScene();
+      sceneManager.register(facilityScene);
+
+      // Start with boot scene
+      sceneManager.start('boot').then(() => {
+        setIsLoaded(true);
+        setError(null);
+      });
+
+      // Game loop
+      app.ticker.add((ticker) => {
+        sceneManager.update(ticker.deltaTime);
+      });
+
+      // Handle UI scene updates
+      app.ticker.add(() => {
+        if (sceneManager.getCurrent() === 'world' || sceneManager.getScene('ui')) {
+          const uiSceneInstance = sceneManager.getScene('ui') as any;
+          uiSceneInstance?.update?.(0);
+        }
       });
 
     } catch (err) {
-      console.error('Failed to initialize Phaser game:', err);
+      console.error('Failed to initialize PixiJS game:', err);
       setError('ゲームの初期化に失敗しました');
     }
 
     return () => {
-      if (gameRef.current) {
-        gameRef.current.destroy(true);
-        gameRef.current = null;
+      if (appRef.current) {
+        appRef.current.destroy(true, { children: true, texture: true, baseTexture: true });
+        appRef.current = null;
       }
     };
   }, [assignments, launchFacilityUI]);
 
-  const setupWorldSceneListeners = (worldScene: Phaser.Scene) => {
-    worldScene.events.on('facility-interact', (facility: FacilityData) => {
-      launchFacilityUI(facility);
-    });
-    worldScene.events.on('battle-start', (data: unknown) => {
-      callbacksRef.current.onBattleStart?.(data);
-    });
-    worldScene.events.on('battle-end', (result: { type: 'victory' | 'defeat' | 'flee'; assignmentId?: string; reward?: unknown }) => {
-      callbacksRef.current.onBattleEnd?.(result.type, result.assignmentId, result.reward);
-    });
-  };
-
   // プレイヤーデータ更新
-  useEffect(() => {
-    if (!gameRef.current || !playerData) return;
+  useEffect(async () => {
+    if (!appRef.current || !playerData) return;
     
-    const uiScene = gameRef.current.scene.getScene('UIScene') as Phaser.Scene;
-    if (uiScene && uiScene.scene.isActive()) {
-      uiScene.events.emit('update-player-data', playerData);
+    const uiScene = sceneManagerRef.current?.getScene('ui') as any;
+    if (uiScene && uiScene.onUpdatePlayerData) {
+      uiScene.onUpdatePlayerData(playerData);
     }
   }, [playerData]);
 
