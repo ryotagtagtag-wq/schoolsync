@@ -45,8 +45,6 @@ function LoginForm() {
     }
   };
 
-
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
       <Card className="w-full max-w-md">
@@ -92,8 +90,6 @@ function LoginForm() {
               {isLoading ? 'ログイン中...' : 'ログイン'}
             </Button>
           </form>
-
-
 
           <p className="text-center text-sm text-muted-foreground">
             アカウントをお持ちでないですか？{' '}

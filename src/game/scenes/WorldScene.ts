@@ -76,6 +76,12 @@ export class WorldScene extends Phaser.Scene {
       _pendingAssignments = [];
     }
 
+    // Wait for tileset texture to be ready
+    if (!this.textures.exists('tileset')) {
+      this.time.delayedCall(100, () => this.create(), [], this);
+      return;
+    }
+
     this.createTilemap();
     this.createPlayer();
     this.createInput();
@@ -476,7 +482,15 @@ export class WorldScene extends Phaser.Scene {
     
     // プレイヤーとマップ遷移
     for (const transition of this.transitionObjects) {
-      const zone = this.physics.add.overlap(this.player, this.physics.add.existing(zone), this.onTransitionOverlap, undefined, this);
+      const zone = this.add.zone(
+        transition.x + transition.width / 2,
+        transition.y + transition.height / 2,
+        transition.width,
+        transition.height
+      );
+      this.physics.add.existing(zone);
+      zone.setData('transition', transition.properties);
+      this.physics.add.overlap(this.player, zone, this.onTransitionOverlap, undefined, this);
     }
     
     // モンスター同士・壁との衝突

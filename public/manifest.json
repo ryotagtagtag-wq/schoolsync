@@ -1,12 +1,12 @@
 {
-  "name": "Questra - 学校の課題管理ツール",
+  "name": "Questra - 見習い賢者の冒険録",
   "short_name": "Questra",
-  "description": "期限管理、進捗追跡、カレンダー、グループ共有、通知リマインダー",
-  "start_url": "/dashboard",
+  "description": "課題を冒険に。6つの施設で賢者を目指せ。",
+  "start_url": "/play",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#111827",
-  "orientation": "portrait-primary",
+  "background_color": "#0f0f1a",
+  "theme_color": "#6B46C1",
+  "orientation": "landscape-primary",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -21,7 +21,7 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["education", "productivity"],
+  "categories": ["games", "education"],
   "lang": "ja",
   "dir": "ltr"
 }
