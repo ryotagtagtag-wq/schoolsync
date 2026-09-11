@@ -1,0 +1,9 @@
+[     916ms] [WARNING] Error while trying to use the following icon from the Manifest: https://quest.ryopc.org/icon-192.png (Download error or resource isn't a valid image) @ https://quest.ryopc.org/play:0
+[    4897ms] [WARNING]     at new eW (https://quest.ryopc.org/_next/static/immutable/chunks/1s7qiygz3kd5c.js:1:44232)
+    at eq.createUI (https://quest.ryopc.org/_next/static/immutable/chunks/1s7qiygz3kd5c.js:1:57543)
+    at eq.init (https://quest.ryopc.org/_next/static/immutable/chunks/1s7qiygz3kd5c.js:1:57060)
+    at I.start (https://quest.ryopc.org/_next/static/immutable/chunks/1s7qiygz3kd5c.js:1:8671)
+    at https://quest.ryopc.org/_next/static/immutable/chunks/1s7qiygz3kd5c.js:68:5231 @ https://quest.ryopc.org/_next/static/immutable/chunks/095xg71e-vq3j.js:19
+[   15565ms] [WARNING]     at eJ.generatePlayerSpritesheet (https://quest.ryopc.org/_next/static/immutable/chunks/1s7qiygz3kd5c.js:1:46728)
+    at eJ.generateAll (https://quest.ryopc.org/_next/static/immutable/chunks/1s7qiygz3kd5c.js:1:45085)
+    at eq.generateAssetsWithProgress (https://quest.ryopc.org/_next/static/immutable/chunks/1s7qiygz3kd5c.js:1:58425) @ https://quest.ryopc.org/_next/static/immutable/chunks/095xg71e-vq3j.js:19
