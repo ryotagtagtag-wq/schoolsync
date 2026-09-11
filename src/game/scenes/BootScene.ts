@@ -86,6 +86,7 @@ export class BootScene implements Scene {
   }
 
   private async generateAssetsWithProgress(): Promise<void> {
+    // UI is already created in init(), safe to update progress
     for (let i = 0; i <= 100; i += 10) {
       this.updateProgress(i / 100);
       await new Promise(r => setTimeout(r, 30));
@@ -175,6 +176,7 @@ export class BootScene implements Scene {
   }
 
   private updateProgress(value: number): void {
+    if (!this.progressBar) return;
     this.progressBar.clear();
     this.progressBar.rect(GAME_WIDTH / 2 - 150, GAME_HEIGHT / 2 - 10, 300 * value, 20)
       .fill(0x6B46C1);

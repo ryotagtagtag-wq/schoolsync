@@ -1,0 +1,9 @@
+[      44ms] [ERROR] Failed to load resource: net::ERR_FAILED @ chrome-extension://invalid/:0
+[     107ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/play:0
+[     137ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/_next/static/chunks/06f0ulsh-8mpm.css:0
+[     188ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/_next/static/chunks/1xwl6jqfs4f3c.js:0
+[     188ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/_next/static/chunks/0zqrzjymaq2f4.js:0
+[     248ms] Access to storage is not allowed from this context.
+[     249ms] Access to storage is not allowed from this context.
+[     249ms] Access to storage is not allowed from this context.
+[     250ms] Access to storage is not allowed from this context.

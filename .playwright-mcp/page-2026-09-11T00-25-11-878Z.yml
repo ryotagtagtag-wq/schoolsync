@@ -1,0 +1,22 @@
+- generic [ref=f3e1]:
+  - generic [ref=f3e4]:
+    - generic [ref=f3e5]:
+      - generic [ref=f3e6]: Questra
+      - generic [ref=f3e7]: 学校の課題管理ツールにログイン
+    - generic [ref=f3e8]:
+      - generic [ref=f3e9]:
+        - generic [ref=f3e10]:
+          - generic [ref=f3e11]: メールアドレス
+          - textbox "メールアドレス" [ref=f3e12]:
+            - /placeholder: example@school.edu
+        - generic [ref=f3e13]:
+          - generic [ref=f3e14]: パスワード
+          - textbox "パスワード" [ref=f3e15]:
+            - /placeholder: 8文字以上
+        - button "ログイン" [ref=f3e16]
+      - paragraph [ref=f3e17]:
+        - text: アカウントをお持ちでないですか？
+        - link "新規登録" [ref=f3e18] [cursor=pointer]:
+          - /url: /register
+  - region "Notifications alt+T"
+  - alert [ref=f3e19]
