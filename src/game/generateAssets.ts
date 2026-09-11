@@ -1,4 +1,4 @@
-import { Graphics, Texture, BaseTexture, Sprite, Container } from 'pixi.js';
+import { Graphics, Texture, BaseTexture, Sprite, Container, Point } from 'pixi.js';
 import { GAME_WIDTH, GAME_HEIGHT, TILE_SIZE, FACILITIES, type FacilityData } from './config';
 
 export class AssetGenerator {
@@ -18,21 +18,12 @@ export class AssetGenerator {
     this.generateTileset();
   }
 
-  private createTextureFromGraphics(graphics: Graphics, width: number, height: number, name: string): Texture {
-    const texture = this.app.renderer.generateTexture(graphics, {
-      resolution: 1,
-      multisample: Texture.defaultMultisample,
-    });
-    return texture;
-  }
-
+  // ===== プレイヤースプライトシート (32x32, 36フレーム) =====
   private generatePlayerSpritesheet(): void {
     const frameWidth = 32;
     const frameHeight = 32;
     const cols = 9;
     const rows = 4;
-    const totalWidth = frameWidth * cols;
-    const totalHeight = frameHeight * rows;
 
     const container = new Container();
     
@@ -45,53 +36,42 @@ export class AssetGenerator {
       outline: 0x111827,
     };
 
-    const drawCharacter = (frameX: number, frameY: number, direction: 'down' | 'up' | 'left' | 'right', walking: boolean) => {
+    function drawCharacter(frameX: number, frameY: number, direction: 'down' | 'up' | 'left' | 'right', walking: boolean): void {
       const graphics = new Graphics();
       const x = frameX * frameWidth;
       const y = frameY * frameHeight;
       const cx = x + frameWidth / 2;
       const cy = y + frameHeight / 2;
 
-      graphics.translate(cx, cy);
+      graphics.position.set(cx, cy);
 
       if (direction === 'left' || direction === 'right') {
         graphics.scale.x = direction === 'left' ? -1 : 1;
       }
 
-      const walkOffset = walking ? Math.sin(frameX * Math.PI / 2) * 2 : 0;
       const armSwing = walking ? Math.sin(frameX * Math.PI / 2) * 4 : 0;
       const legSwing = walking ? Math.sin(frameX * Math.PI / 2) * 3 : 0;
 
       graphics.ellipse(0, 14, 10, 3).fill({ color: 0x000000, alpha: 0.2 });
-
       graphics.rect(-8, -4, 16, 14).fill(colors.shirt).stroke({ width: 1, color: colors.outline });
-
       graphics.rect(-12 + armSwing, -2, 6, 10).fill(colors.shirt).stroke({ width: 1, color: colors.outline });
       graphics.rect(6 - armSwing, -2, 6, 10).fill(colors.shirt).stroke({ width: 1, color: colors.outline });
-
       graphics.rect(-6, 10 + legSwing, 5, 8).fill(colors.pants).stroke({ width: 1, color: colors.outline });
       graphics.rect(1, 10 - legSwing, 5, 8).fill(colors.pants).stroke({ width: 1, color: colors.outline });
-
       graphics.rect(-6, 18 + legSwing, 5, 3).fill(colors.shoes);
       graphics.rect(1, 18 - legSwing, 5, 3).fill(colors.shoes);
-
       graphics.circle(0, -10, 8).fill(colors.skin).stroke({ width: 1, color: colors.outline });
-
       graphics.arc(0, -14, 9, Math.PI, 0, true).lineTo(9, -10).arc(0, -10, 9, 0, Math.PI, true).fill(colors.hair);
-
       graphics.rect(-4, -12, 2, 2).fill(colors.outline);
       graphics.rect(2, -12, 2, 2).fill(colors.outline);
-
       if (direction === 'down') {
         graphics.rect(-1, -8, 2, 1).fill(colors.outline);
       }
-
-      graphics.translate(-cx, -cy);
       container.addChild(graphics);
-    };
+    }
 
-    const directions: ('down' | 'up' | 'left' | 'right')[] = ['down', 'up', 'left', 'right'];
-    directions.forEach((dir, row) => {
+    const directions: Array<'down' | 'up' | 'left' | 'right'> = ['down', 'up', 'left', 'right'];
+    directions.forEach((dir: 'down' | 'up' | 'left' | 'right', row: number) => {
       for (let i = 0; i < 3; i++) drawCharacter(i, row, dir, false);
       for (let i = 3; i < 9; i++) drawCharacter(i, row, dir, true);
     });
@@ -101,10 +81,9 @@ export class AssetGenerator {
       const graphics = new Graphics();
       const x = i * frameWidth + frameWidth / 2;
       const y = 4 * frameHeight + frameHeight / 2;
-      graphics.translate(x, y);
+      graphics.position.set(x, y);
       graphics.rect(-8, -4, 16, 14).fill(colors.shirt).stroke({ width: 1, color: colors.outline });
       graphics.rect(6, -2 + Math.sin(i * Math.PI / 2) * 4, 10, 6).fill(colors.shirt).stroke({ width: 1, color: colors.outline });
-      graphics.translate(-x, -y);
       container.addChild(graphics);
     }
 
@@ -122,7 +101,7 @@ export class AssetGenerator {
     }
     Texture.addToCache(texture, 'player');
   }
-
+  // ===== モンスタースプライトシート =====
   private generateMonsterSpritesheet(name: string, color: number, emoji: string): void {
     const frameWidth = 32;
     const frameHeight = 32;
@@ -138,12 +117,13 @@ export class AssetGenerator {
       const cx = x + frameWidth / 2;
       const cy = y + frameHeight / 2;
 
-      graphics.translate(cx, cy);
+      graphics.position.set(cx, cy);
 
       const bob = anim === 'idle' ? Math.sin(frameX * Math.PI) * 2 : 0;
       const hitFlash = anim === 'hit' ? 1 : 0;
       const deathProgress = anim === 'death' ? frameX / 9 : 0;
 
+      // 影
       graphics.ellipse(0, 12, 12, 4).fill({ color: 0x000000, alpha: 0.3 });
 
       const bodyColor = hitFlash ? 0xFFFFFF : color;
@@ -151,10 +131,12 @@ export class AssetGenerator {
       graphics.fillStyle(bodyColor);
       
       if (emoji.includes('🗿') || emoji.includes('🪨')) {
+        // ゴーレム：岩っぽい
         graphics.moveTo(-12, 4).lineTo(-10, -8).lineTo(0, -12).lineTo(10, -8).lineTo(12, 4).lineTo(8, 10).lineTo(-8, 10).closePath().fill().stroke({ width: 2, color: 0x374151 });
         graphics.rect(-5, -4, 3, 3).fill(0xF59E0B);
         graphics.rect(2, -4, 3, 3).fill(0xF59E0B);
       } else if (emoji.includes('🐉') || emoji.includes('🐲')) {
+        // ドラゴン
         graphics.ellipse(0, 0, 14, 10).fill();
         graphics.moveTo(-14, -2).lineTo(-20, -10).lineTo(-10, 2).closePath().fill(hitFlash ? 0xFFFFFF : this.adjustColor(color, -30)).stroke({ width: 1, color: 0x374151 });
         graphics.moveTo(14, -2).lineTo(20, -10).lineTo(10, 2).closePath().fill(hitFlash ? 0xFFFFFF : this.adjustColor(color, -30)).stroke({ width: 1, color: 0x374151 });
@@ -163,6 +145,7 @@ export class AssetGenerator {
         graphics.moveTo(-8, -10).lineTo(-10, -16).lineTo(-6, -10).closePath().fill(0xF59E0B);
         graphics.moveTo(8, -10).lineTo(10, -16).lineTo(6, -10).closePath().fill(0xF59E0B);
       } else if (emoji.includes('🧙')) {
+        // 魔導師
         graphics.moveTo(-10, -2).lineTo(0, -14).lineTo(10, -2).lineTo(8, 10).lineTo(-8, 10).closePath().fill();
         graphics.moveTo(-8, -6).lineTo(0, -16).lineTo(8, -6).closePath().fill(hitFlash ? 0xFFFFFF : this.adjustColor(color, -20));
         graphics.rect(10, -10, 3, 20).fill(0x8B4513);
@@ -170,6 +153,7 @@ export class AssetGenerator {
         graphics.rect(-4, -4, 2, 2).fill(0xFFFFFF);
         graphics.rect(2, -4, 2, 2).fill(0xFFFFFF);
       } else if (emoji.includes('🔥') || emoji.includes('🐦') || emoji.includes('🌅')) {
+        // フェニックス
         graphics.ellipse(0, 0, 12, 10).fill();
         for (let i = -1; i <= 1; i += 2) {
           graphics.moveTo(i * 8, -2).lineTo(i * 16, -12 + Math.sin(frameX) * 4).lineTo(i * 10, 2).closePath().fill(hitFlash ? 0xFFFFFF : 0xF97316);
@@ -178,12 +162,14 @@ export class AssetGenerator {
         graphics.rect(-3, -3, 2, 2).fill(0xFFFFFF);
         graphics.rect(1, -3, 2, 2).fill(0xFFFFFF);
       } else if (emoji.includes('🗿') || emoji.includes('🏔️') || emoji.includes('🌍')) {
+        // タイタン
         graphics.roundRect(-12, -6, 24, 20, 4).fill();
         graphics.rect(-16 + (anim === 'hit' ? -4 : 0), -2, 8, 12).fill();
         graphics.rect(8 + (anim === 'hit' ? 4 : 0), -2, 8, 12).fill();
         graphics.rect(-5, -2, 4, 4).fill(0xF59E0B);
         graphics.rect(1, -2, 4, 4).fill(0xF59E0B);
       } else if (emoji.includes('💪') || emoji.includes('🤺') || emoji.includes('⚔️')) {
+        // バーサーカー
         graphics.ellipse(0, 0, 13, 11).fill();
         graphics.ellipse(-6, 0, 5, 7).fill(hitFlash ? 0xFFFFFF : this.adjustColor(color, 20));
         graphics.ellipse(6, 0, 5, 7).fill(hitFlash ? 0xFFFFFF : this.adjustColor(color, 20));
@@ -192,6 +178,7 @@ export class AssetGenerator {
         graphics.rect(-4, -3, 3, 3).fill(0xFFFFFF);
         graphics.rect(1, -3, 3, 3).fill(0xFFFFFF);
       } else if (emoji.includes('🐱') || emoji.includes('😺') || emoji.includes('🎨')) {
+        // ネコマタ
         graphics.ellipse(0, 0, 11, 10).fill();
         graphics.moveTo(-8, -8).lineTo(-12, -18).lineTo(-4, -8).closePath().fill(hitFlash ? 0xFFFFFF : this.adjustColor(color, -20));
         graphics.moveTo(8, -8).lineTo(12, -18).lineTo(4, -8).closePath().fill(hitFlash ? 0xFFFFFF : this.adjustColor(color, -20));
@@ -205,18 +192,21 @@ export class AssetGenerator {
         }
       }
 
+      // 死亡アニメーション
       if (anim === 'death') {
         graphics.globalAlpha = 1 - deathProgress;
         graphics.rect(-16, -16, 32, 32).fill(0x6B7280);
       }
 
-      graphics.translate(-cx, -cy);
       container.addChild(graphics);
-    };
+    }
 
+    // アイドル (行0, 10フレーム)
     for (let i = 0; i < 10; i++) drawMonster(i, 0, 'idle');
+    // ヒット (行1, 2フレーム)
     drawMonster(0, 1, 'hit');
     drawMonster(1, 1, 'hit');
+    // 死亡 (行2, 10フレーム)
     for (let i = 0; i < 10; i++) drawMonster(i, 2, 'death');
 
     const texture = this.app.renderer.generateTexture(container, { resolution: 1 });
@@ -254,6 +244,7 @@ export class AssetGenerator {
     return (r << 16) | (g << 8) | b;
   }
 
+  // ===== 建物スプライト =====
   private generateBuildingSprites(): void {
     FACILITIES.forEach(facility => {
       const size = 64;
@@ -271,19 +262,26 @@ export class AssetGenerator {
         facility.icon === '🏪' ? '#34D399' :
         facility.icon === '🏃' ? '#FBBF24' : '#A78BFA');
 
+      // 影
       graphics.ellipse(cx, size - 4, 24, 6).fill({ color: 0x000000, alpha: 0.3 });
 
+      // 建物本体
       graphics.rect(cx - 24, cy - 28, 48, 36).fill({ color, alpha: 1 });
       graphics.rect(cx - 24, cy - 28, 48, 36).stroke({ width: 2, color: this.adjustColor(color, -30) });
 
+      // 屋根
       graphics.moveTo(cx - 28, cy - 28).lineTo(cx, cy - 44).lineTo(cx + 28, cy - 28).closePath().fill(this.adjustColor(color, -40));
 
+      // ドア
       graphics.rect(cx - 8, cy, 16, 20).fill(0x374151);
       graphics.circle(cx + 4, cy + 10, 2).fill(accent);
 
+      // 窓
       graphics.rect(cx - 20, cy - 20, 10, 12).fill(0xFEF3C7).stroke({ width: 1, color: 0x374151 });
       graphics.rect(cx + 10, cy - 20, 10, 12).fill(0xFEF3C7).stroke({ width: 1, color: 0x374151 });
 
+      // アイコン表示（テキストの代わりにシンプルな形状）
+      // アクセントライン
       graphics.rect(cx - 24, cy - 30, 48, 3).fill(accent);
 
       const texture = this.app.renderer.generateTexture(graphics, { resolution: 1 });
@@ -291,6 +289,7 @@ export class AssetGenerator {
     });
   }
 
+  // ===== UIスプライト =====
   private generateUISprites(): void {
     this.generatePanel();
     this.generateButton();
@@ -335,12 +334,14 @@ export class AssetGenerator {
   }
 
   private generateJoystick(): void {
+    // ベース
     const baseGraphics = new Graphics();
     baseGraphics.circle(60, 60, 60).fill({ color: 0x000000, alpha: 0.3 });
     baseGraphics.circle(60, 60, 55).stroke({ width: 3, color: 0x6B46C1, alpha: 0.5 });
     const baseTexture = this.app.renderer.generateTexture(baseGraphics, { resolution: 1 });
     Texture.addToCache(baseTexture, 'joystick-base');
 
+    // スティック
     const stickGraphics = new Graphics();
     stickGraphics.circle(30, 30, 30).fill(0x6B46C1);
     stickGraphics.circle(25, 25, 10).fill({ color: 0xFFFFFF, alpha: 0.4 });
@@ -348,6 +349,7 @@ export class AssetGenerator {
     Texture.addToCache(stickTexture, 'joystick-stick');
   }
 
+  // ===== エフェクトスプライト =====
   private generateEffectSprites(): void {
     this.generateParticle();
     this.generateExplosion();
@@ -374,7 +376,7 @@ export class AssetGenerator {
       const cy = frameSize / 2;
       const maxRadius = 30;
 
-      graphics.translate(cx, cy);
+      graphics.position.set(cx, cy);
 
       graphics.circle(0, 0, maxRadius * progress).stroke({ width: 4, color: 0xF59E0B, alpha: 1 - progress });
       graphics.circle(0, 0, maxRadius * progress * 0.7).stroke({ width: 3, color: 0x8B5CF6, alpha: 1 - progress });
@@ -389,7 +391,6 @@ export class AssetGenerator {
         graphics.circle(Math.cos(angle) * dist, Math.sin(angle) * dist, 3 * (1 - progress)).fill({ color: 0xF59E0B, alpha: 1 - progress });
       }
 
-      graphics.translate(-cx, -cy);
       container.addChild(graphics);
     }
 
@@ -418,7 +419,7 @@ export class AssetGenerator {
       const cx = x + frameSize / 2;
       const cy = frameSize / 2;
 
-      graphics.translate(cx, cy);
+      graphics.position.set(cx, cy);
 
       const size = 16 * (1 - progress * 0.5);
       graphics.rect(-size/2, -2, size, 4).fill({ color: 0xFFFFFF, alpha: 1 - progress });
@@ -426,7 +427,6 @@ export class AssetGenerator {
 
       graphics.circle(0, 0, 12 * (1 + progress)).stroke({ width: 2, color: 0xEF4444, alpha: 1 - progress });
 
-      graphics.translate(-cx, -cy);
       container.addChild(graphics);
     }
 
@@ -443,6 +443,7 @@ export class AssetGenerator {
     Texture.addToCache(texture, 'hit-effect');
   }
 
+  // ===== アイテムスプライト =====
   private generateItemSprites(): void {
     const items = [
       { name: 'item-xp-book', color: 0x8B5CF6, emoji: '📖', glow: 0xA78BFA },
@@ -456,12 +457,16 @@ export class AssetGenerator {
       const cx = 24;
       const cy = 24;
 
+      // 影
       graphics.ellipse(cx, 40, 16, 4).fill({ color: 0x000000, alpha: 0.2 });
 
+      // 光る背景
       graphics.circle(cx, cy, 24).fill({ color: item.glow, alpha: 0.5 });
 
+      // アイテム本体
       graphics.rect(cx - 10, cy - 10, 20, 20).fill(item.color);
 
+      // レアリティ枠
       graphics.circle(cx, cy, 20).stroke({ width: 3, color: item.glow });
 
       const texture = this.app.renderer.generateTexture(graphics, { resolution: 1 });
@@ -469,6 +474,7 @@ export class AssetGenerator {
     });
   }
 
+  // ===== タイルセット =====
   private generateTileset(): void {
     const tileSize = 32;
     const cols = 16;
@@ -479,60 +485,60 @@ export class AssetGenerator {
       const graphics = new Graphics();
       const tx = x * tileSize;
       const ty = y * tileSize;
-      graphics.translate(tx, ty);
+      graphics.position.set(tx + tileSize / 2, ty + tileSize / 2);
 
       switch (type) {
         case 'grass':
-          graphics.rect(0, 0, tileSize, tileSize).fill(0x2D7D32);
+          graphics.rect(-tileSize/2, -tileSize/2, tileSize, tileSize).fill(0x2D7D32);
           for (let i = 0; i < 8; i++) {
-            graphics.rect(Math.random() * tileSize, Math.random() * tileSize, 2, 2).fill(0x388E3C);
+            graphics.rect(Math.random() * tileSize - tileSize/2, Math.random() * tileSize - tileSize/2, 2, 2).fill(0x388E3C);
           }
           break;
         case 'dirt':
-          graphics.rect(0, 0, tileSize, tileSize).fill(0x8D6E63);
+          graphics.rect(-tileSize/2, -tileSize/2, tileSize, tileSize).fill(0x8D6E63);
           for (let i = 0; i < 12; i++) {
-            graphics.rect(Math.random() * tileSize, Math.random() * tileSize, 1, 1).fill(0x6D4C41);
+            graphics.rect(Math.random() * tileSize - tileSize/2, Math.random() * tileSize - tileSize/2, 1, 1).fill(0x6D4C41);
           }
           break;
         case 'path':
-          graphics.rect(0, 0, tileSize, tileSize).fill(0xD7CCC8);
-          graphics.moveTo(0, tileSize/2).lineTo(tileSize, tileSize/2).stroke({ width: 1, color: 0xBCAAA4 });
+          graphics.rect(-tileSize/2, -tileSize/2, tileSize, tileSize).fill(0xD7CCC8);
+          graphics.moveTo(-tileSize/2, 0).lineTo(tileSize/2, 0).stroke({ width: 1, color: 0xBCAAA4 });
           break;
         case 'water':
-          graphics.rect(0, 0, tileSize, tileSize).fill(0x1565C0);
+          graphics.rect(-tileSize/2, -tileSize/2, tileSize, tileSize).fill(0x1565C0);
           for (let i = 0; i < 3; i++) {
-            graphics.circle(tileSize/2, tileSize/2, 4 + i * 6).stroke({ width: 1, color: 0xFFFFFF, alpha: 0.2 });
+            graphics.circle(0, 0, 4 + i * 6).stroke({ width: 1, color: 0xFFFFFF, alpha: 0.2 });
           }
           break;
         case 'tree':
-          graphics.rect(tileSize/2 - 4, tileSize/2, 8, 16).fill(0x5D4037);
-          graphics.circle(tileSize/2, tileSize/2 - 4, 14).fill(0x2E7D32);
-          graphics.circle(tileSize/2 - 4, tileSize/2 - 8, 10).fill(0x388E3C);
-          graphics.circle(tileSize/2 + 4, tileSize/2 - 8, 10).fill(0x388E3C);
+          graphics.rect(-4, tileSize/2, 8, 16).fill(0x5D4037);
+          graphics.circle(0, -4, 14).fill(0x2E7D32);
+          graphics.circle(-4, -8, 10).fill(0x388E3C);
+          graphics.circle(4, -8, 10).fill(0x388E3C);
           break;
         case 'building-floor':
-          graphics.rect(0, 0, tileSize, tileSize).fill(0xE0E0E0);
+          graphics.rect(-tileSize/2, -tileSize/2, tileSize, tileSize).fill(0xE0E0E0);
           for (let i = 0; i <= tileSize; i += 8) {
-            graphics.moveTo(i, 0).lineTo(i, tileSize).stroke({ width: 1, color: 0xBDBDBD });
-            graphics.moveTo(0, i).lineTo(tileSize, i).stroke({ width: 1, color: 0xBDBDBD });
+            graphics.moveTo(i - tileSize/2, -tileSize/2).lineTo(i - tileSize/2, tileSize/2).stroke({ width: 1, color: 0xBDBDBD });
+            graphics.moveTo(-tileSize/2, i - tileSize/2).lineTo(tileSize/2, i - tileSize/2).stroke({ width: 1, color: 0xBDBDBD });
           }
           break;
         case 'building-wall':
-          graphics.rect(0, 0, tileSize, tileSize).fill(0x757575);
+          graphics.rect(-tileSize/2, -tileSize/2, tileSize, tileSize).fill(0x757575);
           for (let y = 0; y < tileSize; y += 8) {
             for (let x = (y % 16 === 0 ? 0 : -4); x < tileSize; x += 16) {
-              graphics.rect(x, y, 16, 8).stroke({ width: 1, color: 0x616161 });
+              graphics.rect(x - tileSize/2, y - tileSize/2, 16, 8).stroke({ width: 1, color: 0x616161 });
             }
           }
           break;
         default:
-          graphics.rect(0, 0, tileSize, tileSize).fill(0x1a1a2e);
+          graphics.rect(-tileSize/2, -tileSize/2, tileSize, tileSize).fill(0x1a1a2e);
       }
 
-      graphics.translate(-tx, -ty);
       container.addChild(graphics);
-    };
+    }
 
+    // タイル配置
     for (let y = 0; y < 4; y++) {
       for (let x = 0; x < cols; x++) {
         if (y === 0) drawTile(x, y, 'grass');

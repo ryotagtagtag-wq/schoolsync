@@ -1,0 +1,18 @@
+[      -1ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ https://quest.ryopc.org/play:0
+[     111ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ https://quest.ryopc.org/_next/static/immutable/chunks/30tt_9wolqh6t.js:0
+[     111ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ https://quest.ryopc.org/_next/static/immutable/chunks/30tt_9wolqh6t.js:0
+[     111ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ https://quest.ryopc.org/_next/static/immutable/chunks/30tt_9wolqh6t.js:0
+[     187ms] [WARNING]     at new eG (https://quest.ryopc.org/_next/static/immutable/chunks/30tt_9wolqh6t.js:1:44374)
+    at ta.createUI (https://quest.ryopc.org/_next/static/immutable/chunks/30tt_9wolqh6t.js:1:89479)
+    at ta.init (https://quest.ryopc.org/_next/static/immutable/chunks/30tt_9wolqh6t.js:1:88980)
+    at I.start (https://quest.ryopc.org/_next/static/immutable/chunks/30tt_9wolqh6t.js:1:8813)
+    at https://quest.ryopc.org/_next/static/immutable/chunks/30tt_9wolqh6t.js:68:5064 @ https://quest.ryopc.org/_next/static/immutable/chunks/095xg71e-vq3j.js:19
+[     274ms] [WARNING] Error while trying to use the following icon from the Manifest: https://quest.ryopc.org/icon-192.png (Download error or resource isn't a valid image) @ https://quest.ryopc.org/play:0
+[     967ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ https://quest.ryopc.org/_next/static/immutable/chunks/30tt_9wolqh6t.js:0
+[    1249ms] TypeError: n.translate is not a function
+    at t (https://quest.ryopc.org/_next/static/immutable/chunks/30tt_9wolqh6t.js:1:76781)
+    at https://quest.ryopc.org/_next/static/immutable/chunks/30tt_9wolqh6t.js:1:77714
+    at Array.forEach (<anonymous>)
+    at tn.generatePlayerSpritesheet (https://quest.ryopc.org/_next/static/immutable/chunks/30tt_9wolqh6t.js:1:77678)
+    at tn.generateAll (https://quest.ryopc.org/_next/static/immutable/chunks/30tt_9wolqh6t.js:1:76340)
+    at ta.generateAssetsWithProgress (https://quest.ryopc.org/_next/static/immutable/chunks/30tt_9wolqh6t.js:1:90361)
