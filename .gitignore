@@ -1,42 +1,88 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# ====================================================================
+# 📦 依存パッケージ (Dependency directories)
+# ====================================================================
+node_modules/
+jspm_packages/
+web_modules/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+# ====================================================================
+# 🛠️ ビルド出力・コンパイル生成物 (Build outputs)
+# ====================================================================
+dist/
+build/
+out/
+.next/
+.vuepress/dist
+.nuxt
+.output
+.docusaurus
+.svelte-kit
 
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# ====================================================================
+# 📜 ログファイル (Logs)
+# ====================================================================
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# ====================================================================
+# 🧪 テスト・カバレッジ報告 (Testing & Coverage)
+# ====================================================================
+coverage/
+.nyc_output
+htmlcov/
+.playwright/
+playwright-report/
+test-results/
 
-# vercel
-.vercel
+# ====================================================================
+# ⚡ ツール・リンターのキャッシュ (Caches and tooling)
+# ====================================================================
+.npm
+.eslintcache
+.stylelintcache
+.prettiercache
+.parcel-cache
+.turbo/
+.jest/
+.tsbuildinfo
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-SPEC.html
+# ====================================================================
+# 🔐 環境変数・ローカル設定 (ローカル開発用。絶対にコミットしない)
+# ====================================================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ※ チーム共有用の初期設定の雛形（.env.example など）はコミット対象にするため除外しない
+
+# ====================================================================
+# 💻 開発エディタ / OS 固有ファイル (Editor & OS files)
+# ====================================================================
+# macOS / Windows
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+
+# VS Code (個人設定は除外、拡張機能の推奨設定等は管理に含める場合あり)
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+*.code-workspace
+
+# JetBrains (IntelliJ, WebStorm, etc.)
+.idea/
+
+# パッケージマネージャーのローカルキャッシュ
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnpm-store/
