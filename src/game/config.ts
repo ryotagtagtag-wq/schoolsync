@@ -4,16 +4,22 @@ export const GAME_WIDTH = 1280;
 export const GAME_HEIGHT = 720;
 export const TILE_SIZE = 32;
 
-export const gameConfig = {
-  width: GAME_WIDTH,
-  height: GAME_HEIGHT,
-  backgroundColor: 0x1a1a2e,
-  resolution: window.devicePixelRatio || 1,
-  autoDensity: true,
-  antialias: false,
-  preferWebGL: true,
-  powerPreference: 'high-performance' as const,
-};
+// Dynamic config that works in both SSR and client
+export function getGameConfig() {
+  const isClient = typeof window !== 'undefined';
+  return {
+    type: 'webgl' as const,
+    parent: 'game-container',
+    width: GAME_WIDTH,
+    height: GAME_HEIGHT,
+    backgroundColor: 0x1a1a2e,
+    resolution: isClient ? (window.devicePixelRatio || 1) : 1,
+    autoDensity: true,
+    antialias: false,
+    preferWebGL: true,
+    powerPreference: 'high-performance' as const,
+  };
+}
 
 export type PixiApp = Application;
 

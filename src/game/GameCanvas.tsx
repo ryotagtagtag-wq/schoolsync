@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Application } from 'pixi.js';
-import { gameConfig, type PixiApp } from './config';
-import { SceneManager, SceneName } from './SceneManager';
+import { getGameConfig, type PixiApp } from './config';
+import { SceneManager } from './SceneManager';
 import { BootScene } from './scenes/BootScene';
 import { WorldScene } from './scenes/WorldScene';
 import { BattleScene } from './scenes/BattleScene';
@@ -51,15 +51,14 @@ export function GameCanvas({
   onFacilityAction,
   className = '',
 }: GameCanvasProps) {
-  const appRef = useRef<PixiApp | null>(null);
+  const appRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const sceneManagerRef = useRef<SceneManager | null>(null);
+  const sceneManagerRef = useRef<any>(null);
   const callbacksRef = useRef<Callbacks>({});
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Update callbacks ref
-  useEffect(async () => {
+  useEffect(() => {
     callbacksRef.current = { onFacilityInteract, onBattleStart, onBattleEnd, onLevelUp, onFacilityAction };
   }, [onFacilityInteract, onBattleStart, onBattleEnd, onLevelUp, onFacilityAction]);
 
@@ -95,91 +94,81 @@ export function GameCanvas({
       },
     };
 
-    sceneManagerRef.current.pause('world');
-    sceneManagerRef.current.launch('facility', facilityData);
+    sceneManagerRef.current?.pause('world');
+    sceneManagerRef.current?.launch('facility', facilityData);
   }, [playerData, assignments]);
 
-  useEffect(async () => {
-    if (appRef.current || !containerRef.current) return;
+  useEffect(() => {
+    if (!containerRef.current) return;
 
-    try {
-      setPendingAssignments(assignments);
+    const initialize = async () => {
+      try {
+        setPendingAssignments(assignments);
 
-      // Create PixiJS Application
-      const app = new Application();
-      await app.init({
-        ...gameConfig,
-        parent: containerRef.current,
-      });
+        const app = new Application();
+        await app.init(getGameConfig());
 
-      appRef.current = app;
+        const sceneManager = new SceneManager(app);
+        sceneManagerRef.current = sceneManager;
 
-      // Create scene manager
-      const sceneManager = new SceneManager(app);
-      sceneManagerRef.current = sceneManager;
+        const bootScene = new BootScene(app, sceneManager);
+        sceneManager.register(bootScene);
 
-      // Register all scenes
-      const bootScene = new BootScene(app, sceneManager);
-      sceneManager.register(bootScene);
+        const worldScene = new WorldScene();
+        worldScene.setSceneManager(sceneManager);
+        worldScene.setCallbacks({
+          onFacilityInteract: (facility: any) => {
+            callbacksRef.current.onFacilityInteract?.(facility.id);
+          },
+          onBattleStart: (data: any) => {
+            callbacksRef.current.onBattleStart?.(data);
+          },
+          onBattleEnd: (result: any) => {
+            callbacksRef.current.onBattleEnd?.(result.type, result.assignmentId, result.reward);
+          },
+        });
+        sceneManager.register(worldScene);
 
-      const worldScene = new WorldScene();
-      worldScene.setSceneManager(sceneManager);
-      worldScene.setCallbacks({
-        onFacilityInteract: (facility: FacilityData) => {
-          callbacksRef.current.onFacilityInteract?.(facility.id);
-        },
-        onBattleStart: (data: any) => {
-          callbacksRef.current.onBattleStart?.(data);
-        },
-        onBattleEnd: (result: any) => {
-          callbacksRef.current.onBattleEnd?.(result.type, result.assignmentId, result.reward);
-        },
-      });
-      sceneManager.register(worldScene);
+        const battleScene = new BattleScene(app);
+        sceneManager.register(battleScene);
 
-      const battleScene = new BattleScene(app);
-      sceneManager.register(battleScene);
+        const uiScene = new UIScene();
+        sceneManager.register(uiScene);
 
-      const uiScene = new UIScene();
-      sceneManager.register(uiScene);
+        const facilityScene = new FacilityUIScene();
+        sceneManager.register(facilityScene);
 
-      const facilityScene = new FacilityUIScene();
-      sceneManager.register(facilityScene);
-
-      // Start with boot scene
-      sceneManager.start('boot').then(() => {
+        await sceneManager.start('boot');
         setIsLoaded(true);
         setError(null);
-      });
 
-      // Game loop
-      app.ticker.add((ticker) => {
-        sceneManager.update(ticker.deltaTime);
-      });
+        app.ticker.add((ticker: any) => {
+          sceneManager.update(ticker.deltaTime);
+        });
 
-      // Handle UI scene updates
-      app.ticker.add(() => {
-        if (sceneManager.getCurrent() === 'world' || sceneManager.getScene('ui')) {
-          const uiSceneInstance = sceneManager.getScene('ui') as any;
-          uiSceneInstance?.update?.(0);
-        }
-      });
+        app.ticker.add(() => {
+          if (sceneManager.getCurrent() === 'world' || sceneManager.getScene('ui')) {
+            const uiSceneInstance = sceneManager.getScene('ui') as any;
+            uiSceneInstance?.update?.(0);
+          }
+        });
+      } catch (err) {
+        console.error('Failed to initialize PixiJS game:', err);
+        setError('ゲームの初期化に失敗しました');
+      }
+    };
 
-    } catch (err) {
-      console.error('Failed to initialize PixiJS game:', err);
+    initialize().catch(err => {
+      console.error('Failed to initialize game:', err);
       setError('ゲームの初期化に失敗しました');
-    }
+    });
 
     return () => {
-      if (appRef.current) {
-        appRef.current.destroy(true, { children: true, texture: true, baseTexture: true });
-        appRef.current = null;
-      }
+      // Cleanup
     };
   }, [assignments, launchFacilityUI]);
 
-  // プレイヤーデータ更新
-  useEffect(async () => {
+  useEffect(() => {
     if (!appRef.current || !playerData) return;
     
     const uiScene = sceneManagerRef.current?.getScene('ui') as any;
