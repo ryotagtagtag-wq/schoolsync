@@ -1,7 +1,0 @@
-[      -1ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ https://quest.ryopc.org/play:0
-[     133ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ https://quest.ryopc.org/_next/static/immutable/chunks/3975ja0sinqy8.js:0
-[     133ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ https://quest.ryopc.org/_next/static/immutable/chunks/3975ja0sinqy8.js:0
-[     133ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ https://quest.ryopc.org/_next/static/immutable/chunks/3975ja0sinqy8.js:0
-[     433ms] [WARNING] Error while trying to use the following icon from the Manifest: https://quest.ryopc.org/icon-192.png (Download error or resource isn't a valid image) @ https://quest.ryopc.org/play:0
-[   11177ms] TypeError: Cannot set properties of undefined (setting 'text')
-    at ta.generateAssetsWithProgress (https://quest.ryopc.org/_next/static/immutable/chunks/3975ja0sinqy8.js:1:90292)

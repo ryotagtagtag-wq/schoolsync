@@ -1,1 +1,0 @@
-ALTER TABLE "user_profiles" ALTER COLUMN "last_active_date" SET DEFAULT '';

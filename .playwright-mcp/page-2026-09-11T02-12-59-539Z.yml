@@ -1,6 +1,0 @@
-- generic [ref=f1e1]:
-  - generic [ref=f1e4]:
-    - paragraph [ref=f1e6]: Loading Questra...
-    - paragraph [ref=f1e7]: 冒険の準備をしています...
-  - region "Notifications alt+T"
-  - alert [ref=f1e8]

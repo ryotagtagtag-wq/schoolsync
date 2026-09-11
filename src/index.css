@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+  
+  body {
+    @apply bg-ivory text-text-dark font-rounded;
+  }
+  
+  * {
+    @apply border-forest-green/20;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-forest-green text-soft-white px-6 py-3 rounded-full font-medium
+           hover:bg-forest-green-light active:scale-95 transition-all duration-200
+           shadow-[0_4px_0_#1e4030] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-forest-green disabled:active:scale-100;
+  }
+  
+  .btn-secondary {
+    @apply bg-pastel-green text-forest-green px-6 py-3 rounded-full font-medium
+           hover:bg-pastel-green/80 active:scale-95 transition-all duration-200;
+  }
+  
+  .card {
+    @apply bg-soft-white rounded-2xl shadow-[0_4px_12px_rgba(45,90,61,0.08)] border border-forest-green/10;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl border-2 border-forest-green/20
+           focus:border-forest-green focus:outline-none focus:ring-2 focus:ring-forest-green/20
+           bg-soft-white text-text-dark placeholder:text-forest-green/40;
+  }
+  
+  .tab-btn {
+    @apply flex-1 py-3 px-4 rounded-xl font-medium transition-all duration-200
+           text-forest-green/60 hover:text-forest-green hover:bg-forest-green/5;
+  }
+  
+  .tab-btn-active {
+    @apply bg-forest-green text-soft-white shadow-[0_2px_8px_rgba(45,90,61,0.3)];
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
