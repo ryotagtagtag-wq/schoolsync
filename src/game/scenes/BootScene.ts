@@ -1,8 +1,10 @@
 import { Container, Graphics, Text, TextStyle, Application } from 'pixi.js';
-import { Sound } from '@pixi/sound';
 import { Scene, SceneManager } from '../SceneManager';
 import { generateAllAssets } from '../generateAssets';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config';
+
+// Simple sound buffer cache for client-side procedural audio
+const soundBufferCache = new Map<string, AudioBuffer>();
 
 export class BootScene implements Scene {
   name: 'boot' = 'boot';
@@ -14,7 +16,6 @@ export class BootScene implements Scene {
   private loadingText!: Text;
   private percentText!: Text;
   private tipText!: Text;
-  private soundsLoaded = false;
 
   constructor(app: Application, sceneManager: SceneManager) {
     this.app = app;
@@ -26,7 +27,6 @@ export class BootScene implements Scene {
   }
 
   create(): void {
-    this.createUI();
     this.generateAssetsWithProgress();
   }
 
@@ -111,11 +111,10 @@ export class BootScene implements Scene {
   }
 
   private async generateSounds(): Promise<void> {
-    // Client-side only sound generation
     if (typeof window === 'undefined') return;
-    
+
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    
+
     const createTone = (frequency: number, duration: number, type: OscillatorType = 'sine', volume: number = 0.3) => {
       const buffer = audioContext.createBuffer(1, audioContext.sampleRate * duration, audioContext.sampleRate);
       const data = buffer.getChannelData(0);
@@ -173,10 +172,8 @@ export class BootScene implements Scene {
     };
 
     for (const [name, buffer] of Object.entries(sounds)) {
-      Sound.add(name, buffer);
+      soundBufferCache.set(name, buffer);
     }
-
-    this.soundsLoaded = true;
   }
 
   private updateProgress(value: number): void {
@@ -193,3 +190,6 @@ export class BootScene implements Scene {
     this.container.destroy({ children: true });
   }
 }
+
+// Export the sound buffer cache for other scenes to use
+export { soundBufferCache };

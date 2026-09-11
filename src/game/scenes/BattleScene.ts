@@ -1,8 +1,75 @@
 import { Container, Graphics, Text, TextStyle, Sprite, Texture, Application, Ticker } from 'pixi.js';
-import { Sound } from '@pixi/sound';
 import { Scene } from '../SceneManager';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config';
 import { SUBJECT_MAP, SUBJECT_ADVANTAGE, MONSTER_SPECIAL_MOVES, SUBJECT_PLAYER_SKILLS } from '../config';
+import { soundBufferCache } from './BootScene';
+
+interface BattleData {
+  subject: string;
+  difficulty: number;
+  assignmentId: string;
+  monsterId: string;
+  hp: number;
+  maxHp: number;
+  xpReward: number;
+  goldReward: number;
+  spawnPeriod?: string;
+  isActivePeriod?: boolean;
+  playerData: {
+    userId: string;
+    level: number;
+    xp: number;
+    xpToNext: number;
+    gold: number;
+    streak: number;
+    stats: { int: number; wis: number; str: number; end: number; cre: number; soc: number };
+  };
+  onVictory: (reward: { xp: number; gold: number; items: any[] }) => void;
+  onDefeat: () => void;
+  onFlee: () => void;
+}
+
+type BattlePhase = 'player_turn' | 'monster_turn' | 'victory' | 'defeat' | 'flee' | 'animating';
+type StatusEffect = 'stun' | 'burn' | 'silence' | 'confuse' | 'poison' | 'defense_up' | 'attack_up' | 'defense_down' | 'crit_up';
+
+interface ActiveStatus {
+  type: StatusEffect;
+  turns: number;
+  value?: number;
+}
+
+interface Combatant {
+  hp: number;
+  maxHp: number;
+  stats: { int: number; wis: number; str: number; end: number; cre: number; soc: number };
+  statuses: ActiveStatus[];
+  cooldowns: Record<string, number>;
+  buffs: { attack: number; defense: number; crit: number };
+}
+
+// Audio context for sound playback
+let audioContext: AudioContext | null = null;
+
+function getAudioContext(): AudioContext {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  }
+  return audioContext;
+}
+
+function playSoundFromBuffer(name: string, volume: number = 1.0): void {
+  const buffer = soundBufferCache.get(name);
+  if (!buffer) return;
+  
+  const ctx = getAudioContext();
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  const gainNode = ctx.createGain();
+  gainNode.gain.value = volume;
+  source.connect(gainNode);
+  gainNode.connect(ctx.destination);
+  source.start(0);
+}
 
 interface BattleData {
   subject: string;
@@ -159,13 +226,6 @@ export class BattleScene implements Scene {
       .fill({ color: 0x1a1a2e, alpha: 0.95 })
       .stroke({ width: 3, color: 0x6B46C1 });
     this.container.addChild(arena);
-
-    for (let i = 0; i < 20; i++) {
-      const p = new Graphics();
-      p.circle(Math.random() * GAME_WIDTH, Math.random() * GAME_HEIGHT, Math.random() * 2 + 1)
-        .fill({ color: 0x6B46C1, alpha: Math.random() * 0.3 + 0.1 });
-      this.container.addChild(p);
-    }
   }
 
   private createMonsterUI(): void {
@@ -815,13 +875,17 @@ export class BattleScene implements Scene {
   }
 
   private playSound(name: string, volume: number = 1.0): void {
-    try {
-      const sound = Sound.find(name);
-      if (sound) {
-        sound.volume = volume;
-        sound.play();
-      }
-    } catch (e) {}
+    const buffer = soundBufferCache.get(name);
+    if (!buffer) return;
+    
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = volume;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
   }
 
   private playElementalSound(element: string): void {
@@ -959,13 +1023,17 @@ export class BattleScene implements Scene {
   }
 
   private playSound(name: string, volume: number = 1.0): void {
-    try {
-      const sound = Sound.find(name);
-      if (sound) {
-        sound.volume = volume;
-        sound.play();
-      }
-    } catch (e) {}
+    const buffer = soundBufferCache.get(name);
+    if (!buffer) return;
+    
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = volume;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
   }
 
   private playElementalSound(element: string): void {
@@ -1103,157 +1171,17 @@ export class BattleScene implements Scene {
   }
 
   private playSound(name: string, volume: number = 1.0): void {
-    try {
-      const sound = Sound.find(name);
-      if (sound) {
-        sound.volume = volume;
-        sound.play();
-      }
-    } catch (e) {}
-  }
-
-  private playElementalSound(element: string): void {
-    const sounds: Record<string, string> = {
-      mathematics: 'element_rock',
-      english: 'element_dragon',
-      japanese: 'element_mage',
-      science: 'element_fire',
-      social: 'element_nature',
-      physical: 'element_beast',
-      art: 'element_cat',
-    };
-    this.playSound(sounds[element] || 'attack_hit');
-  }
-
-  private playStatusSound(status: string): void {
-    const sounds: Record<string, string> = {
-      burn: 'status_burn',
-      stun: 'status_stun',
-      poison: 'status_poison',
-      cure: 'status_cure',
-    };
-    this.playSound(sounds[status] || 'ui_click');
-  }
-
-  private animateAttack(attacker: 'player' | 'monster', onComplete: () => void): void {
-    const sprite = attacker === 'player' ? null : this.monsterSprite;
-    const target = attacker === 'player' ? this.monsterSprite : null;
+    const buffer = soundBufferCache.get(name);
+    if (!buffer) return;
     
-    if (!sprite || !target) {
-      onComplete();
-      return;
-    }
-
-    const originalX = sprite.x;
-    const originalY = sprite.y;
-    const targetX = target.x;
-    const targetY = target.y;
-
-    const duration = 200;
-    const startTime = Date.now();
-    
-    const animate = () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-      
-      sprite.x = originalX + (targetX - originalX - 50) * eased;
-      sprite.y = originalY + (targetY - originalY) * eased;
-      sprite.scale.set(3 * (1 + 0.1 * Math.sin(progress * Math.PI * 4)));
-      
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        const returnStart = Date.now();
-        const returnAnimate = () => {
-          const retElapsed = Date.now() - returnStart;
-          const retProgress = Math.min(retElapsed / 200, 1);
-          const retEased = retProgress < 0.5 ? 2 * retProgress * retProgress : 1 - Math.pow(-2 * retProgress + 2, 2) / 2;
-          
-          sprite.x = originalX + (targetX - originalX - 50) * (1 - retEased);
-          sprite.y = originalY + (targetY - originalY) * (1 - retEased);
-          sprite.scale.set(3);
-          
-          if (retProgress < 1) requestAnimationFrame(returnAnimate);
-          else {
-            sprite.x = originalX;
-            sprite.y = originalY;
-            sprite.scale.set(3);
-            onComplete();
-          }
-        };
-        requestAnimationFrame(returnAnimate);
-      }
-    };
-    requestAnimationFrame(animate);
-  }
-
-  private animateSkill(skill: { name: string; effect: string; cooldown: number }, onComplete: () => void): void {
-    const flash = new Graphics();
-    flash.rect(0, 0, GAME_WIDTH, GAME_HEIGHT).fill({ color: 0x8B5CF6, alpha: 0.3 });
-    this.container.addChild(flash);
-    
-    let alpha = 0.3;
-    const fade = () => {
-      alpha *= 0.85;
-      flash.clear().rect(0, 0, GAME_WIDTH, GAME_HEIGHT).fill({ color: 0x8B5CF6, alpha });
-      if (alpha > 0.01) requestAnimationFrame(fade);
-      else { flash.destroy(); onComplete(); }
-    };
-    requestAnimationFrame(fade);
-  }
-
-  private victory(): void {
-    this.phase = 'victory';
-    this.addColoredLog('勝利！', 0x10B981);
-    this.playSound('victory', 0.7);
-    this.phaseText.text = '勝利！';
-    this.phaseText.style.fill = 0x10B981;
-
-    let xp = this.battleData.xpReward;
-    let gold = this.battleData.goldReward;
-    const items: any[] = [];
-
-    xp = Math.floor(xp * (1 + this.battleData.difficulty * 0.2));
-    gold = Math.floor(gold * (1 + this.battleData.difficulty * 0.2));
-
-    if (this.battleData.spawnPeriod === 'night') {
-      xp = Math.floor(xp * 1.3);
-      gold = Math.floor(gold * 1.3);
-      this.addColoredLog('夜間ボーナス！ 報酬1.3倍', 0xF59E0B);
-    } else if (this.battleData.spawnPeriod === 'overdue') {
-      xp = Math.floor(xp * 1.5);
-      gold = Math.floor(gold * 1.5);
-      this.addColoredLog('期限切れボーナス！ 報酬1.5倍', 0xEF4444);
-    }
-
-    if (this.battleData.difficulty >= 3 && Math.random() < 0.3) {
-      items.push({ itemId: 'item-xp-book', quantity: 1 });
-      this.addColoredLog('アイテム入手：経験値の本', 0x8B5CF6);
-    }
-
-    this.addColoredLog(`報酬: XP +${xp}, ゴールド +${gold}`, 0xF59E0B);
-
-    setTimeout(() => this.battleData.onVictory({ xp, gold, items }), 1500);
-  }
-
-  private defeat(): void {
-    this.phase = 'defeat';
-    this.addColoredLog('敗北...', 0xEF4444);
-    this.playSound('defeat', 0.7);
-    this.phaseText.text = '敗北';
-    this.phaseText.style.fill = 0xEF4444;
-    setTimeout(() => this.battleData.onDefeat(), 1500);
-  }
-
-  private playSound(name: string, volume: number = 1.0): void {
-    try {
-      const sound = Sound.find(name);
-      if (sound) {
-        sound.volume = volume;
-        sound.play();
-      }
-    } catch (e) {}
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = volume;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
   }
 
   private playElementalSound(element: string): void {
@@ -1357,13 +1285,17 @@ export class BattleScene implements Scene {
   }
 
   private playSound(name: string, volume: number = 1.0): void {
-    try {
-      const sound = Sound.find(name);
-      if (sound) {
-        sound.volume = volume;
-        sound.play();
-      }
-    } catch (e) {}
+    const buffer = soundBufferCache.get(name);
+    if (!buffer) return;
+    
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = volume;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
   }
 
   private playElementalSound(element: string): void {

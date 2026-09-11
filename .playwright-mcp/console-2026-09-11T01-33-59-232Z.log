@@ -1,0 +1,13 @@
+[    3725ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ https://quest.ryopc.org/play:0
+[    4534ms] [WARNING]     at new eG (https://quest.ryopc.org/_next/static/immutable/chunks/36afy292xotc1.js:1:44374)
+    at th.createUI (https://quest.ryopc.org/_next/static/immutable/chunks/36afy292xotc1.js:1:88970)
+    at th.init (https://quest.ryopc.org/_next/static/immutable/chunks/36afy292xotc1.js:1:88471)
+    at I.start (https://quest.ryopc.org/_next/static/immutable/chunks/36afy292xotc1.js:1:8813)
+    at https://quest.ryopc.org/_next/static/immutable/chunks/36afy292xotc1.js:68:5064 @ https://quest.ryopc.org/_next/static/immutable/chunks/095xg71e-vq3j.js:19
+[    4869ms] [WARNING] Error while trying to use the following icon from the Manifest: https://quest.ryopc.org/icon-192.png (Download error or resource isn't a valid image) @ https://quest.ryopc.org/play:0
+[   15194ms] [WARNING]     at tl.generatePlayerSpritesheet (https://quest.ryopc.org/_next/static/immutable/chunks/36afy292xotc1.js:1:78138)
+    at tl.generateAll (https://quest.ryopc.org/_next/static/immutable/chunks/36afy292xotc1.js:1:76495)
+    at th.generateAssetsWithProgress (https://quest.ryopc.org/_next/static/immutable/chunks/36afy292xotc1.js:1:89852) @ https://quest.ryopc.org/_next/static/immutable/chunks/095xg71e-vq3j.js:19
+[   15282ms] TypeError: e9.add is not a function
+    at th.generateSounds (https://quest.ryopc.org/_next/static/immutable/chunks/36afy292xotc1.js:1:91750)
+    at th.generateAssetsWithProgress (https://quest.ryopc.org/_next/static/immutable/chunks/36afy292xotc1.js:1:89961)
