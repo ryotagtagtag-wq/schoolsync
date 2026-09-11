@@ -1,5 +1,7 @@
 import { Graphics, Texture, BaseTexture, Sprite, Container, Point } from 'pixi.js';
 import { GAME_WIDTH, GAME_HEIGHT, TILE_SIZE, FACILITIES, type FacilityData } from './config';
+import { addToCache } from './textureCache';
+
 
 export class AssetGenerator {
   private app: any;
@@ -96,10 +98,10 @@ export class AssetGenerator {
           width: frameWidth,
           height: frameHeight,
         });
-        Texture.addToCache(frameTexture, `player_${row}_${col}`);
+        addToCache(frameTexture, `player_${row}_${col}`);
       }
     }
-    Texture.addToCache(texture, 'player');
+    addToCache(texture, 'player');
   }
   // ===== モンスタースプライトシート =====
   private generateMonsterSpritesheet(name: string, color: number, emoji: string): void {
@@ -218,10 +220,10 @@ export class AssetGenerator {
           width: frameWidth,
           height: frameHeight,
         });
-        Texture.addToCache(frameTexture, `${name}_${row}_${col}`);
+        addToCache(frameTexture, `${name}_${row}_${col}`);
       }
     }
-    Texture.addToCache(texture, name);
+    addToCache(texture, name);
   }
 
   private generateMonsterSpritesheets(): void {
@@ -285,7 +287,7 @@ export class AssetGenerator {
       graphics.rect(cx - 24, cy - 30, 48, 3).fill(accent);
 
       const texture = this.app.renderer.generateTexture(graphics, { resolution: 1 });
-      Texture.addToCache(texture, `building-${facility.buildingType}`);
+      addToCache(texture, `building-${facility.buildingType}`);
     });
   }
 
@@ -303,7 +305,7 @@ export class AssetGenerator {
     const r = 10;
     graphics.roundRect(0, 0, 200, 100, r).fill({ color: 0x1a1a2e, alpha: 0.9 }).stroke({ width: 2, color: 0x6B46C1, alpha: 0.5 });
     const texture = this.app.renderer.generateTexture(graphics, { resolution: 1 });
-    Texture.addToCache(texture, 'ui-panel');
+    addToCache(texture, 'ui-panel');
   }
 
   private generateButton(): void {
@@ -312,7 +314,7 @@ export class AssetGenerator {
     graphics.roundRect(0, 0, 180, 50, r).fill(0x6B46C1);
     graphics.roundRect(2, 2, 176, 20, r).fill({ color: 0xFFFFFF, alpha: 0.2 });
     const texture = this.app.renderer.generateTexture(graphics, { resolution: 1 });
-    Texture.addToCache(texture, 'ui-button');
+    addToCache(texture, 'ui-button');
   }
 
   private generateXPBar(): void {
@@ -321,7 +323,7 @@ export class AssetGenerator {
     graphics.rect(0, 0, 150, 20).fill(0x8B5CF6);
     graphics.rect(0, 0, 150, 8).fill({ color: 0xFFFFFF, alpha: 0.3 });
     const texture = this.app.renderer.generateTexture(graphics, { resolution: 1 });
-    Texture.addToCache(texture, 'ui-xpbar');
+    addToCache(texture, 'ui-xpbar');
   }
 
   private generateHPBar(): void {
@@ -330,7 +332,7 @@ export class AssetGenerator {
     graphics.rect(0, 0, 120, 12).fill(0x10B981);
     graphics.rect(0, 0, 120, 5).fill({ color: 0xFFFFFF, alpha: 0.3 });
     const texture = this.app.renderer.generateTexture(graphics, { resolution: 1 });
-    Texture.addToCache(texture, 'ui-hpbar');
+    addToCache(texture, 'ui-hpbar');
   }
 
   private generateJoystick(): void {
@@ -339,14 +341,14 @@ export class AssetGenerator {
     baseGraphics.circle(60, 60, 60).fill({ color: 0x000000, alpha: 0.3 });
     baseGraphics.circle(60, 60, 55).stroke({ width: 3, color: 0x6B46C1, alpha: 0.5 });
     const baseTexture = this.app.renderer.generateTexture(baseGraphics, { resolution: 1 });
-    Texture.addToCache(baseTexture, 'joystick-base');
+    addToCache(baseTexture, 'joystick-base');
 
     // スティック
     const stickGraphics = new Graphics();
     stickGraphics.circle(30, 30, 30).fill(0x6B46C1);
     stickGraphics.circle(25, 25, 10).fill({ color: 0xFFFFFF, alpha: 0.4 });
     const stickTexture = this.app.renderer.generateTexture(stickGraphics, { resolution: 1 });
-    Texture.addToCache(stickTexture, 'joystick-stick');
+    addToCache(stickTexture, 'joystick-stick');
   }
 
   // ===== エフェクトスプライト =====
@@ -360,7 +362,7 @@ export class AssetGenerator {
     const graphics = new Graphics();
     graphics.circle(4, 4, 4).fill(0xFFFFFF);
     const texture = this.app.renderer.generateTexture(graphics, { resolution: 1 });
-    Texture.addToCache(texture, 'particle');
+    addToCache(texture, 'particle');
   }
 
   private generateExplosion(): void {
@@ -402,9 +404,9 @@ export class AssetGenerator {
         width: frameSize,
         height: frameSize,
       });
-      Texture.addToCache(frameTexture, `explosion_${i}`);
+      addToCache(frameTexture, `explosion_${i}`);
     }
-    Texture.addToCache(texture, 'explosion');
+    addToCache(texture, 'explosion');
   }
 
   private generateHitEffect(): void {
@@ -438,9 +440,9 @@ export class AssetGenerator {
         width: frameSize,
         height: frameSize,
       });
-      Texture.addToCache(frameTexture, `hit-effect_${i}`);
+      addToCache(frameTexture, `hit-effect_${i}`);
     }
-    Texture.addToCache(texture, 'hit-effect');
+    addToCache(texture, 'hit-effect');
   }
 
   // ===== アイテムスプライト =====
@@ -470,7 +472,7 @@ export class AssetGenerator {
       graphics.circle(cx, cy, 20).stroke({ width: 3, color: item.glow });
 
       const texture = this.app.renderer.generateTexture(graphics, { resolution: 1 });
-      Texture.addToCache(texture, item.name);
+      addToCache(texture, item.name);
     });
   }
 
@@ -566,10 +568,10 @@ export class AssetGenerator {
           width: tileSize,
           height: tileSize,
         });
-        Texture.addToCache(frameTexture, `tileset_${row}_${col}`);
+        addToCache(frameTexture, `tileset_${row}_${col}`);
       }
     }
-    Texture.addToCache(texture, 'tileset');
+    addToCache(texture, 'tileset');
   }
 
   private hexToNumber(hex: string): number {
