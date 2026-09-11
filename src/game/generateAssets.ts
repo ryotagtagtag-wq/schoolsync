@@ -130,7 +130,7 @@ export class AssetGenerator {
 
       const bodyColor = hitFlash ? 0xFFFFFF : color;
       graphics.beginPath();
-      graphics.fillStyle(bodyColor);
+      graphics.fill({ color: bodyColor });
       
       if (emoji.includes('🗿') || emoji.includes('🪨')) {
         // ゴーレム：岩っぽい
