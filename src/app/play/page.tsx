@@ -19,19 +19,37 @@ export default async function PlayPage() {
   }
 
   // プレイヤープロフィール取得
-  const profileResult = await getPlayerProfile();
-  const playerData = profileResult.success ? profileResult.data : null;
+  let playerData = null;
+  try {
+    const profileResult = await getPlayerProfile();
+    if (profileResult.success) {
+      playerData = profileResult.data;
+    } else {
+      console.warn('getPlayerProfile failed:', profileResult.error);
+    }
+  } catch (error) {
+    console.error('getPlayerProfile threw:', error);
+  }
 
   // 未完了の課題を取得してモンスターとして表示（期限・ステータス込み）
-  const assignmentsResult = await getAssignments({ status: 'pending' });
-  const assignments = (assignmentsResult.success ? assignmentsResult.data : []).map((a) => ({
-    id: a.id,
-    subject: a.subject || '未知',
-    priority: a.priority || 1,
-    title: a.title || '',
-    status: a.status || 'pending',
-    dueDate: a.dueDate,
-  }));
+  let assignments = [];
+  try {
+    const assignmentsResult = await getAssignments({ status: 'pending' });
+    if (assignmentsResult.success && assignmentsResult.data) {
+      assignments = assignmentsResult.data.map((a) => ({
+        id: a.id,
+        subject: a.subject || '未知',
+        priority: a.priority || 1,
+        title: a.title || '',
+        status: a.status || 'pending',
+        dueDate: a.dueDate,
+      }));
+    } else {
+      console.warn('getAssignments failed:', assignmentsResult.error);
+    }
+  } catch (error) {
+    console.error('getAssignments threw:', error);
+  }
 
   return (
     <div className="min-h-screen bg-[#0f0f1a]">

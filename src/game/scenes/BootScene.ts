@@ -31,6 +31,7 @@ export class BootScene implements Scene {
   }
 
   private createUI(): void {
+    if (this.progressBar) return;
     const width = GAME_WIDTH;
     const height = GAME_HEIGHT;
 
