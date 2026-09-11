@@ -6,7 +6,7 @@ export type SceneName = 'boot' | 'world' | 'battle' | 'ui' | 'facility';
 export interface Scene {
   name: SceneName;
   container: Container;
-  init?(data: any): void;
+  init?(data?: any): void;
   create(): void;
   update?(delta: number): void;
   destroy(): void;
@@ -47,9 +47,8 @@ export class SceneManager {
     this.sceneStack.push(name);
     scene.container.visible = true;
 
-    if (data) {
-      scene.init?.(data);
-    }
+    // Always call init if it exists
+    scene.init?.(data);
     scene.create();
   }
 
@@ -64,9 +63,7 @@ export class SceneManager {
     this.sceneStack.push(name);
     scene.container.visible = true;
 
-    if (data) {
-      scene.init?.(data);
-    }
+    scene.init?.(data);
     scene.create();
   }
 
