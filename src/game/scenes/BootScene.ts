@@ -26,6 +26,7 @@ export class BootScene implements Scene {
   }
 
   create(): void {
+    this.createUI();
     this.generateAssetsWithProgress();
   }
 
@@ -86,7 +87,6 @@ export class BootScene implements Scene {
   }
 
   private async generateAssetsWithProgress(): Promise<void> {
-    // UI is already created in init(), safe to update progress
     for (let i = 0; i <= 100; i += 10) {
       this.updateProgress(i / 100);
       await new Promise(r => setTimeout(r, 30));
@@ -110,6 +110,9 @@ export class BootScene implements Scene {
   }
 
   private async generateSounds(): Promise<void> {
+    // Client-side only sound generation
+    if (typeof window === 'undefined') return;
+    
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     
     const createTone = (frequency: number, duration: number, type: OscillatorType = 'sine', volume: number = 0.3) => {

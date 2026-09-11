@@ -1,0 +1,11 @@
+- generic [ref=f8e1]:
+  - main [ref=f8e4]:
+    - generic:
+      - generic [ref=f8e6]:
+        - link "← ダッシュボード" [ref=f8e7] [cursor=pointer]:
+          - /url: /dashboard
+        - button "🎒 バックパック" [ref=f8e8]
+        - button "🏪 ショップ" [ref=f8e9]
+      - generic [ref=f8e10]: Questra v0.1
+  - region "Notifications alt+T"
+  - alert [ref=f8e12]
