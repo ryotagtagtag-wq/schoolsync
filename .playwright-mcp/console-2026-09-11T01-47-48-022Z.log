@@ -1,0 +1,10 @@
+[    3617ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ https://quest.ryopc.org/play:0
+[    4671ms] [WARNING]     at new eU (https://quest.ryopc.org/_next/static/immutable/chunks/0xx9s8tthmg08.js:1:44370)
+    at eV.createUI (https://quest.ryopc.org/_next/static/immutable/chunks/0xx9s8tthmg08.js:1:57681)
+    at eV.init (https://quest.ryopc.org/_next/static/immutable/chunks/0xx9s8tthmg08.js:1:57198)
+    at j.start (https://quest.ryopc.org/_next/static/immutable/chunks/0xx9s8tthmg08.js:1:8811)
+    at https://quest.ryopc.org/_next/static/immutable/chunks/0xx9s8tthmg08.js:68:5064 @ https://quest.ryopc.org/_next/static/immutable/chunks/095xg71e-vq3j.js:19
+[    5082ms] [WARNING] Error while trying to use the following icon from the Manifest: https://quest.ryopc.org/icon-192.png (Download error or resource isn't a valid image) @ https://quest.ryopc.org/play:0
+[   15443ms] [WARNING]     at eO.generatePlayerSpritesheet (https://quest.ryopc.org/_next/static/immutable/chunks/0xx9s8tthmg08.js:1:46866)
+    at eO.generateAll (https://quest.ryopc.org/_next/static/immutable/chunks/0xx9s8tthmg08.js:1:45223)
+    at eV.generateAssetsWithProgress (https://quest.ryopc.org/_next/static/immutable/chunks/0xx9s8tthmg08.js:1:58563) @ https://quest.ryopc.org/_next/static/immutable/chunks/095xg71e-vq3j.js:19

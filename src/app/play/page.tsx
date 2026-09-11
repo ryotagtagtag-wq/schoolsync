@@ -11,7 +11,13 @@ export const metadata: Metadata = {
 };
 
 export default async function PlayPage() {
-  const session = await auth();
+  let session;
+  try {
+    session = await auth();
+  } catch (error) {
+    console.error('auth() threw:', error);
+    redirect('/login?callbackUrl=/play');
+  }
   
   // 未認証の場合はログインページへリダイレクト
   if (!session?.user?.id) {
