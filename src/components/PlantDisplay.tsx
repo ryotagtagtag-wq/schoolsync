@@ -42,9 +42,9 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({
   return (
     <div className="flex flex-col items-center pt-2 pb-4">
       <div className="relative w-64 h-64 flex items-end justify-center">
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-16 rounded-b-xl bg-warm-brown/30 border-2 border-warm-brown/50" />
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-28 h-12 rounded-lg bg-warm-brown/50 border border-warm-brown/60" />
-        
+<div className="absolute bottom-12 left-1/2 -translate-x-1/2 ml-3 w-32 h-16 rounded-b-xl bg-warm-brown/30 border-2 border-warm-brown/50" />
+<div className="absolute bottom-16 left-1/2 -translate-x-1/2 ml-3 w-28 h-12 rounded-lg bg-warm-brown/50 border border-warm-brown/60" />
+
         {sparkles.map(sparkle => (
           <div
             key={sparkle.id}
@@ -60,7 +60,7 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({
         ))}
         
         <div
-          className={`absolute bottom-20 left-1/2 -translate-x-1/2 text-8xl transition-all duration-500 ${
+          className={`absolute bottom-20 left-1/2 -translate-x-1/2 text-9xl transition-all duration-500 ${
             isHappy ? 'animate-bounce-gentle wiggle' : ''
           }`}
           role="img"
