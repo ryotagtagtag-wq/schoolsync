@@ -42,8 +42,9 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({
   return (
     <div className="flex flex-col items-center pt-2 pb-4">
       <div className="relative w-64 h-64 flex items-end justify-center">
-<div className="absolute bottom-12 left-1/2 -translate-x-1/2 ml-3 w-32 h-16 rounded-b-xl bg-warm-brown/30 border-2 border-warm-brown/50" />
-<div className="absolute bottom-16 left-1/2 -translate-x-1/2 ml-3 w-28 h-12 rounded-lg bg-warm-brown/50 border border-warm-brown/60" />
+{/* bottomの数値を 12→10、16→14 にそれぞれ2ずつ減らして少し下げました */}
+<div className="absolute bottom-10 left-1/2 -translate-x-1/2 ml-3 w-32 h-16 rounded-b-xl bg-warm-brown/30 border-2 border-warm-brown/50" />
+<div className="absolute bottom-14 left-1/2 -translate-x-1/2 ml-3 w-28 h-12 rounded-lg bg-warm-brown/50 border border-warm-brown/60" />
 
         {sparkles.map(sparkle => (
           <div
