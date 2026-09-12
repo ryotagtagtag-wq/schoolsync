@@ -2,10 +2,10 @@ import React, { useState, useRef } from 'react';
 import { TabType } from './types';
 import { usePlantData } from './hooks/usePlantData';
 import { PlantDisplay, PlantDisplayRef } from './components/PlantDisplay';
-import { TaskList } from './components/TaskList';
 import { Shop } from './components/Shop';
 import { Backpack } from './components/Backpack';
 import { Garden } from './components/Garden';
+import { Quest } from './components/Quest';
 import { TabBar } from './components/TabBar';
 
 const App: React.FC = () => {
@@ -30,6 +30,12 @@ const App: React.FC = () => {
     deletePlant,
     renamePlant,
     PLANT_TYPES,
+    dailyStats,
+    createError,
+    completeError,
+    DAILY_QUEST_CREATE_LIMIT,
+    DAILY_QUEST_COMPLETE_LIMIT,
+    MIN_COMPLETION_MINUTES,
   } = usePlantData();
   
   if (!isReady) {
@@ -44,10 +50,6 @@ const App: React.FC = () => {
     );
   }
   
-  const handleBackpackItemUse = (itemId: string) => {
-    useItem(itemId);
-    plantDisplayRef.current?.triggerHappy();
-  };
 
   return (
     <div className="min-h-screen pb-24">
@@ -84,16 +86,30 @@ const App: React.FC = () => {
             
             <section aria-labelledby="tasks-heading">
               <h2 id="tasks-heading" className="text-xl font-bold text-forest-green mb-4 flex items-center gap-2">
-                <span aria-hidden="true">📋</span>
-                クエストリスト
+                <span aria-hidden="true">📝</span>
+                クエスト (メイン画面では簡易表示)
               </h2>
-              <TaskList
-                tasks={data.tasks}
-                onAddTask={addTask}
-                onDeleteTask={deleteTask}
-                onToggleTask={toggleTask}
-              />
+              <p className="text-forest-green/60 text-center py-4">
+                詳しいクエスト管理は <strong>「クエスト」タブ</strong> で！
+              </p>
             </section>
+          </div>
+        )}
+        
+        {activeTab === 'quest' && (
+          <div className="animate-pop-in" role="tabpanel" aria-label="クエスト">
+            <Quest
+              tasks={data.tasks}
+              onAddTask={addTask}
+              onDeleteTask={deleteTask}
+              onToggleTask={toggleTask}
+              dailyStats={dailyStats}
+              createError={createError}
+              completeError={completeError}
+              DAILY_QUEST_CREATE_LIMIT={DAILY_QUEST_CREATE_LIMIT}
+              DAILY_QUEST_COMPLETE_LIMIT={DAILY_QUEST_COMPLETE_LIMIT}
+              MIN_COMPLETION_MINUTES={MIN_COMPLETION_MINUTES}
+            />
           </div>
         )}
         
@@ -119,7 +135,7 @@ const App: React.FC = () => {
             </h2>
             <Backpack
               ownedItems={data.ownedItems}
-              onUseItem={handleBackpackItemUse}
+              onUseItem={(itemId) => { useItem(itemId); plantDisplayRef.current?.triggerHappy(); }}
             />
           </div>
         )}

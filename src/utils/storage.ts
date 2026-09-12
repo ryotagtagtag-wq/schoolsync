@@ -1,5 +1,19 @@
 import { PlantData, INITIAL_PLANT_DATA } from '../types';
 
+function getTodayString(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
+function getDefaultDailyStats() {
+  return {
+    date: getTodayString(),
+    questsCreated: 0,
+    questsCompleted: 0,
+    questsDeleted: 0,
+    streakDays: 0,
+  };
+}
+
 export function loadPlantData(): PlantData {
   try {
     const stored = localStorage.getItem('questra_plant_data');
@@ -9,40 +23,51 @@ export function loadPlantData(): PlantData {
     
     // 旧データ形式からの移行
     if (!parsed.plants) {
-      // 旧形式: exp, coins, tasks, ownedItems のみ
       return {
         exp: parsed.exp || 0,
         coins: parsed.coins || 0,
-        tasks: parsed.tasks || [],
+        tasks: (parsed.tasks || []).map((t: any) => ({
+          id: t.id, title: t.title, completed: t.completed, createdAt: t.createdAt,
+          completedAt: t.completedAt, category: t.category, estimatedMinutes: t.estimatedMinutes,
+          isTemplate: t.isTemplate,
+        })),
         ownedItems: parsed.ownedItems || [],
         plants: [{
-          id: 'plant_1',
-          plantTypeId: 'default',
-          exp: parsed.exp || 0,
-          vitality: 100,
-          lastWateredAt: Date.now(),
-          createdAt: Date.now(),
+          id: 'plant_1', plantTypeId: 'default', exp: parsed.exp || 0,
+          vitality: 100, lastWateredAt: Date.now(), createdAt: Date.now(),
         }],
         activePlantId: 'plant_1',
+        dailyStats: getDefaultDailyStats(),
       };
     }
     
-    // 新形式の場合はそのまま返す（不足フィールドはデフォルトで補完）
+    // dailyStats の日付チェック・リセット
+    let dailyStats = parsed.dailyStats || getDefaultDailyStats();
+    const today = getTodayString();
+    if (dailyStats.date !== today) {
+      // ストリーク継続判定
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      const streak = dailyStats.lastCompletedDate === yesterday ? dailyStats.streakDays + 1 : 
+                     dailyStats.lastCompletedDate === today ? dailyStats.streakDays : 0;
+      dailyStats = { ...getDefaultDailyStats(), streakDays: streak };
+    }
+    
     return {
       exp: parsed.exp || 0,
       coins: parsed.coins || 0,
-      tasks: parsed.tasks || [],
+      tasks: (parsed.tasks || []).map((t: any) => ({
+        id: t.id, title: t.title, completed: t.completed, createdAt: t.createdAt,
+        completedAt: t.completedAt, category: t.category, estimatedMinutes: t.estimatedMinutes,
+        isTemplate: t.isTemplate,
+      })),
       ownedItems: parsed.ownedItems || [],
       plants: parsed.plants.map((p: any) => ({
-        id: p.id,
-        plantTypeId: p.plantTypeId || 'default',
-        nickname: p.nickname,
-        exp: p.exp || 0,
-        vitality: p.vitality !== undefined ? p.vitality : 100,
-        lastWateredAt: p.lastWateredAt || Date.now(),
-        createdAt: p.createdAt || Date.now(),
+        id: p.id, plantTypeId: p.plantTypeId || 'default', nickname: p.nickname,
+        exp: p.exp || 0, vitality: p.vitality !== undefined ? p.vitality : 100,
+        lastWateredAt: p.lastWateredAt || Date.now(), createdAt: p.createdAt || Date.now(),
       })),
       activePlantId: parsed.activePlantId || (parsed.plants[0]?.id || 'plant_1'),
+      dailyStats,
     };
   } catch {
     return INITIAL_PLANT_DATA;
