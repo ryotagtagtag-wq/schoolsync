@@ -66,7 +66,7 @@ export const PlantDisplay = forwardRef<PlantDisplayRef, PlantDisplayProps>(({
         
         <div
           className={`absolute bottom-20 left-1/2 -translate-x-1/2 text-9xl transition-all duration-500 ${
-            isHappy ? 'animate-bounce-gentle wiggle' : ''
+            isHappy ? 'wiggle' : ''
           }`}
           role="img"
           aria-label={`植物: ${plantStage.name}`}
