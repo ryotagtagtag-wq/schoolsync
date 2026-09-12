@@ -1,20 +1,24 @@
-import React, { useState } from 'react';
+import { useState, useImperativeHandle, forwardRef } from 'react';
 import { PlantStage } from '../types';
 import { getGrowthProgress } from '../utils/plantLogic';
+
+export interface PlantDisplayRef {
+  triggerHappy: () => void;
+}
 
 interface PlantDisplayProps {
   exp: number;
   plantStage: PlantStage;
   nextStageExp: number | null;
-  onItemUse: () => void;
+  onItemUse?: () => void;
 }
 
-export const PlantDisplay: React.FC<PlantDisplayProps> = ({
+export const PlantDisplay = forwardRef<PlantDisplayRef, PlantDisplayProps>(({
   exp,
   plantStage,
   nextStageExp,
   onItemUse,
-}) => {
+}, ref) => {
   const [isHappy, setIsHappy] = useState(false);
   const [sparkles, setSparkles] = useState<Array<{ id: number; x: number; y: number }>>([]);
   const progress = getGrowthProgress(exp);
@@ -32,20 +36,20 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({
       setIsHappy(false);
       setSparkles([]);
     }, 2000);
+    
+    onItemUse?.();
   };
   
-  const handleItemUse = () => {
-    triggerHappy();
-    onItemUse();
-  };
-  
+  useImperativeHandle(ref, () => ({
+    triggerHappy,
+  }));
+
   return (
     <div className="flex flex-col items-center pt-2 pb-4">
       <div className="relative w-64 h-64 flex items-end justify-center">
-{/* bottomの数値を 12→10、16→14 にそれぞれ2ずつ減らして少し下げました */}
-<div className="absolute bottom-10 left-1/2 -translate-x-1/2 ml-3 w-32 h-16 rounded-b-xl bg-warm-brown/30 border-2 border-warm-brown/50" />
-<div className="absolute bottom-14 left-1/2 -translate-x-1/2 ml-3 w-28 h-12 rounded-lg bg-warm-brown/50 border border-warm-brown/60" />
-
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 ml-3 w-32 h-16 rounded-b-xl bg-warm-brown/30 border-2 border-warm-brown/50" />
+        <div className="absolute bottom-14 left-1/2 -translate-x-1/2 ml-3 w-28 h-12 rounded-lg bg-warm-brown/50 border border-warm-brown/60" />
+        
         {sparkles.map(sparkle => (
           <div
             key={sparkle.id}
@@ -107,12 +111,14 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({
       )}
       
       <button
-        onClick={handleItemUse}
+        onClick={triggerHappy}
         className="mt-6 btn-secondary text-sm px-5 py-2"
-        aria-label="バックパックからアイテムを使って植物を喜ばせる"
+        aria-label="植物をなでて喜ばせる（アイテムがなくてもOK）"
       >
-        🎁 アイテムを使って喜ばせる
+        💚 なでなでして喜ばせる
       </button>
     </div>
   );
-};
+});
+
+PlantDisplay.displayName = 'PlantDisplay';

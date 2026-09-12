@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { TabType } from './types';
 import { usePlantData } from './hooks/usePlantData';
-import { PlantDisplay } from './components/PlantDisplay';
+import { PlantDisplay, PlantDisplayRef } from './components/PlantDisplay';
 import { TaskList } from './components/TaskList';
 import { Shop } from './components/Shop';
 import { Backpack } from './components/Backpack';
@@ -9,6 +9,7 @@ import { TabBar } from './components/TabBar';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('main');
+  const plantDisplayRef = useRef<PlantDisplayRef>(null);
   const {
     data,
     isReady,
@@ -33,10 +34,11 @@ const App: React.FC = () => {
     );
   }
   
-  const handleItemUse = () => {
-    // PlantDisplay側でアニメーションを発火
+  const handleBackpackItemUse = (itemId: string) => {
+    useItem(itemId);
+    plantDisplayRef.current?.triggerHappy();
   };
-  
+
   return (
     <div className="min-h-screen pb-24">
       <header className="sticky top-0 z-40 bg-ivory/95 backdrop-blur-sm border-b border-forest-green/10">
@@ -61,10 +63,10 @@ const App: React.FC = () => {
         {activeTab === 'main' && (
           <div className="space-y-6 animate-pop-in" role="tabpanel" aria-label="メイン">
             <PlantDisplay
+              ref={plantDisplayRef}
               exp={data.exp}
               plantStage={plantStage}
               nextStageExp={nextStageExp}
-              onItemUse={handleItemUse}
             />
             
             <section aria-labelledby="tasks-heading">
@@ -104,7 +106,7 @@ const App: React.FC = () => {
             </h2>
             <Backpack
               ownedItems={data.ownedItems}
-              onUseItem={useItem}
+              onUseItem={handleBackpackItemUse}
             />
           </div>
         )}
