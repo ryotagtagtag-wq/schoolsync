@@ -11,6 +11,7 @@ const TABS: { id: TabType; label: string; emoji: string }[] = [
   { id: 'main', label: 'メイン', emoji: '🏠' },
   { id: 'shop', label: 'ショップ', emoji: '🛍️' },
   { id: 'backpack', label: 'バックパック', emoji: '🎒' },
+  { id: 'garden', label: 'ガーデン', emoji: '🌿' },
 ];
 
 export const TabBar: React.FC<TabBarProps> = ({ activeTab, onTabChange, coins }: TabBarProps): React.ReactElement => {
@@ -20,7 +21,7 @@ export const TabBar: React.FC<TabBarProps> = ({ activeTab, onTabChange, coins }:
       role="tablist"
       aria-label="メインナビゲーション"
     >
-      <div className="grid grid-cols-3 gap-1 p-2 safe-area-inset-bottom">
+      <div className="grid grid-cols-4 gap-1 p-2 safe-area-inset-bottom">
         {TABS.map((tab: { id: TabType; label: string; emoji: string }) => (
           <button
             key={tab.id}

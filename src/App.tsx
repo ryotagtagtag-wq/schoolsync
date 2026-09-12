@@ -5,6 +5,7 @@ import { PlantDisplay, PlantDisplayRef } from './components/PlantDisplay';
 import { TaskList } from './components/TaskList';
 import { Shop } from './components/Shop';
 import { Backpack } from './components/Backpack';
+import { Garden } from './components/Garden';
 import { TabBar } from './components/TabBar';
 
 const App: React.FC = () => {
@@ -13,13 +14,22 @@ const App: React.FC = () => {
   const {
     data,
     isReady,
+    activePlant,
     plantStage,
     nextStageExp,
+    currentVitality,
+    itemEffect,
     addTask,
     deleteTask,
     toggleTask,
     buyItem,
     useItem,
+    petPlant,
+    setActivePlant,
+    addPlant,
+    deletePlant,
+    renamePlant,
+    PLANT_TYPES,
   } = usePlantData();
   
   if (!isReady) {
@@ -49,7 +59,7 @@ const App: React.FC = () => {
               Questra
             </h1>
             <div className="flex items-center gap-3 text-forest-green">
-              <span className="font-medium">EXP: {data.exp}</span>
+              <span className="font-medium">EXP: {activePlant.exp}</span>
               <span className="flex items-center gap-1 bg-pastel-yellow px-3 py-1 rounded-full">
                 <span aria-hidden="true">💰</span>
                 <span className="font-bold">{data.coins}</span>
@@ -64,9 +74,12 @@ const App: React.FC = () => {
           <div className="space-y-6 animate-pop-in" role="tabpanel" aria-label="メイン">
             <PlantDisplay
               ref={plantDisplayRef}
-              exp={data.exp}
+              plant={activePlant}
               plantStage={plantStage}
               nextStageExp={nextStageExp}
+              currentVitality={currentVitality}
+              onPet={petPlant}
+              itemEffect={itemEffect}
             />
             
             <section aria-labelledby="tasks-heading">
@@ -107,6 +120,24 @@ const App: React.FC = () => {
             <Backpack
               ownedItems={data.ownedItems}
               onUseItem={handleBackpackItemUse}
+            />
+          </div>
+        )}
+        
+        {activeTab === 'garden' && (
+          <div className="animate-pop-in" role="tabpanel" aria-label="ガーデン">
+            <h2 className="text-xl font-bold text-forest-green mb-4 flex items-center gap-2">
+              <span aria-hidden="true">🌿</span>
+              ガーデン
+            </h2>
+            <Garden
+              plants={data.plants}
+              plantTypes={PLANT_TYPES}
+              activePlantId={data.activePlantId}
+              onSetActive={setActivePlant}
+              onAddPlant={addPlant}
+              onDeletePlant={deletePlant}
+              onRenamePlant={renamePlant}
             />
           </div>
         )}
