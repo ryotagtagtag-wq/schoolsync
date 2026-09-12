@@ -60,7 +60,7 @@ export const PlantDisplay: React.FC<PlantDisplayProps> = ({
         ))}
         
         <div
-          className={`relative text-8xl transition-all duration-500 ${
+          className={`absolute bottom-20 left-1/2 -translate-x-1/2 text-8xl transition-all duration-500 ${
             isHappy ? 'animate-bounce-gentle wiggle' : ''
           }`}
           role="img"
