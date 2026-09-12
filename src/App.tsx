@@ -8,6 +8,10 @@ import { Garden } from './components/Garden';
 import { Quest } from './components/Quest';
 import { TabBar } from './components/TabBar';
 
+const CAT_EMOJI: Record<string, string> = {
+  study: '📚', exercise: '🏃', household: '🧹', hobby: '🎨', health: '🧘', social: '💬', custom: '✨',
+};
+
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('main');
   const plantDisplayRef = useRef<PlantDisplayRef>(null);
@@ -49,7 +53,7 @@ const App: React.FC = () => {
       </div>
     );
   }
-  
+
 
   return (
     <div className="min-h-screen pb-24">
@@ -87,11 +91,54 @@ const App: React.FC = () => {
             <section aria-labelledby="tasks-heading">
               <h2 id="tasks-heading" className="text-xl font-bold text-forest-green mb-4 flex items-center gap-2">
                 <span aria-hidden="true">📝</span>
-                クエスト (メイン画面では簡易表示)
+                今日のクエスト
               </h2>
-              <p className="text-forest-green/60 text-center py-4">
-                詳しいクエスト管理は <strong>「クエスト」タブ</strong> で！
-              </p>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {data.tasks.filter(t => !t.completed).length === 0 ? (
+                  <div className="card p-6 text-center animate-pop-in">
+                    <span className="text-3xl mb-2 block">📝</span>
+                    <p className="text-forest-green/60">クエストがありません</p>
+                    <p className="text-forest-green/50 text-sm mt-1">「クエスト」タブで追加しよう！</p>
+                  </div>
+                ) : (
+                  <>
+                    {data.tasks.filter(t => !t.completed).slice(0, 3).map(task => {
+                      return (
+                        <article key={task.id} className="card p-3 animate-pop-in flex items-center gap-3">
+                          <button
+                            onClick={() => toggleTask(task.id)}
+                            className="w-6 h-6 rounded border-2 border-forest-green/30 flex-shrink-0"
+                            aria-label="完了する"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-forest-green truncate">{task.title}</p>
+                            {task.category && (
+                              <span className="text-xs text-forest-green/60">
+                                {CAT_EMOJI[task.category] || '✨'} {task.category}
+                              </span>
+                            )}
+                          </div>
+                          <button 
+                            onClick={() => toggleTask(task.id)} 
+                            className="text-forest-green/50 hover:text-forest-green"
+                            aria-label="完了する"
+                          >
+                            ✓
+                          </button>
+                        </article>
+                      );
+                    })}
+                  </>
+                )}
+                {data.tasks.filter(t => !t.completed).length > 3 && (
+                  <button 
+                    onClick={() => setActiveTab('quest')}
+                    className="w-full btn-secondary text-sm"
+                  >
+                    すべて見る（{data.tasks.filter(t => !t.completed).length}件） →
+                  </button>
+                )}
+              </div>
             </section>
           </div>
         )}
