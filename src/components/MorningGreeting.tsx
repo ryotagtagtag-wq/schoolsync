@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { PlantInstance } from '../types';
 import { getRandomLine, getTeacherType } from '../data/teacherLines';
 
+const EGG_IMAGE = 'https://ik.imagekit.io/ryopc/%E5%8D%B5%E7%94%BB%E5%83%8F.png';
+
+
 interface MorningGreetingProps {
   plant: PlantInstance;
   onComplete: () => void;
@@ -55,7 +58,6 @@ export const MorningGreeting: React.FC<MorningGreetingProps> = ({
         onComplete();
       }, 1500);
     } else if (phase === 'eggFound') {
-      // 卵発見後はそのまま閉じる（後でドラゴン画像追加用に状態保存）
       setShowModal(false);
       onComplete();
     }
@@ -77,8 +79,16 @@ export const MorningGreeting: React.FC<MorningGreetingProps> = ({
         )}
 
         <div className="text-center">
-          <div className="text-6xl mb-4 animate-bounce-gentle" aria-hidden="true">
-            {phase === 'eggFound' ? '🥚' : '🌱'}
+          <div className="mb-4">
+            {phase === 'eggFound' ? (
+              <img 
+                src={EGG_IMAGE} 
+                alt="不思議な卵" 
+                className="w-32 h-32 mx-auto animate-bounce-gentle"
+              />
+            ) : (
+              <div className="text-6xl mb-4 animate-bounce-gentle" aria-hidden="true">🌱</div>
+            )}
           </div>
 
           <p className="text-forest-green text-lg font-medium mb-6 whitespace-pre-line">
