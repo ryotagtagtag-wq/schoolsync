@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { TabType } from './types';
 import { usePlantData } from './hooks/usePlantData';
 import { PlantDisplay, PlantDisplayRef } from './components/PlantDisplay';
@@ -6,6 +6,7 @@ import { Shop } from './components/Shop';
 import { Backpack } from './components/Backpack';
 import { Garden } from './components/Garden';
 import { Quest } from './components/Quest';
+import { MorningGreeting } from './components/MorningGreeting';
 import { TabBar } from './components/TabBar';
 
 const CAT_EMOJI: Record<string, string> = {
@@ -15,6 +16,8 @@ const CAT_EMOJI: Record<string, string> = {
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('main');
   const plantDisplayRef = useRef<PlantDisplayRef>(null);
+  const [showMorningGreeting, setShowMorningGreeting] = useState(false);
+  
   const {
     data,
     isReady,
@@ -42,6 +45,25 @@ const App: React.FC = () => {
     MIN_COMPLETION_MINUTES,
   } = usePlantData();
   
+  // 朝の挨拶表示制御
+  useEffect(() => {
+    if (!isReady) return;
+    const today = new Date().toISOString().split('T')[0];
+    const lastShown = localStorage.getItem('morningGreetingLastShown');
+    if (lastShown !== today) {
+      setShowMorningGreeting(true);
+    }
+  }, [isReady]);
+
+  const handleMorningGreetingComplete = () => {
+    setShowMorningGreeting(false);
+  };
+
+  const handleMorningEggFound = (eggState: any) => {
+    // 卵発見時の処理（必要なら状態保存）
+    console.log('Egg found!', eggState);
+  };
+
   if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-ivory">
@@ -53,7 +75,6 @@ const App: React.FC = () => {
       </div>
     );
   }
-
 
   return (
     <div className="min-h-screen pb-24">
@@ -205,6 +226,15 @@ const App: React.FC = () => {
           </div>
         )}
       </main>
+      
+      {/* 朝の挨拶モーダル */}
+      {showMorningGreeting && (
+        <MorningGreeting
+          plant={activePlant}
+          onComplete={handleMorningGreetingComplete}
+          onEggFound={handleMorningEggFound}
+        />
+      )}
       
       <TabBar
         activeTab={activeTab}
