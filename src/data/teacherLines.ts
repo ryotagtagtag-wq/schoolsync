@@ -17,7 +17,9 @@ export interface TeacherLineCategory {
 }
 
 export const TEACHER_LINES: Record<PlantTeacherType, TeacherLineCategory> = {
-  // ひまわり先生：元気・前向き・短い・応援
+  // ひまわり先生：ポジティブ＆活発
+  // 「小さな一歩も輝いてる！」タスクを完了するたびに、明るい言葉で背中を押してくれる。
+  // 前向きな気持ちで自分を大切にすることを教えてくれる。
   sunflower: {
     morning: [
       "おはよう！今日もいい日にしよう！",
@@ -30,6 +32,7 @@ export const TEACHER_LINES: Record<PlantTeacherType, TeacherLineCategory> = {
       "今日も君なら大丈夫！",
     ],
     afterComplete: [
+      "小さな一歩も輝いてる！",
       "よくできた！偉いね！",
       "その調子！明日も頑張ろう！",
       "やったね！いい笑顔だ！",
@@ -55,7 +58,9 @@ export const TEACHER_LINES: Record<PlantTeacherType, TeacherLineCategory> = {
     ],
   },
 
-  // サボテン先生：短く・淡々・でも心に響く・無骨な優しさ
+  // サボテン先生：直接的＆実直
+  // 「言い訳なし、やるだけ！」シンプルで的確なアドバイスでタスクを片付けさせる。
+  // ムダなく、確実に物事を進める力を養ってくれる。
   cactus: {
     morning: [
       "水。飲め。",
@@ -66,6 +71,7 @@ export const TEACHER_LINES: Record<PlantTeacherType, TeacherLineCategory> = {
       "今日も無事。よし。",
     ],
     afterComplete: [
+      "言い訳なし、やるだけ！",
       "よし。",
       "悪くない。",
       "続けろ。",
@@ -89,7 +95,9 @@ export const TEACHER_LINES: Record<PlantTeacherType, TeacherLineCategory> = {
     ],
   },
 
-  // モンステラ先生：優しく・知的・寄り添う・言葉多め
+  // モンステラ先生：おだやか＆サポート型
+  // 「焦らなくていいよ、一緒に進もう。」優しく寄り添いながらタスクへ導く。
+  // 無理せず自分のペースで成長できるよう、心のケアを大切にしてくれる。
   monstera: {
     morning: [
       "おはよう。深呼吸、しようか。",
@@ -102,6 +110,7 @@ export const TEACHER_LINES: Record<PlantTeacherType, TeacherLineCategory> = {
       "窓を開けて、新しい空気を入れよう。",
     ],
     afterComplete: [
+      "焦らなくていいよ、一緒に進もう。",
       "よくやったね。ゆっくり休んで。",
       "あなたのペースでいいんだよ。",
       "よく頑張ったね。誇りに思う。",
@@ -127,7 +136,9 @@ export const TEACHER_LINES: Record<PlantTeacherType, TeacherLineCategory> = {
     ],
   },
 
-  // ふしぎなタネ先生：好奇心・実験的・ワクワク・子供っぽい
+  // たね先生：好奇心旺盛＆冒険的
+  // 「やってみなきゃわからない！」新しい挑戦をゲーム感覚で楽しませる。
+  // 失敗も学びと捉え、どんどん試して成長することを促してくれる。
   seed: {
     morning: [
       "今日何色の空かな？見てみよう！",
@@ -140,6 +151,7 @@ export const TEACHER_LINES: Record<PlantTeacherType, TeacherLineCategory> = {
       "おはよう！今日も発見の日！",
     ],
     afterComplete: [
+      "やってみなきゃわからない！",
       "おもしろいこと見つかった？",
       "次は何しようか？ワクワクするね！",
       "やったー！新発見かも！",
