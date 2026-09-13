@@ -2,9 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { PlantInstance } from '../types';
 import { getRandomLine, getTeacherType } from '../data/teacherLines';
 
-const EGG_IMAGE = 'https://ik.imagekit.io/ryopc/%E5%8D%B5%E7%94%BB%E5%83%8F.png';
-
-
 interface MorningGreetingProps {
   plant: PlantInstance;
   onComplete: () => void;
@@ -18,7 +15,9 @@ export const MorningGreeting: React.FC<MorningGreetingProps> = ({
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [greeting, setGreeting] = useState('');
-  const [phase, setPhase] = useState<'greeting' | 'eggFound'>('greeting');
+  const [phase, setPhase] = useState<'greeting' | 'eggFound' | 'hatching' | 'dragonBorn' | 'nameInput'>('greeting');
+  const [eggProgress, setEggProgress] = useState(0);
+  const [dragonName, setDragonName] = useState('');
 
   const teacherType = getTeacherType(plant.plantTypeId);
 
@@ -37,7 +36,7 @@ export const MorningGreeting: React.FC<MorningGreetingProps> = ({
     setPhase('greeting');
 
     // 卵発見判定（25%）
-    if (Math.random() < 0.25) {
+    if (Math.random() < 0.25 && (!plant.egg || !plant.egg.hasEgg)) {
       setTimeout(() => {
         setPhase('eggFound');
         const eggLine = getRandomLine(teacherType, 'eggFound');
@@ -49,6 +48,30 @@ export const MorningGreeting: React.FC<MorningGreetingProps> = ({
     localStorage.setItem('morningGreetingLastShown', today);
   }, [plant.plantTypeId, onComplete]);
 
+  // 孵化プログレス自動進行
+  useEffect(() => {
+    if (phase !== 'hatching') return;
+    
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 15 + 5;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+        // 孵化完了
+        setPhase('dragonBorn');
+        const bornLine = getRandomLine(teacherType, 'dragonBorn');
+        setGreeting(bornLine);
+      } else {
+        setEggProgress(progress);
+        const hatchingLine = getRandomLine(teacherType, 'eggGrowing');
+        setGreeting(hatchingLine);
+      }
+    }, 400);
+
+    return () => clearInterval(interval);
+  }, [phase, teacherType]);
+
   const handleComplete = () => {
     if (phase === 'greeting') {
       const completeLine = getRandomLine(teacherType, 'afterComplete');
@@ -58,9 +81,30 @@ export const MorningGreeting: React.FC<MorningGreetingProps> = ({
         onComplete();
       }, 1500);
     } else if (phase === 'eggFound') {
+      // 孵化フェーズへ
+      setPhase('hatching');
+      setEggProgress(0);
+      setGreeting(getRandomLine(teacherType, 'eggGrowing'));
+    } else if (phase === 'dragonBorn') {
+      // 名前入力フェーズへ
+      setPhase('nameInput');
+    } else if (phase === 'nameInput') {
+      // 名前入力完了
       setShowModal(false);
       onComplete();
     }
+  };
+
+  const handleNameSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!dragonName.trim()) return;
+    setPhase('dragonBorn');
+    const greetingLine = getRandomLine(teacherType, 'dragonGreeting');
+    setGreeting(`${dragonName}と名付けたよ！${greetingLine}`);
+    setTimeout(() => {
+      setShowModal(false);
+      onComplete();
+    }, 2000);
   };
 
   if (!showModal) return null;
@@ -82,9 +126,21 @@ export const MorningGreeting: React.FC<MorningGreetingProps> = ({
           <div className="mb-4">
             {phase === 'eggFound' ? (
               <img 
-                src={EGG_IMAGE} 
+                src="https://ik.imagekit.io/ryopc/%E5%8D%B5%E7%94%BB%E5%83%8F.png" 
                 alt="不思議な卵" 
                 className="w-32 h-32 mx-auto animate-bounce-gentle"
+              />
+            ) : phase === 'hatching' ? (
+              <img 
+                src="https://ik.imagekit.io/ryopc/%E5%8D%B5%E7%94%BB%E5%83%8F.png" 
+                alt="孵化中の卵" 
+                className="w-32 h-32 mx-auto animate-pulse"
+              />
+            ) : phase === 'dragonBorn' || phase === 'nameInput' ? (
+              <img 
+                src="https://ik.imagekit.io/ryopc/%E3%83%88%E3%82%99%E3%83%A9%E3%82%B3%E3%82%99%E3%83%B3%E5%AD%B5%E5%8C%96.png" 
+                alt="ドラゴン" 
+                className="w-40 h-40 mx-auto animate-bounce-gentle"
               />
             ) : (
               <div className="text-6xl mb-4 animate-bounce-gentle" aria-hidden="true">🌱</div>
@@ -94,6 +150,37 @@ export const MorningGreeting: React.FC<MorningGreetingProps> = ({
           <p className="text-forest-green text-lg font-medium mb-6 whitespace-pre-line">
             {greeting}
           </p>
+
+          {phase === 'hatching' && (
+            <div className="mb-4">
+              <div className="h-3 bg-forest-green/10 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-pastel-orange rounded-full transition-all duration-300 ease-out"
+                  style={{ width: `${eggProgress}%` }}
+                />
+              </div>
+              <p className="text-xs text-forest-green/60 mt-1">
+                孵化中... {Math.floor(eggProgress)}%
+              </p>
+            </div>
+          )}
+
+          {phase === 'nameInput' && (
+            <form onSubmit={handleNameSubmit} className="mt-4">
+              <input
+                type="text"
+                value={dragonName}
+                onChange={e => setDragonName(e.target.value)}
+                placeholder="ドラゴンの名前をつけてね"
+                className="w-full p-3 border border-forest-green/30 rounded-lg text-forest-green placeholder-forest-green/40 mb-3"
+                maxLength={10}
+                autoFocus
+              />
+              <button type="submit" className="w-full btn-primary">
+                名前をつける 🐉
+              </button>
+            </form>
+          )}
 
           {phase === 'greeting' && (
             <button
@@ -110,6 +197,41 @@ export const MorningGreeting: React.FC<MorningGreetingProps> = ({
               className="mt-6 w-full btn-primary"
             >
               見守る 🥚
+            </button>
+          )}
+
+          {phase === 'dragonBorn' && !dragonName && (
+            <button
+              onClick={handleComplete}
+              className="mt-6 w-full btn-primary"
+            >
+              会えた！ 🐉
+            </button>
+          )}
+
+          {phase === 'nameInput' && (
+            <form onSubmit={handleNameSubmit} className="mt-4">
+              <input
+                type="text"
+                value={dragonName}
+                onChange={e => setDragonName(e.target.value)}
+                placeholder="ドラゴンの名前をつけてね"
+                className="w-full p-3 border border-forest-green/30 rounded-lg text-forest-green placeholder-forest-green/40 mb-3"
+                maxLength={10}
+                autoFocus
+              />
+              <button type="submit" className="w-full btn-primary">
+                名前をつける 🐉
+              </button>
+            </form>
+          )}
+
+          {(phase === 'dragonBorn' && dragonName) && (
+            <button
+              onClick={handleComplete}
+              className="mt-6 w-full btn-primary"
+            >
+              仲間になった！ 🐉
             </button>
           )}
         </div>
