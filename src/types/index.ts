@@ -5,8 +5,8 @@ export interface Task {
   createdAt: number;
   completedAt?: number;
   category?: TaskCategory;
-  estimatedMinutes?: number; // 予想所要時間
-  isTemplate?: boolean; // テンプレートから作成されたか
+  estimatedMinutes?: number;
+  isTemplate?: boolean;
 }
 
 export type TaskCategory = 
@@ -59,6 +59,26 @@ export interface PlantInstance {
   vitality: number;
   lastWateredAt: number;
   createdAt: number;
+  // 卵・ドラゴン関連
+  egg?: EggState;
+  dragon?: DragonState;
+}
+
+export interface EggState {
+  hasEgg: boolean;
+  discoveredAt?: number;
+  growth: number; // 0-100, タスク完了で増加
+  hatchedAt?: number;
+  dragonBorn: boolean;
+  dragonName?: string;
+  dragonExp?: number;
+}
+
+export interface DragonState {
+  name: string;
+  level: number;
+  exp: number;
+  hatchedAt: number;
 }
 
 export interface PlantData {
@@ -121,7 +141,7 @@ export const INITIAL_PLANT_DATA: PlantData = {
   coins: 0,
   tasks: [],
   ownedItems: [],
-  plants: [{ id: 'plant_1', plantTypeId: 'default', exp: 0, vitality: 100, lastWateredAt: Date.now(), createdAt: Date.now() }],
+  plants: [{ id: 'plant_1', plantTypeId: 'default', exp: 0, vitality: 100, lastWateredAt: Date.now(), createdAt: Date.now(), egg: { hasEgg: false, growth: 0, dragonBorn: false } }],
   activePlantId: 'plant_1',
   dailyStats: { date: new Date().toISOString().split('T')[0], questsCreated: 0, questsCompleted: 0, questsDeleted: 0, streakDays: 0 },
 };

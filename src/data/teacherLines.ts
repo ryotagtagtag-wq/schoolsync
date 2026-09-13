@@ -11,7 +11,7 @@ export interface TeacherLineCategory {
   afterComplete: string[];
   // 卵・ドラゴン関連
   eggFound?: string[];
-  eggHatching?: string[];
+  eggGrowing?: string[];
   dragonBorn?: string[];
   dragonGreeting?: string[];
 }
@@ -44,9 +44,10 @@ export const TEACHER_LINES: Record<PlantTeacherType, TeacherLineCategory> = {
       "おっ？不思議な卵発見！",
       "わー！何か生まれそう！",
     ],
-    eggHatching: [
-      "卵が動いた！？今か今か！",
-      "もうすぐ生まれるよ！わくわく！",
+    eggGrowing: [
+      "卵が少し大きくなった気がする！",
+      "あなたの頑張りが、眠っていた卵を目覚めさせた！",
+      "毎日の積み重ねが、あの子の力になっているよ！",
     ],
     dragonBorn: [
       "わあ！ドラゴンだ！かっこいい！",
@@ -55,6 +56,7 @@ export const TEACHER_LINES: Record<PlantTeacherType, TeacherLineCategory> = {
     dragonGreeting: [
       "ドラゴンも元気そう！一緒に頑張ろう！",
       "ドラゴンと一緒なら最強だね！",
+      "おめでとう！これからもずっと一緒に成長していこう！",
     ],
   },
 
@@ -81,9 +83,10 @@ export const TEACHER_LINES: Record<PlantTeacherType, TeacherLineCategory> = {
       "卵。不思議だ。",
       "卵…なんだこれ。",
     ],
-    eggHatching: [
-      "動いた。もうすぐだ。",
-      "待つ。",
+    eggGrowing: [
+      "卵、大きくなった。",
+      "お前の積み重ねが、卵を動かした。",
+      "継続。それが力だ。",
     ],
     dragonBorn: [
       "ドラゴン。強そうだ。",
@@ -92,6 +95,7 @@ export const TEACHER_LINES: Record<PlantTeacherType, TeacherLineCategory> = {
     dragonGreeting: [
       "ドラゴンも水飲め。",
       "一緒に生きろ。",
+      "おめでとう。ずっと一緒だ。",
     ],
   },
 
@@ -122,9 +126,10 @@ export const TEACHER_LINES: Record<PlantTeacherType, TeacherLineCategory> = {
       "卵…大切に見守りましょう。",
       "不思議な卵…ワクワクしますね。",
     ],
-    eggHatching: [
-      "卵が揺れてる…もうすぐ生まれるみたい。",
-      "もうすぐ会えますね。楽しみね。",
+    eggGrowing: [
+      "卵が少し大きくなったわね。",
+      "あなたの頑張りが、眠っていた卵を目覚めさせたのね。",
+      "毎日の積み重ねが、あの子の力になっているわ。",
     ],
     dragonBorn: [
       "わあ、ドラゴンが生まれたのね。美しい…",
@@ -133,6 +138,7 @@ export const TEACHER_LINES: Record<PlantTeacherType, TeacherLineCategory> = {
     dragonGreeting: [
       "ドラゴンも一緒に、深呼吸しましょう。",
       "ドラゴンも仲間ね。大切にね。",
+      "おめでとう。これからもずっと一緒に成長していきましょう。",
     ],
   },
 
@@ -163,9 +169,10 @@ export const TEACHER_LINES: Record<PlantTeacherType, TeacherLineCategory> = {
       "卵発見！実験対象ゲット！",
       "卵！？何から生まれるかな！？",
     ],
-    eggHatching: [
-      "動いた！動いた！今か今か！",
-      "もうすぐ孵る！カウントダウン！",
+    eggGrowing: [
+      "卵が大きくなった！何%かな？",
+      "あなたの頑張りが、眠っていた卵を目覚めさせた！",
+      "毎日の積み重ねが、あの子の力になっているよ！",
     ],
     dragonBorn: [
       "わあ！ドラゴンだ！伝説の生物！",
@@ -174,6 +181,7 @@ export const TEACHER_LINES: Record<PlantTeacherType, TeacherLineCategory> = {
     dragonGreeting: [
       "ドラゴンと一緒に冒険だ！",
       "ドラゴンも実験仲間だね！",
+      "おめでとう！これからもずっと一緒に成長していこう！",
     ],
   },
 };
@@ -208,16 +216,23 @@ export function getTeacherType(plantTypeId: string): PlantTeacherType {
 // 卵・ドラゴン状態の型定義
 export interface EggState {
   hasEgg: boolean;
-  isHatching: boolean;
-  hatchProgress: number; // 0-100
+  discoveredAt?: number;
+  growth: number; // 0-100, タスク完了で増加
   hatchedAt?: number;
   dragonBorn: boolean;
   dragonName?: string;
+  dragonExp?: number;
 }
 
-export const INITIAL_EGG_STATE: EggState = {
+export interface DragonState {
+  name: string;
+  level: number;
+  exp: number;
+  hatchedAt: number;
+}
+
+export const INITIAL_EGG_STATE = {
   hasEgg: false,
-  isHatching: false,
-  hatchProgress: 0,
+  growth: 0,
   dragonBorn: false,
 };

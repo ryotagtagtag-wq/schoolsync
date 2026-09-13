@@ -3,20 +3,13 @@ import { PlantData, SHOP_ITEMS, PLANT_TYPES } from '../types';
 import { loadPlantData, savePlantData, generateId } from '../utils/storage';
 import { getPlantStage, getExpToNextStage, getGrowthProgress, calculateVitality, applyItemEffect, createPlantInstance } from '../utils/plantLogic';
 
-const DAILY_QUEST_CREATE_LIMIT = 5;
-const DAILY_QUEST_COMPLETE_LIMIT = 10;
-const MIN_COMPLETION_MINUTES = 5;
-const DELETE_COOLDOWN_MINUTES = 10;
-
 export function usePlantData() {
   const [data, setData] = useState<PlantData>(() => loadPlantData());
   const [isReady, setIsReady] = useState(false);
-  const [itemEffect, setItemEffect] = useState<{ exp: number; vitality: number; message: string } | null>(null);
-  const [createError, setCreateError] = useState<string | null>(null);
-  const [completeError, setCompleteError] = useState<string | null>(null);
   
   useEffect(() => { setIsReady(true); }, []);
   
+  // 元気自動再計算（1分ごと）
   useEffect(() => {
     const interval = setInterval(() => {
       setData(prev => {
@@ -38,27 +31,16 @@ export function usePlantData() {
     });
   }, []);
   
-  const activePlant = data.plants.find(p => p.id === data.activePlantId) || data.plants[0];
-  const currentVitality = calculateVitality(activePlant);
-  const plantStage = getPlantStage(activePlant);
-  const nextStageExp = getExpToNextStage(activePlant);
-  const progress = getGrowthProgress(activePlant);
-  
   const today = new Date().toISOString().split('T')[0];
+  
   const stats = data.dailyStats.date === today ? data.dailyStats : { 
     date: today, questsCreated: 0, questsCompleted: 0, questsDeleted: 0, 
     streakDays: data.dailyStats.streakDays, lastCompletedDate: data.dailyStats.lastCompletedDate 
   };
   
+  // タスク追加
   const addTask = useCallback((title: string, category?: string, estimatedMinutes?: number) => {
     if (!title.trim()) return;
-    setCreateError(null);
-    
-    if (stats.questsCreated >= DAILY_QUEST_CREATE_LIMIT) {
-      setCreateError(`今日はもう ${DAILY_QUEST_CREATE_LIMIT} 個までしかクエストを作れません。明日までお待ちください。`);
-      return;
-    }
-    
     const newTask = {
       id: generateId(),
       title: title.trim(),
@@ -71,7 +53,7 @@ export function usePlantData() {
     updateData(prev => {
       const newStats = prev.dailyStats.date === today ? prev.dailyStats : { 
         date: today, questsCreated: 0, questsCompleted: 0, questsDeleted: 0, 
-        streakDays: prev.dailyStats.streakDays, lastCompletedDate: prev.dailyStats.lastCompletedDate 
+        streakDays: prev.dailyStats.streakDays 
       };
       return {
         ...prev,
@@ -79,22 +61,19 @@ export function usePlantData() {
         dailyStats: { ...newStats, questsCreated: newStats.questsCreated + 1 },
       };
     });
-  }, [updateData, stats.questsCreated]);
+  }, []);
   
+  // タスク削除
   const deleteTask = useCallback((taskId: string) => {
     const task = data.tasks.find(t => t.id === taskId);
     if (!task) return;
-    
     const minutesSinceCreated = (Date.now() - task.createdAt) / 60000;
-    if (minutesSinceCreated < DELETE_COOLDOWN_MINUTES && !task.completed) {
-      setCreateError(`作成から ${DELETE_COOLDOWN_MINUTES} 分経たないと削除できません。`);
-      return;
-    }
+    if (minutesSinceCreated < 10 && !task.completed) return;
     
     updateData(prev => {
       const newStats = prev.dailyStats.date === today ? prev.dailyStats : { 
-        date: today, questsCreated: 0, questsCompleted: 0, questsDeleted: 0, 
-        streakDays: prev.dailyStats.streakDays, lastCompletedDate: prev.dailyStats.lastCompletedDate 
+        date: new Date().toISOString().split('T')[0], questsCreated: 0, questsCompleted: 0, questsDeleted: 0, 
+        streakDays: prev.dailyStats.streakDays 
       };
       return {
         ...prev,
@@ -102,8 +81,9 @@ export function usePlantData() {
         dailyStats: { ...newStats, questsDeleted: newStats.questsDeleted + 1 },
       };
     });
-  }, [updateData, data.tasks]);
+  }, [data.tasks]);
   
+  // タスク完了切替
   const toggleTask = useCallback((taskId: string) => {
     updateData(prev => {
       const task = prev.tasks.find(t => t.id === taskId);
@@ -113,24 +93,18 @@ export function usePlantData() {
       let expChange = 0;
       let coinChange = 0;
       let newStreak = prev.dailyStats.streakDays;
-      let newLastCompleted = prev.dailyStats.lastCompletedDate;
       
       if (newCompleted) {
         const minutesSpent = (Date.now() - task.createdAt) / 60000;
         const dailyStats = prev.dailyStats.date === today ? prev.dailyStats : { 
           date: today, questsCreated: 0, questsCompleted: 0, questsDeleted: 0, 
-          streakDays: prev.dailyStats.streakDays, lastCompletedDate: prev.dailyStats.lastCompletedDate 
+          streakDays: prev.dailyStats.streakDays 
         };
         
-        if (dailyStats.questsCompleted >= DAILY_QUEST_COMPLETE_LIMIT) {
-          setCompleteError(`今日はもう ${DAILY_QUEST_COMPLETE_LIMIT} 個までしか報酬付きで完了できません。`);
-          return prev;
-        }
+        if (dailyStats.questsCompleted >= 10) return prev;
         
         let rewardMultiplier = 1;
-        if (minutesSpent < MIN_COMPLETION_MINUTES) {
-          rewardMultiplier = 0.3;
-        }
+        if (minutesSpent < 5) rewardMultiplier = 0.3;
         
         const baseExp = 10;
         const baseCoin = 10;
@@ -139,6 +113,33 @@ export function usePlantData() {
         expChange = Math.round((baseExp + streakBonus) * rewardMultiplier);
         coinChange = Math.round(baseCoin * rewardMultiplier);
         
+        // 卵・ドラゴン処理
+        const updatedPlants = prev.plants.map(p => {
+          if (p.id !== prev.activePlantId) return p;
+          
+          let newEgg = p.egg;
+          
+          if (p.egg && !p.egg.dragonBorn) {
+            // 卵がある場合：成長させる
+            const newGrowth = Math.min(100, (p.egg.growth || 0) + 15);
+            const hatched = newGrowth >= 100 && !p.egg.dragonBorn;
+            
+            newEgg = {
+              ...p.egg!,
+              growth: newGrowth,
+              hatchedAt: hatched ? Date.now() : p.egg!.hatchedAt,
+              dragonBorn: hatched || p.egg!.dragonBorn,
+            };
+          } else if (!p.egg || !p.egg.hasEgg) {
+            // 卵がない場合：25%で卵発見
+            if (Math.random() < 0.25) {
+              newEgg = { hasEgg: true, discoveredAt: Date.now(), growth: 15, dragonBorn: false };
+            }
+          }
+          
+          return { ...p, exp: p.exp + expChange, vitality: Math.min(100, calculateVitality(p) + 5), egg: newEgg };
+        });
+        
         const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
         if (prev.dailyStats.lastCompletedDate === today) {
         } else if (prev.dailyStats.lastCompletedDate === yesterday) {
@@ -146,47 +147,41 @@ export function usePlantData() {
         } else {
           newStreak = 1;
         }
-        newLastCompleted = today;
         
         return {
           ...prev,
           exp: Math.max(0, prev.exp + expChange),
           coins: Math.max(0, prev.coins + coinChange),
-          tasks: prev.tasks.map(t => 
-            t.id === taskId ? { ...t, completed: true, completedAt: Date.now() } : t
-          ),
-          plants: prev.plants.map(p => 
-            p.id === prev.activePlantId ? { ...p, exp: Math.max(0, p.exp + expChange) } : p
-          ),
-          dailyStats: {
-            ...dailyStats,
-            questsCompleted: dailyStats.questsCompleted + 1,
-            streakDays: newStreak,
-            lastCompletedDate: newLastCompleted,
+          tasks: prev.tasks.map(t => t.id === taskId ? { ...t, completed: true, completedAt: Date.now() } : t),
+          plants: updatedPlants,
+          dailyStats: { 
+            date: new Date().toISOString().split('T')[0], 
+            questsCreated: dailyStats.questsCreated, 
+            questsCompleted: dailyStats.questsCompleted + 1, 
+            questsDeleted: dailyStats.questsDeleted, 
+            streakDays: newStreak, 
+            lastCompletedDate: new Date().toISOString().split('T')[0] 
           },
         };
       } else {
-        expChange = -10;
-        coinChange = -10;
+        // 未完了に戻す
+        const expChangeBack = -10;
+        const coinChangeBack = -10;
         return {
           ...prev,
-          exp: Math.max(0, prev.exp + expChange),
-          coins: Math.max(0, prev.coins + coinChange),
-          tasks: prev.tasks.map(t => 
-            t.id === taskId ? { ...t, completed: false, completedAt: undefined } : t
-          ),
-          plants: prev.plants.map(p => 
-            p.id === prev.activePlantId ? { ...p, exp: Math.max(0, p.exp + expChange) } : p
-          ),
+          exp: Math.max(0, prev.exp + expChangeBack),
+          coins: Math.max(0, prev.coins + coinChangeBack),
+          tasks: prev.tasks.map(t => t.id === taskId ? { ...t, completed: false, completedAt: undefined } : t),
+          plants: prev.plants.map(p => p.id === prev.activePlantId ? { ...p, exp: Math.max(0, p.exp + expChangeBack) } : p),
         };
       }
     });
-  }, [updateData]);
+  }, []);
   
+  // アイテム購入
   const buyItem = useCallback((itemId: string) => {
     const shopItem = SHOP_ITEMS.find(item => item.id === itemId);
     if (!shopItem) return false;
-    
     let success = false;
     updateData(prev => {
       if (prev.coins < shopItem.price) return prev;
@@ -201,18 +196,15 @@ export function usePlantData() {
       };
     });
     return success;
-  }, [updateData]);
+  }, []);
   
+  // アイテム使用
   const useItem = useCallback((itemId: string) => {
     updateData(prev => {
       const plant = prev.plants.find(p => p.id === prev.activePlantId);
       if (!plant) return prev;
       
-      const { expGain, vitalityGain, message } = applyItemEffect(plant, itemId);
-      if (expGain > 0 || vitalityGain > 0) {
-        setItemEffect({ exp: expGain, vitality: vitalityGain, message });
-        setTimeout(() => setItemEffect(null), 2000);
-      }
+      const { expGain, vitalityGain } = applyItemEffect(plant, itemId);
       
       const item = prev.ownedItems.find(i => i.id === itemId);
       if (!item || item.quantity <= 0) return prev;
@@ -223,21 +215,25 @@ export function usePlantData() {
         exp: prev.exp + expGain,
         plants: prev.plants.map(p => {
           if (p.id !== prev.activePlantId) return p;
-          return { ...p, exp: p.exp + expGain, vitality: Math.min(100, calculateVitality(p) + vitalityGain), lastWateredAt: vitalityGain > 0 ? Date.now() : p.lastWateredAt };
+          return { 
+            ...p, 
+            exp: p.exp + expGain, 
+            vitality: Math.min(100, calculateVitality(p) + vitalityGain), 
+            lastWateredAt: vitalityGain > 0 ? Date.now() : p.lastWateredAt 
+          };
         }),
         ownedItems: newQuantity > 0
           ? prev.ownedItems.map(i => i.id === itemId ? { ...i, quantity: newQuantity } : i)
           : prev.ownedItems.filter(i => i.id !== itemId),
       };
     });
-  }, [updateData]);
+  }, []);
   
+  // 植物をなでる
   const petPlant = useCallback(() => {
     updateData(prev => {
       const plant = prev.plants.find(p => p.id === prev.activePlantId);
       if (!plant) return prev;
-      setItemEffect({ exp: 0, vitality: 0, message: 'なでなで♡' });
-      setTimeout(() => setItemEffect(null), 1500);
       return {
         ...prev,
         plants: prev.plants.map(p => 
@@ -245,29 +241,38 @@ export function usePlantData() {
         ),
       };
     });
-  }, [updateData]);
+  }, []);
   
-  const setActivePlant = useCallback((plantId: string) => updateData(prev => ({ ...prev, activePlantId: plantId })), [updateData]);
+  // 植物操作
+  const setActivePlant = useCallback((plantId: string) => updateData(prev => ({ ...prev, activePlantId: plantId })), []);
   const addPlant = useCallback((plantTypeId: string, nickname?: string) => {
     const newPlant = createPlantInstance(plantTypeId, nickname);
     updateData(prev => ({ ...prev, plants: [...prev.plants, newPlant], activePlantId: newPlant.id }));
-  }, [updateData]);
+  }, []);
   const deletePlant = useCallback((plantId: string) => updateData(prev => {
     if (prev.plants.length <= 1) return prev;
     const newPlants = prev.plants.filter(p => p.id !== plantId);
     return { ...prev, plants: newPlants, activePlantId: prev.activePlantId === plantId ? newPlants[0].id : prev.activePlantId };
-  }), [updateData]);
+  }), []);
   const renamePlant = useCallback((plantId: string, nickname: string) => updateData(prev => ({
     ...prev, plants: prev.plants.map(p => p.id === plantId ? { ...p, nickname: nickname.trim() || undefined } : p)
-  })), [updateData]);
+  })), []);
+  
+  // 現在のアクティブな植物
+  const activePlant = data.plants.find(p => p.id === data.activePlantId) || data.plants[0];
+  const currentVitality = calculateVitality(activePlant);
+  const plantStage = getPlantStage(activePlant);
+  const nextStageExp = getExpToNextStage(activePlant);
+  const progress = getGrowthProgress(activePlant);
   
   return {
-    data, isReady, activePlant, plantStage, nextStageExp, progress, currentVitality, itemEffect,
-    createError, completeError,
+    data, isReady, activePlant, plantStage, nextStageExp, progress, currentVitality,
     addTask, deleteTask, toggleTask, buyItem, useItem, petPlant,
     setActivePlant, addPlant, deletePlant, renamePlant,
     SHOP_ITEMS, PLANT_TYPES,
     dailyStats: stats,
-    DAILY_QUEST_CREATE_LIMIT, DAILY_QUEST_COMPLETE_LIMIT, MIN_COMPLETION_MINUTES,
+    DAILY_QUEST_CREATE_LIMIT: 5, 
+    DAILY_QUEST_COMPLETE_LIMIT: 10, 
+    MIN_COMPLETION_MINUTES: 5,
   };
 }

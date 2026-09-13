@@ -25,7 +25,6 @@ const App: React.FC = () => {
     plantStage,
     nextStageExp,
     currentVitality,
-    itemEffect,
     addTask,
     deleteTask,
     toggleTask,
@@ -38,8 +37,6 @@ const App: React.FC = () => {
     renamePlant,
     PLANT_TYPES,
     dailyStats,
-    createError,
-    completeError,
     DAILY_QUEST_CREATE_LIMIT,
     DAILY_QUEST_COMPLETE_LIMIT,
     MIN_COMPLETION_MINUTES,
@@ -60,7 +57,6 @@ const App: React.FC = () => {
   };
 
   const handleMorningEggFound = (eggState: any) => {
-    // 卵発見時の処理（必要なら状態保存）
     console.log('Egg found!', eggState);
   };
 
@@ -106,7 +102,7 @@ const App: React.FC = () => {
               nextStageExp={nextStageExp}
               currentVitality={currentVitality}
               onPet={petPlant}
-              itemEffect={itemEffect}
+              itemEffect={null}
             />
             
             <section aria-labelledby="tasks-heading">
@@ -172,8 +168,8 @@ const App: React.FC = () => {
               onDeleteTask={deleteTask}
               onToggleTask={toggleTask}
               dailyStats={dailyStats}
-              createError={createError}
-              completeError={completeError}
+              createError={null}
+              completeError={null}
               DAILY_QUEST_CREATE_LIMIT={DAILY_QUEST_CREATE_LIMIT}
               DAILY_QUEST_COMPLETE_LIMIT={DAILY_QUEST_COMPLETE_LIMIT}
               MIN_COMPLETION_MINUTES={MIN_COMPLETION_MINUTES}
