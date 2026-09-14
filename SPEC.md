@@ -2,31 +2,11 @@
 
 **タスク管理 × 植物育成 × ドラゴン孵化**
 
-[![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?logo=typescript)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
-[![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?logo=vite)](https://vite.dev/)
-[![Cloudflare Pages](https://img.shields.io/badge/Cloudflare%20Pages-Deployed-F38020?logo=cloudflare)](https://pages.cloudflare.com/)
 
 **本番 URL:** https://quest.ryopc.org  
 **リポジトリ:** https://github.com/ryotagtagtag-wq/schoolsync  
 **作成者:** game_ryo  
 **最終更新:** 2026-09-14
-
----
-
-## 目次
-
-1. [プロジェクト概要](#1-プロジェクト概要)
-2. [技術スタック](#2-技術スタック)
-3. [ファイル構成](#3-ファイル構成)
-4. [データモデル](#4-データモデル)
-5. [機能仕様](#5-機能仕様)
-6. [UI/UX 仕様](#6-uiux-仕様)
-7. [デプロイ・運用](#7-デプロイ運用)
-8. [今後の拡張計画](#8-今後の拡張計画)
-
----
 
 ## 1. プロジェクト概要
 
