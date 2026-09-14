@@ -3,104 +3,138 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Questra - 仕様書 (SPEC)</title>
+  <title>Questra - SPEC</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=M+PLUS+Rounded+1c:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --ivory: #fcfbf7;
-      --mint: #f0f7f4;
-      --forest: #2d5a3d;
-      --forest-light: #4a7c59;
-      --warm-brown: #8b7355;
-      --pastel-pink: #fce4ec;
-      --pastel-blue: #e3f2fd;
-      --pastel-yellow: #fffde7;
-      --pastel-green: #e8f5e9;
+      --bg: #fafafa;
+      --bg-elevated: #ffffff;
+      --border: #e5e5e5;
+      --border-strong: #d4d4d4;
+      --text: #171717;
+      --text-muted: #737373;
+      --primary: #166534;
+      --primary-hover: #15803d;
+      --primary-light: #dcfce7;
+      --accent: #2563eb;
+      --accent-light: #dbeafe;
+      --warning: #b45309;
+      --warning-light: #fef3c7;
+      --danger: #b91c1c;
+      --danger-light: #fee2e2;
     }
-    body { font-family: 'Noto Sans JP', sans-serif; background: var(--ivory); color: #2d3a2d; }
-    .font-rounded { font-family: 'M PLUS Rounded 1c', sans-serif; }
-    .bg-pattern { background-image: radial-gradient(circle at 25% 25%, var(--mint) 0%, transparent 50%), radial-gradient(circle at 75% 75%, var(--pastel-pink) 0%, transparent 50%); }
-    .card { background: white; border: 2px solid var(--forest); border-radius: 16px; box-shadow: 0 4px 0 var(--forest); }
-    .btn-primary { background: var(--forest); color: white; border: none; padding: 12px 24px; border-radius: 9999px; font-weight: 700; transition: all 0.2s; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 0 var(--forest); }
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; }
+    .card-header { border-bottom: 1px solid var(--border); padding: 16px 20px; }
+    .card-body { padding: 20px; }
     .table-container { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #e8f5e9; }
-    th { background: var(--mint); color: var(--forest); font-weight: 700; }
-    tr:hover td { background: var(--pastel-green); }
-    .stage-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; font-size: 14px; font-weight: 600; }
-    .toc a { color: var(--forest); text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.2s; }
-    .toc a:hover { border-color: var(--forest); }
-    .code-block { background: #1e2d1e; color: #a8e6a8; padding: 16px; border-radius: 12px; font-family: 'Monaco', 'Menlo', monospace; font-size: 13px; line-height: 1.6; overflow-x: auto; }
-    .feature-card { border-left: 4px solid var(--forest); }
-    .progress-step { position: relative; padding-left: 32px; }
-    .progress-step::before { content: attr(data-step); position: absolute; left: 0; top: 0; width: 24px; height: 24px; background: var(--forest); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
-    .progress-step:not(:last-child)::after { content: ''; position: absolute; left: 11px; top: 24px; bottom: 0; width: 2px; background: var(--forest); opacity: 0.3; }
-    @media print {
-      .no-print { display: none; }
-      body { background: white; }
-      .card { box-shadow: none; border: 1px solid #ccc; }
-    }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: var(--bg); color: var(--text-muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+    tr:hover td { background: var(--bg); }
+    .code-block { background: #1e1e1e; color: #d4d4d4; padding: 16px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7; overflow-x: auto; white-space: pre; }
+    .inline-code { background: var(--primary-light); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+    .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 500; }
+    .badge-primary { background: var(--primary-light); color: var(--primary); }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-warning { background: #fef3c7; color: #b45309; }
+    .badge-info { background: var(--accent-light); color: #2563eb; }
+    .badge-danger { background: #fee2e2; color: #b91c1c; }
+    .progress-step { position: relative; padding-left: 28px; margin-bottom: 16px; }
+    .progress-step::before { content: attr(data-step); position: absolute; left: 0; top: 0; width: 20px; height: 20px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+    .progress-step:not(:last-child)::after { content: ''; position: absolute; left: 9px; top: 20px; bottom: -16px; width: 2px; background: var(--border); }
+    .toc-link { display: block; padding: 10px 12px; color: var(--text); text-decoration: none; border-radius: 6px; transition: background 0.15s; }
+    .toc-link:hover { background: var(--primary-light); color: var(--primary); }
+    .toc-link.active { background: var(--primary-light); color: var(--primary); font-weight: 500; }
+    .section-title { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 16px; }
+    .section-title span { color: var(--text-muted); font-weight: 400; font-size: 14px; }
+    .subsection-title { font-size: 16px; font-weight: 600; color: var(--text); margin: 20px 0 10px; }
+    .subsection-title-small { font-size: 14px; font-weight: 600; color: var(--text); margin: 16px 0 8px; }
+    .prose { color: var(--text-muted); }
+    .prose strong { color: var(--text); }
+    .prose ul { margin-left: 16px; }
+    .prose li { margin-bottom: 6px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 768px) { .grid-2 { grid-template-columns: repeat(2, 1fr); } .grid-3 { grid-template-columns: repeat(3, 1fr); } .grid-4 { grid-template-columns: repeat(4, 1fr); } }
+    @media print { .no-print { display: none !important; } body { background: white; } .card { border: 1px solid #ccc; box-shadow: none; } }
+    .scrollbar-thin::-webkit-scrollbar { height: 8px; width: 8px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
   </style>
 </head>
-<body class="bg-pattern min-h-screen py-12 px-4">
-  <div class="max-w-5xl mx-auto">
+<body class="min-h-screen py-12 px-4">
+  <div class="max-w-6xl mx-auto">
     <!-- Header -->
-    <header class="text-center mb-12 no-print">
-      <h1 class="font-rounded text-4xl md:text-5xl font-black text-forest mb-4">🌱 Questra</h1>
-      <p class="text-xl text-forest-light mb-2">タスク管理 × 植物育成 × ドラゴン孵化</p>
-      <p class="text-forest/70">仕様書 (SPEC) v1.0</p>
-      <div class="mt-6 flex justify-center gap-4 flex-wrap">
-        <span class="px-4 py-2 bg-white/80 backdrop-blur rounded-full border border-forest/30 text-sm font-medium">React + TypeScript + Tailwind</span>
-        <span class="px-4 py-2 bg-white/80 backdrop-blur rounded-full border border-forest/30 text-sm font-medium">localStorage Only</span>
-        <span class="px-4 py-2 bg-white/80 backdrop-blur rounded-full border border-forest/30 text-sm font-medium">Cloudflare Pages</span>
-        <span class="px-4 py-2 bg-white/80 backdrop-blur rounded-full border border-forest/30 text-sm font-medium">Production: https://quest.ryopc.org</span>
+    <header class="mb-12 no-print">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 pb-8 border-b border-gray-200">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Questra</h1>
+          <p class="text-gray-500 mt-1">タスク管理 × 植物育成 × ドラゴン孵化</p>
+          <p class="text-sm text-gray-400 mt-2">仕様書 (SPEC) v1.0</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <span class="px-3 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">React + TypeScript + Tailwind</span>
+          <span class="px-3 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">localStorage Only</span>
+          <span class="px-3 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">Cloudflare Pages</span>
+          <span class="px-3 py-1 text-xs font-medium bg-primary-light text-primary rounded-full">Production: https://quest.ryopc.org</span>
+        </div>
       </div>
+
+      <!-- Table of Contents -->
+      <nav class="card mb-8 no-print" id="toc">
+        <div class="card-header">
+          <h2 class="section-title">目次</h2>
+        </div>
+        <div class="card-body">
+          <div class="grid-2 md:grid-cols-4">
+            <a href="#overview" class="toc-link" data-target="overview">1. プロジェクト概要</a>
+            <a href="#tech-stack" class="toc-link" data-target="tech-stack">2. 技術スタック</a>
+            <a href="#file-structure" class="toc-link" data-target="file-structure">3. ファイル構成</a>
+            <a href="#data-models" class="toc-link" data-target="data-models">4. データモデル</a>
+            <a href="#features" class="toc-link" data-target="features">5. 機能仕様</a>
+            <a href="#ui-ux" class="toc-link" data-target="ui-ux">6. UI/UX 仕様</a>
+            <a href="#deployment" class="toc-link" data-target="deployment">7. デプロイ・運用</a>
+            <a href="#future" class="toc-link" data-target="future">8. 今後の拡張</a>
+          </div>
+        </div>
+      </nav>
     </header>
 
-    <!-- Table of Contents -->
-    <nav class="card p-6 mb-8 toc no-print" id="toc">
-      <h2 class="font-rounded text-2xl font-bold text-forest mb-4">📋 目次</h2>
-      <div class="grid md:grid-cols-2 gap-3 text-base">
-        <a href="#overview" class="block p-3 bg-white/50 rounded-lg hover:bg-white">1. プロジェクト概要</a>
-        <a href="#tech-stack" class="block p-3 bg-white/50 rounded-lg hover:bg-white">2. 技術スタック</a>
-        <a href="#file-structure" class="block p-3 bg-white/50 rounded-lg hover:bg-white">3. ファイル構成</a>
-        <a href="#data-models" class="block p-3 bg-white/50 rounded-lg hover:bg-white">4. データモデル</a>
-        <a href="#features" class="block p-3 bg-white/50 rounded-lg hover:bg-white">5. 機能仕様</a>
-        <a href="#ui-ux" class="block p-3 bg-white/50 rounded-lg hover:bg-white">6. UI/UX 仕様</a>
-        <a href="#deployment" class="block p-3 bg-white/50 rounded-lg hover:bg-white">7. デプロイ・運用</a>
-        <a href="#future" class="block p-3 bg-white/50 rounded-lg hover:bg-white">8. 今後の拡張</a>
-      </div>
-    </nav>
-
     <!-- 1. Project Overview -->
-    <section id="overview" class="card p-6 mb-8">
-      <h2 class="font-rounded text-2xl font-bold text-forest mb-4 flex items-center gap-2">1. プロジェクト概要 <span class="text-base font-normal text-forest/70">Overview</span></h2>
-      <div class="prose max-w-none text-forest/90 space-y-4">
+    <section id="overview" class="card mb-8">
+      <div class="card-header">
+        <h2 class="section-title">1. プロジェクト概要 <span>Overview</span></h2>
+      </div>
+      <div class="card-body prose">
         <p><strong>Questra</strong> は、「やるべきこと」をクエストとして完了させることで、画面上の植物を育て、卵を発見・孵化させてドラゴンを仲間にする、ゲーミフィケーション型タスク管理アプリです。</p>
-        <div class="grid md:grid-cols-3 gap-4 mt-4">
-          <div class="p-4 bg-white/50 rounded-lg border border-forest/20">
-            <h3 class="font-rounded font-bold text-forest mb-2">🎯 コアコンセプト</h3>
-            <ul class="space-y-1 text-sm">
+        <div class="grid-3 mt-6">
+          <div class="card p-4">
+            <h3 class="font-semibold text-gray-900 mb-3">コアコンセプト</h3>
+            <ul class="text-sm text-gray-600 space-y-2">
               <li>・タスク完了 → EXP/コイン獲得 → 植物成長</li>
               <li>・継続するほど「元気」が溜まり、卵を発見</li>
               <li>・卵が孵化 → ドラゴンが仲間に</li>
               <li>・4人の「植物先生」が性格に合わせてサポート</li>
             </ul>
           </div>
-          <div class="p-4 bg-white/50 rounded-lg border border-forest/20">
-            <h3 class="font-rounded font-bold text-forest mb-2">🔑 キー特徴</h3>
-            <ul class="space-y-1 text-sm">
+          <div class="card p-4">
+            <h3 class="font-semibold text-gray-900 mb-3">キー特徴</h3>
+            <ul class="text-sm text-gray-600 space-y-2">
               <li>・バックエンド不要・localStorage 完結</li>
               <li>・プライバシー・コスト・運用すべてゼロ</li>
-              <li>・北欧絵本風の温かい UI/UX</li>
+              <li>・モダンでミニマルな UI/UX</li>
               <li>・TypeScript strict で型安全性確保</li>
             </ul>
           </div>
-          <div class="p-4 bg-white/50 rounded-lg border border-forest/20">
-            <h3 class="font-rounded font-bold text-forest mb-2">📱 対応環境</h3>
-            <ul class="space-y-1 text-sm">
+          <div class="card p-4">
+            <h3 class="font-semibold text-gray-900 mb-3">対応環境</h3>
+            <ul class="text-sm text-gray-600 space-y-2">
               <li>・モバイルファースト（親指操作）</li>
               <li>・PWA 対応予定（インストール可能）</li>
               <li>・オフライン動作（Service Worker 予定）</li>
@@ -112,572 +146,578 @@
     </section>
 
     <!-- 2. Tech Stack -->
-    <section id="tech-stack" class="card p-6 mb-8">
-      <h2 class="font-rounded text-2xl font-bold text-forest mb-4 flex items-center gap-2">2. 技術スタック <span class="text-base font-normal text-forest/70">Tech Stack</span></h2>
-      <div class="table-container">
-        <table>
-          <thead><tr><th>カテゴリ</th><th>技術 / ライブラリ</th><th>バージョン / 備考</th></tr></thead>
-          <tbody>
-            <tr><td>フレームワーク</td><td>React</td><td>18.3.1</td></tr>
-            <tr><td>言語</td><td>TypeScript</td><td>5.5.x (strict mode)</td></tr>
-            <tr><td>ビルドツール</td><td>Vite</td><td>5.4.x</td></tr>
-            <tr><td>スタイリング</td><td>Tailwind CSS</td><td>3.4.x (カスタムテーマ)</td></tr>
-            <tr><td>状態管理</td><td>React Hooks + localStorage</td><td>単一フック <code>usePlantData</code></td></tr>
-            <tr><td>永続化</td><td>localStorage</td><td>キー: <code>questra_plant_data</code></td></tr>
-            <tr><td>デプロイ</td><td>Cloudflare Pages</td><td>静的ホスティング、エッジ配信</td></tr>
-            <tr><td>リポジトリ</td><td>GitHub</td><td><a href="https://github.com/ryotagtagtag-wq/schoolsync" target="_blank" class="underline">ryotagtagtag-wq/schoolsync</a></td></tr>
-            <tr><td>本番 URL</td><td>Custom Domain</td><td><a href="https://quest.ryopc.org" target="_blank" class="underline">https://quest.ryopc.org</a></td></tr>
-            <tr><td>画像ホスティング</td><td>ImageKit.io</td><td>卵・ドラゴン画像の配信</td></tr>
-          </tbody>
-        </table>
+    <section id="tech-stack" class="card mb-8">
+      <div class="card-header">
+        <h2 class="section-title">2. 技術スタック <span>Tech Stack</span></h2>
       </div>
-      <div class="mt-6 p-4 bg-white/50 rounded-lg border border-forest/20">
-        <h3 class="font-rounded font-bold text-forest mb-3">📦 主要依存関係 (package.json 抜粋)</h3>
-        <div class="code-block">
-{<br>
-&nbsp;&nbsp;"dependencies": {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;"react": "^18.3.1",<br>
-&nbsp;&nbsp;&nbsp;&nbsp;"react-dom": "^18.3.1"<br>
-&nbsp;&nbsp;},<br>
-&nbsp;&nbsp;"devDependencies": {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;"@types/react": "^18.3.3",<br>
-&nbsp;&nbsp;&nbsp;&nbsp;"@types/react-dom": "^18.3.0",<br>
-&nbsp;&nbsp;&nbsp;&nbsp;"@vitejs/plugin-react": "^4.3.1",<br>
-&nbsp;&nbsp;&nbsp;&nbsp;"autoprefixer": "^10.4.19",<br>
-&nbsp;&nbsp;&nbsp;&nbsp;"postcss": "^8.4.38",<br>
-&nbsp;&nbsp;&nbsp;&nbsp;"tailwindcss": "^3.4.4",<br>
-&nbsp;&nbsp;&nbsp;&nbsp;"typescript": "^5.5.3",<br>
-&nbsp;&nbsp;&nbsp;&nbsp;"vite": "^5.4.11"<br>
-&nbsp;&nbsp;}<br>
-}
+      <div class="card-body">
+        <div class="table-container scrollbar-thin">
+          <table>
+            <thead><tr><th>カテゴリ</th><th>技術 / ライブラリ</th><th>バージョン / 備考</th></tr></thead>
+            <tbody>
+              <tr><td>フレームワーク</td><td>React</td><td>18.3.1</td></tr>
+              <tr><td>言語</td><td>TypeScript</td><td>5.5.x (strict mode)</td></tr>
+              <tr><td>ビルドツール</td><td>Vite</td><td>5.4.x</td></tr>
+              <tr><td>スタイリング</td><td>Tailwind CSS</td><td>3.4.x (カスタムテーマ)</td></tr>
+              <tr><td>状態管理</td><td>React Hooks + localStorage</td><td>単一フック <span class="inline-code">usePlantData</span></td></tr>
+              <tr><td>永続化</td><td>localStorage</td><td>キー: <span class="inline-code">questra_plant_data</span></td></tr>
+              <tr><td>デプロイ</td><td>Cloudflare Pages</td><td>静的ホスティング、エッジ配信</td></tr>
+              <tr><td>リポジトリ</td><td>GitHub</td><td><a href="https://github.com/ryotagtagtag-wq/schoolsync" target="_blank" class="text-accent underline">ryotagtagtag-wq/schoolsync</a></td></tr>
+              <tr><td>本番 URL</td><td>Custom Domain</td><td><a href="https://quest.ryopc.org" target="_blank" class="text-accent underline">https://quest.ryopc.org</a></td></tr>
+              <tr><td>画像ホスティング</td><td>ImageKit.io</td><td>卵・ドラゴン画像の配信</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-6 card p-4">
+          <h3 class="font-semibold text-gray-900 mb-3">主要依存関係 (package.json 抜粋)</h3>
+          <div class="code-block">{
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.5.3",
+    "vite": "^5.4.11"
+  }
+}</div>
         </div>
       </div>
     </section>
 
     <!-- 3. File Structure -->
-    <section id="file-structure" class="card p-6 mb-8">
-      <h2 class="font-rounded text-2xl font-bold text-forest mb-4 flex items-center gap-2">3. ファイル構成 <span class="text-base font-normal text-forest/70">File Structure</span></h2>
-      <div class="code-block">
-schoolsync/<br>
-├── index.html                    # エントリーポイント<br>
-├── package.json                  # 依存関係・スクリプト<br>
-├── tsconfig.json                 # TypeScript 設定 (strict)<br>
-├── tsconfig.node.json            # Node 用 TS 設定<br>
-├── vite.config.ts                # Vite 設定<br>
-├── tailwind.config.js            # Tailwind カスタムテーマ<br>
-├── postcss.config.js             # PostCSS 設定<br>
-├── SPEC.html                     # 本仕様書<br>
-└── src/<br>
-&nbsp;&nbsp;&nbsp;&nbsp;├── main.tsx                    # アプリエントリー<br>
-&nbsp;&nbsp;&nbsp;&nbsp;├── index.css                   # グローバルスタイル + Tailwind directives<br>
-&nbsp;&nbsp;&nbsp;&nbsp;├── types/index.ts              # 型定義・定数 (PLANT_TYPES, SHOP_ITEMS 等)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;├── utils/plantLogic.ts         # 植物成長ロジック・元気計算<br>
-&nbsp;&nbsp;&nbsp;&nbsp;├── hooks/usePlantData.ts       # 状態管理フック (核心)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;├── data/teacherLines.ts        # 植物先生セリフデータ<br>
-&nbsp;&nbsp;&nbsp;&nbsp;└── components/<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── App.tsx                   # ルート・タブ制御・朝の挨拶表示<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── PlantDisplay.tsx          # 植物表示・元気バー・なでなで・鉢ステージ<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── TaskList.tsx              # クエスト追加/削除/完了 UI<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── MorningGreeting.tsx       # 朝の挨拶・卵孵化フロー全制御<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Garden.tsx                # 複数植物管理・名前変更・新規迎え入れ<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Shop.tsx                  # コイン表示・アイテム購入<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Backpack.tsx              # 所持アイテム表示・使用<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Quest.tsx                 # 統計・テンプレート・カテゴリ・作成モーダル<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── TabBar.tsx                # 固定ボトムナビ (5タブ)
+    <section id="file-structure" class="card mb-8">
+      <div class="card-header">
+        <h2 class="section-title">3. ファイル構成 <span>File Structure</span></h2>
+      </div>
+      <div class="card-body">
+        <div class="code-block">schoolsync/
+├── index.html                    # エントリーポイント
+├── package.json                  # 依存関係・スクリプト
+├── tsconfig.json                 # TypeScript 設定 (strict)
+├── tsconfig.node.json            # Node 用 TS 設定
+├── vite.config.ts                # Vite 設定
+├── tailwind.config.js            # Tailwind カスタムテーマ
+├── postcss.config.js             # PostCSS 設定
+├── SPEC.html                     # 本仕様書
+└── src/
+    ├── main.tsx                  # アプリエントリー
+    ├── index.css                 # グローバルスタイル + Tailwind directives
+    ├── types/index.ts            # 型定義・定数 (PLANT_TYPES, SHOP_ITEMS 等)
+    ├── utils/plantLogic.ts       # 植物成長ロジック・元気計算
+    ├── hooks/usePlantData.ts     # 状態管理フック (核心)
+    ├── data/teacherLines.ts      # 植物先生セリフデータ
+    └── components/
+        ├── App.tsx               # ルート・タブ制御・朝の挨拶表示
+        ├── PlantDisplay.tsx      # 植物表示・元気バー・なでなで・鉢ステージ
+        ├── TaskList.tsx          # クエスト追加/削除/完了 UI
+        ├── MorningGreeting.tsx   # 朝の挨拶・卵孵化フロー全制御
+        ├── Garden.tsx            # 複数植物管理・名前変更・新規迎え入れ
+        ├── Shop.tsx              # コイン表示・アイテム購入
+        ├── Backpack.tsx          # 所持アイテム表示・使用
+        ├── Quest.tsx             # 統計・テンプレート・カテゴリ・作成モーダル
+        └── TabBar.tsx            # 固定ボトムナビ (5タブ)</div>
       </div>
     </section>
 
     <!-- 4. Data Models -->
-    <section id="data-models" class="card p-6 mb-8">
-      <h2 class="font-rounded text-2xl font-bold text-forest mb-4 flex items-center gap-2">4. データモデル <span class="text-base font-normal text-forest/70">Data Models</span></h2>
-      
-      <h3 class="font-rounded text-xl font-bold text-forest mt-6 mb-3">4.1 localStorage スキーマ (<code>questra_plant_data</code>)</h3>
-      <div class="code-block">
-interface PlantData {<br>
-&nbsp;&nbsp;exp: number;                    // 総経験値 (植物成長に使用)<br>
-&nbsp;&nbsp;coins: number;                  // 所持コイン (ショップ購入用)<br>
-&nbsp;&nbsp;tasks: Task[];                  // クエスト一覧<br>
-&nbsp;&nbsp;ownedItems: OwnedItem[];        // 購入済みアイテム (アイテムID × 個数)<br>
-&nbsp;&nbsp;plants: UserPlant[];            // 複数植物データ<br>
-&nbsp;&nbsp;activePlantId: string;          // 現在表示中の植物ID<br>
-&nbsp;&nbsp;egg: EggData | null;            // 卵データ (未発見時は null)<br>
-&nbsp;&nbsp;dragons: Dragon[];              // 孵化済みドラゴン一覧<br>
-&nbsp;&nbsp;lastVitalityDecay: number;      // 元気自動減衰最終実行時刻 (ms)<br>
-&nbsp;&nbsp;lastMorningGreeting: string;    // 朝の挨拶最終表示日 (YYYY-MM-DD)<br>
-&nbsp;&nbsp;version: number;                // データバージョン (移行用)<br>
-}
+    <section id="data-models" class="card mb-8">
+      <div class="card-header">
+        <h2 class="section-title">4. データモデル <span>Data Models</span></h2>
       </div>
+      <div class="card-body">
 
-      <h3 class="font-rounded text-xl font-bold text-forest mt-6 mb-3">4.2 主要型定義 (types/index.ts)</h3>
-      <div class="table-container">
-        <table>
-          <thead><tr><th>型名</th><th>フィールド</th><th>説明</th></tr></thead>
-          <tbody>
-            <tr><td rowspan="6"><code>Task</code></td><td><code>id: string</code></td><td>ユニークID (<code>generateId()</code>)</td></tr>
-            <tr><td><code>text: string</code></td><td>タスク内容</td></tr>
-            <tr><td><code>completed: boolean</code></td><td>完了フラグ</td></tr>
-            <tr><td><code>createdAt: number</code></td><td>作成時刻 (ms)</td></tr>
-            <tr><td><code>category?: string</code></td><td>カテゴリ (仕事/勉強/健康/家事/その他)</td></tr>
-            <tr><td><code>isTemplate?: boolean</code></td><td>テンプレートフラグ</td></tr>
-            <tr><td rowspan="5"><code>UserPlant</code></td><td><code>id: string</code></td><td>植物インスタンスID</td></tr>
-            <tr><td><code>type: PlantType</code></td><td>植物種別 (ひまわり/サボテン/モンステラ/タネ)</td></tr>
-            <tr><td><code>nickname: string</code></td><td>ユーザー設定のニックネーム</td></tr>
-            <tr><td><code>exp: number</code></td><td>この植物の経験値</td></tr>
-            <tr><td><code>vitality: number</code></td><td>元気値 (0-100, 水やりで回復)</td></tr>
-            <tr><td rowspan="4"><code>OwnedItem</code></td><td><code>itemId: string</code></td><td>SHOP_ITEMS の ID</td></tr>
-            <tr><td><code>quantity: number</code></td><td>所持数</td></tr>
-            <tr><td rowspan="5"><code>EggData</code></td><td><code>stage: 'hidden' | 'found' | 'hatching' | 'hatched'</code></td><td>卵の状態</td></tr>
-            <tr><td><code>progress: number</code></td><td>孵化進捗 (0-100)</td></tr>
-            <tr><td><code>foundAt: number</code></td><td>発見時刻</td></tr>
-            <tr><td><code>discoveredBy: PlantType</code></td><td>発見した植物先生</td></tr>
-            <tr><td rowspan="5"><code>Dragon</code></td><td><code>id: string</code></td><td>ドラゴンID</td></tr>
-            <tr><td><code>name: string</code></td><td>ユーザー命名の名前</td></tr>
-            <tr><td><code>hatchedAt: number</code></td><td>孵化時刻</td></tr>
-            <tr><td><code>imageUrl: string</code></td><td>ドラゴン画像 URL</td></tr>
-            <tr><td><code>parentPlantType: PlantType</code></td><td>親植物の種類</td></tr>
-          </tbody>
-        </table>
-      </div>
+        <h3 class="subsection-title">4.1 localStorage スキーマ (<span class="inline-code">questra_plant_data</span>)</h3>
+        <div class="code-block">interface PlantData {
+  exp: number;                    // 総経験値 (植物成長に使用)
+  coins: number;                  // 所持コイン (ショップ購入用)
+  tasks: Task[];                  // クエスト一覧
+  ownedItems: OwnedItem[];        // 購入済みアイテム (アイテムID × 個数)
+  plants: UserPlant[];            // 複数植物データ
+  activePlantId: string;          // 現在表示中の植物ID
+  egg: EggData | null;            // 卵データ (未発見時は null)
+  dragons: Dragon[];              // 孵化済みドラゴン一覧
+  lastVitalityDecay: number;      // 元気自動減衰最終実行時刻 (ms)
+  lastMorningGreeting: string;    // 朝の挨拶最終表示日 (YYYY-MM-DD)
+  version: number;                // データバージョン (移行用)
+}</div>
 
-      <h3 class="font-rounded text-xl font-bold text-forest mt-6 mb-3">4.3 植物種類定数 (PLANT_TYPES)</h3>
-      <div class="table-container">
-        <table>
-          <thead><tr><th>ID</th><th>名前</th><th>絵文字</th><th>鉢植え絵文字</th><th>花絵文字</th><th>説明</th></tr></thead>
-          <tbody>
-            <tr><td><code>sunflower</code></td><td>ひまわり</td><td>🌱</td><td>🌻</td><td>🌻</td><td>元気いっぱい、太陽が好き</td></tr>
-            <tr><td><code>cactus</code></td><td>サボテン</td><td>🌵</td><td>🌵</td><td>🌸</td><td>マイペース、水は控えめでOK</td></tr>
-            <tr><td><code>monstera</code></td><td>モンステラ</td><td>🌿</td><td>🪴</td><td>🌿</td><td>優雅、大きな葉が特徴</td></tr>
-            <tr><td><code>seed</code></td><td>タネ</td><td>🌰</td><td>🌱</td><td>🌸</td><td>何にでもなれる可能性の塊</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3 class="font-rounded text-xl font-bold text-forest mt-6 mb-3">4.4 ショップアイテム (SHOP_ITEMS)</h3>
-      <div class="table-container">
-        <table>
-          <thead><tr><th>ID</th><th>名前</th><th>絵文字</th><th>価格(コイン)</th><th>効果</th><th>説明</th></tr></thead>
-          <tbody>
-            <tr><td><code>water</code></td><td>まほうの水</td><td>💧</td><td>30</td><td>vitality +30</td><td>植物の元気を回復させる</td></tr>
-            <tr><td><code>sunlight</code></td><td>ポカポカ光</td><td>☀️</td><td>50</td><td>vitality +50</td><td>太陽の光で元気いっぱいに</td></tr>
-            <tr><td><code>fertilizer</code></td><td>栄養たっぷり肥料</td><td>🌿</td><td>100</td><td>vitality +80, exp +20</td><td>成長も促すスペシャルアイテム</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- 5. Features -->
-    <section id="features" class="card p-6 mb-8">
-      <h2 class="font-rounded text-2xl font-bold text-forest mb-4 flex items-center gap-2">5. 機能仕様 <span class="text-base font-normal text-forest/70">Features</span></h2>
-
-      <!-- 5.1 Plant Growth -->
-      <div class="feature-card mb-8 p-6 bg-white/50 rounded-r-lg border-forest/20">
-        <h3 class="font-rounded text-xl font-bold text-forest mb-4 flex items-center gap-2">5.1 植物成長システム</h3>
-        <div class="grid md:grid-cols-2 gap-6">
-          <div>
-            <h4 class="font-semibold text-forest mb-3">成長段階 (経験値ベース・線形)</h4>
-            <div class="space-y-3">
-              <div class="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
-                <span class="stage-badge bg-yellow-100 text-yellow-800">Stage 0</span>
-                <div><strong>0-49 EXP</strong> - ふたば 🌱</div>
-              </div>
-              <div class="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
-                <span class="stage-badge bg-green-100 text-green-800">Stage 1</span>
-                <div><strong>50-99 EXP</strong> - わかば 🌿</div>
-              </div>
-              <div class="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
-                <span class="stage-badge bg-amber-100 text-amber-800">Stage 2</span>
-                <div><strong>100-199 EXP</strong> - お気に入りの鉢植え 🪴</div>
-              </div>
-              <div class="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
-                <span class="stage-badge bg-pink-100 text-pink-800">Stage 3</span>
-                <div><strong>200+ EXP</strong> - きれいなお花 🌸</div>
-              </div>
-            </div>
-          </div>
-          <div>
-            <h4 class="font-semibold text-forest mb-3">経験値獲得ルール</h4>
-            <ul class="space-y-2 text-forest/90">
-              <li>✅ タスク完了: <strong>+10 EXP</strong> / <strong>+10 コイン</strong></li>
-              <li>↩️ 完了取り消し: <strong>-10 EXP</strong> / <strong>-10 コイン</strong> (最小値 0)</li>
-              <li>🌿 肥料使用: <strong>+20 EXP</strong> + 元気 +80</li>
-              <li>📊 進捗バー: 次の段階までの残り EXP をリアルタイム表示</li>
-            </ul>
-            <h4 class="font-semibold text-forest mt-4 mb-2">元気システム</h4>
-            <ul class="space-y-2 text-forest/90">
-              <li>💧 水やり忘れで自動減衰: <strong>1分ごとに -1</strong> (usePlantData で setInterval)</li>
-              <li>🛑 最小値 <strong>0</strong> (枯れない設計)</li>
-              <li>📊 元気バーで視覚化 (PlantDisplay に表示)</li>
-              <li>💧 アイテム使用で即時回復</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- 5.2 Teacher System -->
-      <div class="feature-card mb-8 p-6 bg-white/50 rounded-r-lg border-forest/20">
-        <h3 class="font-rounded text-xl font-bold text-forest mb-4 flex items-center gap-2">5.2 植物先生システム (4キャラクター)</h3>
-        <p class="text-forest/80 mb-4">各植物種類に専属の「先生」がおり、性格に合わせたセリフでユーザーをサポートします。</p>
-        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="p-4 bg-white/50 rounded-lg border border-forest/20">
-            <h4 class="font-rounded font-bold text-forest mb-2">🌻 ひまわり先生</h4>
-            <p class="text-sm text-forest/80">元気でポジティブ。太陽のような明るさで励ます。「今日もがんばろー！」</p>
-          </div>
-          <div class="p-4 bg-white/50 rounded-lg border border-forest/20">
-            <h4 class="font-rounded font-bold text-forest mb-2">🌵 サボテン先生</h4>
-            <p class="text-sm text-forest/80">ツンデレ・マイペース。厳しめだが根は優しい。「ま、やるなら見ててやるよ」</p>
-          </div>
-          <div class="p-4 bg-white/50 rounded-lg border border-forest/20">
-            <h4 class="font-rounded font-bold text-forest mb-2">🪴 モンステラ先生</h4>
-            <p class="text-sm text-forest/80">優雅で知的。穏やかに見守り、気づきを与える。「ゆっくりでいい、着実にね」</p>
-          </div>
-          <div class="p-4 bg-white/50 rounded-lg border border-forest/20">
-            <h4 class="font-rounded font-bold text-forest mb-2">🌰 タネ先生</h4>
-            <p class="text-sm text-forest/80">無限の可能性。好奇心旺盛でワクワクさせる。「なにがでるかな？たのしみだね！」</p>
-          </div>
-        </div>
-        <h4 class="font-semibold text-forest mt-6 mb-3">セリフカテゴリ (teacherLines.ts)</h4>
-        <div class="table-container">
+        <h3 class="subsection-title">4.2 主要型定義 (types/index.ts)</h3>
+        <div class="table-container scrollbar-thin">
           <table>
-            <thead><tr><th>カテゴリ</th><th>発火タイミング</th><th>用途</th></tr></thead>
+            <thead><tr><th>型名</th><th>フィールド</th><th>説明</th></tr></thead>
             <tbody>
-              <tr><td><code>morning</code></td><td>アプリ起動時 (1日1回、朝 5:00-11:59)</td><td>朝の挨拶モーダル表示</td></tr>
-              <tr><td><code>afterComplete</code></td><td>タスク完了時</td><td>完了時の励まし・卵発見トリガー</td></tr>
-              <tr><td><code>eggFound</code></td><td>卵発見時 (25%確率)</td><td>「卵見つけたよ！」報告</td></tr>
-              <tr><td><code>eggGrowing</code></td><td>卵成長中 (タスク完了時)</td><td>「もうすぐ生まれそう」経過報告</td></tr>
-              <tr><td><code>dragonBorn</code></td><td>孵化完了時</td><td>「生まれた！」祝福</td></tr>
-              <tr><td><code>dragonGreeting</code></td><td>ドラゴン仲間入り後</td><td>朝の挨拶でドラゴンも登場</td></tr>
+              <tr><td rowspan="6"><span class="inline-code">Task</span></td><td><span class="inline-code">id: string</span></td><td>ユニークID (<span class="inline-code">generateId()</span>)</td></tr>
+              <tr><td><span class="inline-code">text: string</span></td><td>タスク内容</td></tr>
+              <tr><td><span class="inline-code">completed: boolean</span></td><td>完了フラグ</td></tr>
+              <tr><td><span class="inline-code">createdAt: number</span></td><td>作成時刻 (ms)</td></tr>
+              <tr><td><span class="inline-code">category?: string</span></td><td>カテゴリ (仕事/勉強/健康/家事/その他)</td></tr>
+              <tr><td><span class="inline-code">isTemplate?: boolean</span></td><td>テンプレートフラグ</td></tr>
+              <tr><td rowspan="5"><span class="inline-code">UserPlant</span></td><td><span class="inline-code">id: string</span></td><td>植物インスタンスID</td></tr>
+              <tr><td><span class="inline-code">type: PlantType</span></td><td>植物種別 (ひまわり/サボテン/モンステラ/タネ)</td></tr>
+              <tr><td><span class="inline-code">nickname: string</span></td><td>ユーザー設定のニックネーム</td></tr>
+              <tr><td><span class="inline-code">exp: number</span></td><td>この植物の経験値</td></tr>
+              <tr><td><span class="inline-code">vitality: number</span></td><td>元気値 (0-100, 水やりで回復)</td></tr>
+              <tr><td rowspan="3"><span class="inline-code">OwnedItem</span></td><td><span class="inline-code">itemId: string</span></td><td>SHOP_ITEMS の ID</td></tr>
+              <tr><td><span class="inline-code">quantity: number</span></td><td>所持数</td></tr>
+              <tr><td rowspan="5"><span class="inline-code">EggData</span></td><td><span class="inline-code">stage: 'hidden' | 'found' | 'hatching' | 'hatched'</span></td><td>卵の状態</td></tr>
+              <tr><td><span class="inline-code">progress: number</span></td><td>孵化進捗 (0-100)</td></tr>
+              <tr><td><span class="inline-code">foundAt: number</span></td><td>発見時刻</td></tr>
+              <tr><td><span class="inline-code">discoveredBy: PlantType</span></td><td>発見した植物先生</td></tr>
+              <tr><td rowspan="5"><span class="inline-code">Dragon</span></td><td><span class="inline-code">id: string</span></td><td>ドラゴンID</td></tr>
+              <tr><td><span class="inline-code">name: string</span></td><td>ユーザー命名の名前</td></tr>
+              <tr><td><span class="inline-code">hatchedAt: number</span></td><td>孵化時刻</td></tr>
+              <tr><td><span class="inline-code">imageUrl: string</span></td><td>ドラゴン画像 URL</td></tr>
+              <tr><td><span class="inline-code">parentPlantType: PlantType</span></td><td>親植物の種類</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="subsection-title">4.3 植物種類定数 (PLANT_TYPES)</h3>
+        <div class="table-container scrollbar-thin">
+          <table>
+            <thead><tr><th>ID</th><th>名前</th><th>絵文字</th><th>鉢植え絵文字</th><th>花絵文字</th><th>説明</th></tr></thead>
+            <tbody>
+              <tr><td><span class="inline-code">sunflower</span></td><td>ひまわり</td><td>🌱</td><td>🌻</td><td>🌻</td><td>元気いっぱい、太陽が好き</td></tr>
+              <tr><td><span class="inline-code">cactus</span></td><td>サボテン</td><td>🌵</td><td>🌵</td><td>🌸</td><td>マイペース、水は控えめでOK</td></tr>
+              <tr><td><span class="inline-code">monstera</span></td><td>モンステラ</td><td>🌿</td><td>🪴</td><td>🌿</td><td>優雅、大きな葉が特徴</td></tr>
+              <tr><td><span class="inline-code">seed</span></td><td>タネ</td><td>🌰</td><td>🌱</td><td>🌸</td><td>何にでもなれる可能性の塊</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="subsection-title">4.4 ショップアイテム (SHOP_ITEMS)</h3>
+        <div class="table-container scrollbar-thin">
+          <table>
+            <thead><tr><th>ID</th><th>名前</th><th>絵文字</th><th>価格(コイン)</th><th>効果</th><th>説明</th></tr></thead>
+            <tbody>
+              <tr><td><span class="inline-code">water</span></td><td>まほうの水</td><td>💧</td><td>30</td><td>vitality +30</td><td>植物の元気を回復させる</td></tr>
+              <tr><td><span class="inline-code">sunlight</span></td><td>ポカポカ光</td><td>☀️</td><td>50</td><td>vitality +50</td><td>太陽の光で元気いっぱいに</td></tr>
+              <tr><td><span class="inline-code">fertilizer</span></td><td>栄養たっぷり肥料</td><td>🌿</td><td>100</td><td>vitality +80, exp +20</td><td>成長も促すスペシャルアイテム</td></tr>
             </tbody>
           </table>
         </div>
       </div>
+    </section>
 
-      <!-- 5.3 Egg & Dragon -->
-      <div class="feature-card mb-8 p-6 bg-white/50 rounded-r-lg border-forest/20">
-        <h3 class="font-rounded text-xl font-bold text-forest mb-4 flex items-center gap-2">5.3 卵・ドラゴンシステム</h3>
-        <div class="space-y-6">
-          <div>
-            <h4 class="font-semibold text-forest mb-3">卵発見〜孵化フロー</h4>
-            <div class="space-y-3">
-              <div class="progress-step p-3 bg-white/50 rounded-lg" data-step="1">
-                <strong>タスク完了</strong> → 25% の確率で卵発見 (<code>eggFound</code> セリフ発火)
-              </div>
-              <div class="progress-step p-3 bg-white/50 rounded-lg" data-step="2">
-                <strong>見守りフェーズ</strong> → MorningGreeting で「見守る」ボタン表示
-              </div>
-              <div class="progress-step p-3 bg-white/50 rounded-lg" data-step="3">
-                <strong>成長</strong> → 以降のタスク完了ごとに <strong>+15% 進捗</strong> (<code>eggGrowing</code> セリフ)
-              </div>
-              <div class="progress-step p-3 bg-white/50 rounded-lg" data-step="4">
-                <strong>孵化 (100%)</strong> → プログレスバー自動アニメーション → <code>dragonBorn</code> セリフ
-              </div>
-              <div class="progress-step p-3 bg-white/50 rounded-lg" data-step="5">
-                <strong>ドラゴン誕生</strong> → 画像表示 → <strong>名前入力モーダル</strong> → 決定で仲間入り
-              </div>
-              <div class="progress-step p-3 bg-white/50 rounded-lg" data-step="6">
-                <strong>完了</strong> → ドラゴン画像・名前表示 → 以降 <code>dragonGreeting</code> で朝に登場
+    <!-- 5. Features -->
+    <section id="features" class="card mb-8">
+      <div class="card-header">
+        <h2 class="section-title">5. 機能仕様 <span>Features</span></h2>
+      </div>
+      <div class="card-body space-y-8">
+
+        <!-- 5.1 Plant Growth -->
+        <div class="card p-6">
+          <h3 class="subsection-title">5.1 植物成長システム</h3>
+          <div class="grid-2">
+            <div>
+              <h4 class="subsection-title-small">成長段階 (経験値ベース・線形)</h4>
+              <div class="space-y-3">
+                <div class="flex items-center gap-3 p-3 card">
+                  <span class="badge badge-warning">Stage 0</span>
+                  <div><strong>0-49 EXP</strong> - ふたば 🌱</div>
+                </div>
+                <div class="flex items-center gap-3 p-3 card">
+                  <span class="badge badge-success">Stage 1</span>
+                  <div><strong>50-99 EXP</strong> - わかば 🌿</div>
+                </div>
+                <div class="flex items-center gap-3 p-3 card">
+                  <span class="badge badge-warning">Stage 2</span>
+                  <div><strong>100-199 EXP</strong> - お気に入りの鉢植え 🪴</div>
+                </div>
+                <div class="flex items-center gap-3 p-3 card">
+                  <span class="badge badge-danger">Stage 3</span>
+                  <div><strong>200+ EXP</strong> - きれいなお花 🌸</div>
+                </div>
               </div>
             </div>
-          </div>
-          <div>
-            <h4 class="font-semibold text-forest mb-3">技術仕様</h4>
-            <ul class="space-y-2 text-forest/90">
-              <li>🥚 <strong>卵画像</strong>: <code>https://ik.imagekit.io/.../egg.png</code> (ImageKit.io 配信)</li>
-              <li>🐉 <strong>ドラゴン画像</strong>: <code>https://ik.imagekit.io/.../dragon.png</code> (共通、今後種類別拡張予定)</li>
-              <li>⏱ <strong>孵化プログレスバー</strong>: <code>requestAnimationFrame</code> で滑らかな 0→100% 自動進行 (約 3 秒)</li>
-              <li>⌨️ <strong>名前入力</strong>: モーダルで入力、空白不可、最大 10 文字、Enter で確定</li>
-              <li>💾 <strong>永続化</strong>: <code>dragons[]</code> 配列に追加、localStorage 即時保存</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- 5.4 Morning Greeting -->
-      <div class="feature-card mb-8 p-6 bg-white/50 rounded-r-lg border-forest/20">
-        <h3 class="font-rounded text-xl font-bold text-forest mb-4 flex items-center gap-2">5.4 朝の挨拶モーダル (MorningGreeting)</h3>
-        <div class="grid md:grid-cols-2 gap-6">
-          <div>
-            <h4 class="font-semibold text-forest mb-3">表示条件・制御</h4>
-            <ul class="space-y-2 text-forest/90">
-              <li>🌅 <strong>時間帯</strong>: 朝 5:00〜11:59 のみ表示</li>
-              <li>📅 <strong>頻度</strong>: 1日1回 (<code>lastMorningGreeting</code> で日付管理)</li>
-              <li>🎯 <strong>トリガー</strong>: App.tsx マウント時に <code>checkAndShowMorningGreeting()</code> 実行</li>
-              <li>🐉 <strong>ドラゴン同伴</strong>: 孵化済みドラゴンがいる場合、一緒に登場 (<code>dragonGreeting</code>)</li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="font-semibold text-forest mb-3">モーダル内フロー</h4>
-            <ul class="space-y-2 text-forest/90">
-              <li>📖 <strong>通常時</strong>: 先生の朝の挨拶 (<code>morning</code>) 表示 → 「わかった！」で閉じる</li>
-              <li>🥚 <strong>卵発見時</strong>: <code>eggFound</code> セリフ → 「見守る」ボタンで孵化フロー開始</li>
-              <li>⏳ <strong>孵化中</strong>: プログレスバー自動進行表示 → 100% で次のステップへ</li>
-              <li>🐣 <strong>孵化完了</strong>: ドラゴン画像 + <code>dragonBorn</code> → 名前入力モーダルへ遷移</li>
-              <li>✏️ <strong>名前入力</strong>: フォーム入力 → 「名前を決める」で確定 → 完了画面</li>
-            </ul>
+            <div>
+              <h4 class="subsection-title-small">経験値獲得ルール</h4>
+              <ul class="text-gray-600 space-y-2">
+                <li>✅ タスク完了: <strong>+10 EXP</strong> / <strong>+10 コイン</strong></li>
+                <li>↩️ 完了取り消し: <strong>-10 EXP</strong> / <strong>-10 コイン</strong> (最小値 0)</li>
+                <li>🌿 肥料使用: <strong>+20 EXP</strong> + 元気 +80</li>
+                <li>📊 進捗バー: 次の段階までの残り EXP をリアルタイム表示</li>
+              </ul>
+              <h4 class="subsection-title-small mt-4">元気システム</h4>
+              <ul class="text-gray-600 space-y-2">
+                <li>💧 水やり忘れで自動減衰: <strong>1分ごとに -1</strong> (usePlantData で setInterval)</li>
+                <li>🛑 最小値 <strong>0</strong> (枯れない設計)</li>
+                <li>📊 元気バーで視覚化 (PlantDisplay に表示)</li>
+                <li>💧 アイテム使用で即時回復</li>
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- 5.5 Garden (Multiple Plants) -->
-      <div class="feature-card mb-8 p-6 bg-white/50 rounded-r-lg border-forest/20">
-        <h3 class="font-rounded text-xl font-bold text-forest mb-4 flex items-center gap-2">5.5 ガーデン - 複数植物管理</h3>
-        <ul class="space-y-3 text-forest/90">
-          <li>🌿 <strong>植物一覧表示</strong>: 所有植物をカード形式で表示 (種類絵文字・ニックネーム・成長段階・元気バー)</li>
-          <li>🔄 <strong>アクティブ切替</strong>: タップで <code>activePlantId</code> 変更、メイン画面の植物が即座に切り替わる</li>
-          <li>✏️ <strong>ニックネーム変更</strong>: 各植物カードでインライン編集可能</li>
-          <li>➕ <strong>新規植物迎え入れ</strong>: 「新しい植物を迎える」ボタン → 種類選択モーダル → ニックネーム入力 → <code>exp: 0, vitality: 100</code> で追加</li>
-          <li>🗑️ <strong>植物お別れ</strong>: 確認モーダル後削除 (最後の 1 体は削除不可)</li>
-        </ul>
-      </div>
-
-      <!-- 5.6 Shop & Backpack -->
-      <div class="feature-card mb-8 p-6 bg-white/50 rounded-r-lg border-forest/20">
-        <h3 class="font-rounded text-xl font-bold text-forest mb-4 flex items-center gap-2">5.6 ショップ & バックパック</h3>
-        <div class="grid md:grid-cols-2 gap-6">
-          <div>
-            <h4 class="font-semibold text-forest mb-3">🛍️ Shop.tsx</h4>
-            <ul class="space-y-2 text-forest/90">
-              <li>💰 ヘッダーに所持コイン表示</li>
-              <li>📦 アイテムカード: 絵文字・名前・価格・効果説明・購入ボタン</li>
-              <li>🚫 <strong>購入制御</strong>: コイン不足時はボタン無効化 (opacity-50, pointer-events-none)</li>
-              <li>✅ 購入時: コイン即時減算、<code>ownedItems</code> に追加/個数インクリメント、即時保存</li>
-            </ul>
+        <!-- 5.2 Teacher System -->
+        <div class="card p-6">
+          <h3 class="subsection-title">5.2 植物先生システム (4キャラクター)</h3>
+          <p class="text-gray-600 mb-4">各植物種類に専属の「先生」がおり、性格に合わせたセリフでユーザーをサポートします。</p>
+          <div class="grid-4">
+            <div class="card p-4">
+              <h4 class="font-semibold text-gray-900 mb-2">🌻 ひまわり先生</h4>
+              <p class="text-sm text-gray-600">元気でポジティブ。太陽のような明るさで励ます。「今日もがんばろー！」</p>
+            </div>
+            <div class="card p-4">
+              <h4 class="font-semibold text-gray-900 mb-2">🌵 サボテン先生</h4>
+              <p class="text-sm text-gray-600">ツンデレ・マイペース。厳しめだが根は優しい。「ま、やるなら見ててやるよ」</p>
+            </div>
+            <div class="card p-4">
+              <h4 class="font-semibold text-gray-900 mb-2">🪴 モンステラ先生</h4>
+              <p class="text-sm text-gray-600">優雅で知的。穏やかに見守り、気づきを与える。「ゆっくりでいい、着実にね」</p>
+            </div>
+            <div class="card p-4">
+              <h4 class="font-semibold text-gray-900 mb-2">🌰 タネ先生</h4>
+              <p class="text-sm text-gray-600">無限の可能性。好奇心旺盛でワクワクさせる。「なにがでるかな？たのしみだね！」</p>
+            </div>
           </div>
-          <div>
-            <h4 class="font-semibold text-forest mb-3">🎒 Backpack.tsx</h4>
-            <ul class="space-y-2 text-forest/90">
-              <li>📋 所持アイテム一覧 (名前・絵文字・個数・効果)</li>
-              <li>🎁 <strong>使用ボタン</strong>: タップで <code>useItem(itemId)</code> 実行</li>
-              <li>✨ <strong>使用エフェクト</strong>: PlantDisplay で「なでなで」アニメーション (バウンス + キラキラ 2秒) + 「わーい！💕」ポップイン</li>
-              <li>📉 使用時: <code>ownedItems</code> 個数デクリメント (0 で削除)、効果即時適用 (vitality/exp)、即時保存</li>
-            </ul>
+          <h4 class="subsection-title-small mt-6">セリフカテゴリ (teacherLines.ts)</h4>
+          <div class="table-container scrollbar-thin">
+            <table>
+              <thead><tr><th>カテゴリ</th><th>発火タイミング</th><th>用途</th></tr></thead>
+              <tbody>
+                <tr><td><span class="inline-code">morning</span></td><td>アプリ起動時 (1日1回、朝 5:00-11:59)</td><td>朝の挨拶モーダル表示</td></tr>
+                <tr><td><span class="inline-code">afterComplete</span></td><td>タスク完了時</td><td>完了時の励まし・卵発見トリガー</td></tr>
+                <tr><td><span class="inline-code">eggFound</span></td><td>卵発見時 (25%確率)</td><td>「卵見つけたよ！」報告</td></tr>
+                <tr><td><span class="inline-code">eggGrowing</span></td><td>卵成長中 (タスク完了時)</td><td>「もうすぐ生まれそう」経過報告</td></tr>
+                <tr><td><span class="inline-code">dragonBorn</span></td><td>孵化完了時</td><td>「生まれた！」祝福</td></tr>
+                <tr><td><span class="inline-code">dragonGreeting</span></td><td>ドラゴン仲間入り後</td><td>朝の挨拶でドラゴンも登場</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
-      </div>
 
-      <!-- 5.7 Quest (Task Management) -->
-      <div class="feature-card mb-8 p-6 bg-white/50 rounded-r-lg border-forest/20">
-        <h3 class="font-rounded text-xl font-bold text-forest mb-4 flex items-center gap-2">5.7 クエスト管理 (Quest.tsx)</h3>
-        <ul class="space-y-3 text-forest/90">
-          <li>📊 <strong>統計ダッシュボード</strong>: 総タスク数・完了数・完了率・総獲得 EXP・総コインをカード表示</li>
-          <li>⚡ <strong>テンプレートクイック追加</strong>: 仕事/勉強/健康/家事/その他 カテゴリ別プリセット (各 3-4 件) をワンクリック追加</li>
-          <li>🔍 <strong>カテゴリフィルタ</strong>: 全件/カテゴリ別絞り込みタブ</li>
-          <li>➕ <strong>カスタム作成モーダル</strong>: テキスト入力 + カテゴリ選択 → 追加</li>
-          <li>📝 <strong>ルール説明</strong>: アコーディオンで「クエストのルール」表示 (完了で +10 EXP/コイン、取消で -10 等)</li>
-          <li>✅ <strong>完了トグル</strong>: チェックボックスで完了/未完了切替、即時保存・即時反映</li>
-          <li>🗑️ <strong>削除</strong>: ゴミ箱アイコンで削除 (確認なし、即時)</li>
-        </ul>
-      </div>
-
-      <!-- 5.8 Data Persistence & Safety -->
-      <div class="feature-card mb-8 p-6 bg-white/50 rounded-r-lg border-forest/20">
-        <h3 class="font-rounded text-xl font-bold text-forest mb-4 flex items-center gap-2">5.8 データ永続化・安全性</h3>
-        <div class="grid md:grid-cols-2 gap-6">
-          <div>
-            <h4 class="font-semibold text-forest mb-3">💾 保存戦略 (usePlantData.ts)</h4>
-            <ul class="space-y-2 text-forest/90">
-              <li>🔄 <strong>即時保存</strong>: 全状態変更操作後に <code>saveData()</code> 呼び出し</li>
-              <li>🛡️ <strong>try-catch ラップ</strong>: 読み書き両方で例外吸収、失敗時はデフォルト値で安全起動</li>
-              <li>🆔 <strong>ID 生成</strong>: <code>Date.now().toString(36) + Math.random().toString(36).slice(2)</code> (衝突耐性)</li>
-              <li>🔢 <strong>バージョニング</strong>: <code>version</code> フィールドで将来のスキーマ移行に対応</li>
-            </ul>
+        <!-- 5.3 Egg & Dragon -->
+        <div class="card p-6">
+          <h3 class="subsection-title">5.3 卵・ドラゴンシステム</h3>
+          <div class="grid-2">
+            <div>
+              <h4 class="subsection-title-small">卵発見〜孵化フロー</h4>
+              <div class="space-y-2">
+                <div class="progress-step p-3 card"><strong>タスク完了</strong> → 25% の確率で卵発見 (<span class="inline-code">eggFound</span> セリフ発火)</div>
+                <div class="progress-step p-3 card"><strong>見守りフェーズ</strong> → MorningGreeting で「見守る」ボタン表示</div>
+                <div class="progress-step p-3 card"><strong>成長</strong> → 以降のタスク完了ごとに <strong>+15% 進捗</strong> (<span class="inline-code">eggGrowing</span> セリフ)</div>
+                <div class="progress-step p-3 card"><strong>孵化 (100%)</strong> → プログレスバー自動アニメーション → <span class="inline-code">dragonBorn</span> セリフ</div>
+                <div class="progress-step p-3 card"><strong>ドラゴン誕生</strong> → 画像表示 → <strong>名前入力モーダル</strong> → 決定で仲間入り</div>
+                <div class="progress-step p-3 card"><strong>完了</strong> → ドラゴン画像・名前表示 → 以降 <span class="inline-code">dragonGreeting</span> で朝に登場</div>
+              </div>
+            </div>
+            <div>
+              <h4 class="subsection-title-small">技術仕様</h4>
+              <ul class="text-gray-600 space-y-2">
+                <li>🥚 <strong>卵画像</strong>: <span class="inline-code">https://ik.imagekit.io/.../egg.png</span> (ImageKit.io 配信)</li>
+                <li>🐉 <strong>ドラゴン画像</strong>: <span class="inline-code">https://ik.imagekit.io/.../dragon.png</span> (共通、今後種類別拡張予定)</li>
+                <li>⏱ <strong>孵化プログレスバー</strong>: <span class="inline-code">requestAnimationFrame</span> で滑らかな 0→100% 自動進行 (約 3 秒)</li>
+                <li>⌨️ <strong>名前入力</strong>: モーダルで入力、空白不可、最大 10 文字、Enter で確定</li>
+                <li>💾 <strong>永続化</strong>: <span class="inline-code">dragons[]</span> 配列に追加、localStorage 即時保存</li>
+              </ul>
+            </div>
           </div>
-          <div>
-            <h4 class="font-semibold text-forest mb-3">🛡️ エラーハンドリング</h4>
-            <ul class="space-y-2 text-forest/90">
-              <li>🚫 <strong>プライベートモード対応</strong>: localStorage アクセス失敗時もアプリクラッシュせず初期値で起動</li>
-              <li>💾 <strong>容量超過吸収</strong>: QuotaExceededError も catch し、古いデータ削除等のリカバリ余地確保</li>
-              <li>🔄 <strong>タブ間同期</strong>: 同一オリジンなら <code>storage</code> イベントで自動同期 (将来実装)</li>
-              <li>🧪 <strong>開発時デバッグ</strong>: <code>localStorage.clear()</code> で簡単リセット可能</li>
-            </ul>
+        </div>
+
+        <!-- 5.4 Morning Greeting -->
+        <div class="card p-6">
+          <h3 class="subsection-title">5.4 朝の挨拶モーダル (MorningGreeting)</h3>
+          <div class="grid-2">
+            <div>
+              <h4 class="subsection-title-small">表示条件・制御</h4>
+              <ul class="text-gray-600 space-y-2">
+                <li>🌅 <strong>時間帯</strong>: 朝 5:00〜11:59 のみ表示</li>
+                <li>📅 <strong>頻度</strong>: 1日1回 (<span class="inline-code">lastMorningGreeting</span> で日付管理)</li>
+                <li>🎯 <strong>トリガー</strong>: App.tsx マウント時に <span class="inline-code">checkAndShowMorningGreeting()</span> 実行</li>
+                <li>🐉 <strong>ドラゴン同伴</strong>: 孵化済みドラゴンがいる場合、一緒に登場 (<span class="inline-code">dragonGreeting</span>)</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="subsection-title-small">モーダル内フロー</h4>
+              <ul class="text-gray-600 space-y-2">
+                <li>📖 <strong>通常時</strong>: 先生の朝の挨拶 (<span class="inline-code">morning</span>) 表示 → 「わかった！」で閉じる</li>
+                <li>🥚 <strong>卵発見時</strong>: <span class="inline-code">eggFound</span> セリフ → 「見守る」ボタンで孵化フロー開始</li>
+                <li>⏳ <strong>孵化中</strong>: プログレスバー自動進行表示 → 100% で次のステップへ</li>
+                <li>🐣 <strong>孵化完了</strong>: ドラゴン画像 + <span class="inline-code">dragonBorn</span> → 名前入力モーダルへ遷移</li>
+                <li>✏️ <strong>名前入力</strong>: フォーム入力 → 「名前を決める」で確定 → 完了画面</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5.5 Garden -->
+        <div class="card p-6">
+          <h3 class="subsection-title">5.5 ガーデン - 複数植物管理</h3>
+          <ul class="text-gray-600 space-y-3">
+            <li>🌿 <strong>植物一覧表示</strong>: 所有植物をカード形式で表示 (種類絵文字・ニックネーム・成長段階・元気バー)</li>
+            <li>🔄 <strong>アクティブ切替</strong>: タップで <span class="inline-code">activePlantId</span> 変更、メイン画面の植物が即座に切り替わる</li>
+            <li>✏️ <strong>ニックネーム変更</strong>: 各植物カードでインライン編集可能</li>
+            <li>➕ <strong>新規植物迎え入れ</strong>: 「新しい植物を迎える」ボタン → 種類選択モーダル → ニックネーム入力 → <span class="inline-code">exp: 0, vitality: 100</span> で追加</li>
+            <li>🗑️ <strong>植物お別れ</strong>: 確認モーダル後削除 (最後の 1 体は削除不可)</li>
+          </ul>
+        </div>
+
+        <!-- 5.6 Shop & Backpack -->
+        <div class="card p-6">
+          <h3 class="subsection-title">5.6 ショップ & バックパック</h3>
+          <div class="grid-2">
+            <div>
+              <h4 class="subsection-title-small">🛍️ Shop.tsx</h4>
+              <ul class="text-gray-600 space-y-2">
+                <li>💰 ヘッダーに所持コイン表示</li>
+                <li>📦 アイテムカード: 絵文字・名前・価格・効果説明・購入ボタン</li>
+                <li>🚫 <strong>購入制御</strong>: コイン不足時はボタン無効化 (opacity-50, pointer-events-none)</li>
+                <li>✅ 購入時: コイン即時減算、<span class="inline-code">ownedItems</span> に追加/個数インクリメント、即時保存</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="subsection-title-small">🎒 Backpack.tsx</h4>
+              <ul class="text-gray-600 space-y-2">
+                <li>📋 所持アイテム一覧 (名前・絵文字・個数・効果)</li>
+                <li>🎁 <strong>使用ボタン</strong>: タップで <span class="inline-code">useItem(itemId)</span> 実行</li>
+                <li>✨ <strong>使用エフェクト</strong>: PlantDisplay で「なでなで」アニメーション (バウンス + キラキラ 2秒) + 「わーい！💕」ポップイン</li>
+                <li>📉 使用時: <span class="inline-code">ownedItems</span> 個数デクリメント (0 で削除)、効果即時適用 (vitality/exp)、即時保存</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5.7 Quest -->
+        <div class="card p-6">
+          <h3 class="subsection-title">5.7 クエスト管理 (Quest.tsx)</h3>
+          <ul class="text-gray-600 space-y-3">
+            <li>📊 <strong>統計ダッシュボード</strong>: 総タスク数・完了数・完了率・総獲得 EXP・総コインをカード表示</li>
+            <li>⚡ <strong>テンプレートクイック追加</strong>: 仕事/勉強/健康/家事/その他 カテゴリ別プリセット (各 3-4 件) をワンクリック追加</li>
+            <li>🔍 <strong>カテゴリフィルタ</strong>: 全件/カテゴリ別絞り込みタブ</li>
+            <li>➕ <strong>カスタム作成モーダル</strong>: テキスト入力 + カテゴリ選択 → 追加</li>
+            <li>📝 <strong>ルール説明</strong>: アコーディオンで「クエストのルール」表示 (完了で +10 EXP/コイン、取消で -10 等)</li>
+            <li>✅ <strong>完了トグル</strong>: チェックボックスで完了/未完了切替、即時保存・即時反映</li>
+            <li>🗑️ <strong>削除</strong>: ゴミ箱アイコンで削除 (確認なし、即時)</li>
+          </ul>
+        </div>
+
+        <!-- 5.8 Data Persistence & Safety -->
+        <div class="card p-6">
+          <h3 class="subsection-title">5.8 データ永続化・安全性</h3>
+          <div class="grid-2">
+            <div>
+              <h4 class="subsection-title-small">💾 保存戦略 (usePlantData.ts)</h4>
+              <ul class="text-gray-600 space-y-2">
+                <li>🔄 <strong>即時保存</strong>: 全状態変更操作後に <span class="inline-code">saveData()</span> 呼び出し</li>
+                <li>🛡️ <strong>try-catch ラップ</strong>: 読み書き両方で例外吸収、失敗時はデフォルト値で安全起動</li>
+                <li>🆔 <strong>ID 生成</strong>: <span class="inline-code">Date.now().toString(36) + Math.random().toString(36).slice(2)</span> (衝突耐性)</li>
+                <li>🔢 <strong>バージョニング</strong>: <span class="inline-code">version</span> フィールドで将来のスキーマ移行に対応</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="subsection-title-small">🛡️ エラーハンドリング</h4>
+              <ul class="text-gray-600 space-y-2">
+                <li>🚫 <strong>プライベートモード対応</strong>: localStorage アクセス失敗時もアプリクラッシュせず初期値で起動</li>
+                <li>💾 <strong>容量超過吸収</strong>: QuotaExceededError も catch し、古いデータ削除等のリカバリ余地確保</li>
+                <li>🔄 <strong>タブ間同期</strong>: 同一オリジンなら <span class="inline-code">storage</span> イベントで自動同期 (将来実装)</li>
+                <li>🧪 <strong>開発時デバッグ</strong>: <span class="inline-code">localStorage.clear()</span> で簡単リセット可能</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- 6. UI/UX Specifications -->
-    <section id="ui-ux" class="card p-6 mb-8">
-      <h2 class="font-rounded text-2xl font-bold text-forest mb-4 flex items-center gap-2">6. UI/UX 仕様 <span class="text-base font-normal text-forest/70">UI/UX Specifications</span></h2>
-      
-      <div class="grid md:grid-cols-2 gap-6 mb-8">
-        <div class="p-4 bg-white/50 rounded-lg border border-forest/20">
-          <h3 class="font-rounded font-bold text-forest mb-3">🎨 カラーパレット</h3>
-          <div class="space-y-2 text-sm">
-            <div class="flex items-center gap-3"><div class="w-8 h-8 rounded" style="background: var(--ivory)"></div><span>アイボリー <code>#fcfbf7</code> - ベース背景</span></div>
-            <div class="flex items-center gap-3"><div class="w-8 h-8 rounded" style="background: var(--mint)"></div><span>ミントグリーン <code>#f0f7f4</code> - セクション背景</span></div>
-            <div class="flex items-center gap-3"><div class="w-8 h-8 rounded" style="background: var(--forest)"></div><span>フォレストグリーン <code>#2d5a3d</code> - プライマリ/文字</span></div>
-            <div class="flex items-center gap-3"><div class="w-8 h-8 rounded" style="background: var(--warm-brown)"></div><span>ウォームブラウン <code>#8b7355</code> - 鉢植え/アクセント</span></div>
-            <div class="flex items-center gap-3"><div class="w-8 h-8 rounded" style="background: var(--pastel-pink)"></div><span>パステルピンク <code>#fce4ec</code> - ひまわり系</span></div>
-            <div class="flex items-center gap-3"><div class="w-8 h-8 rounded" style="background: var(--pastel-blue)"></div><span>パステルブルー <code>#e3f2fd</code> - サボテン系</span></div>
-            <div class="flex items-center gap-3"><div class="w-8 h-8 rounded" style="background: var(--pastel-green)"></div><span>パステルグリーン <code>#e8f5e9</code> - モンステラ系</span></div>
-            <div class="flex items-center gap-3"><div class="w-8 h-8 rounded" style="background: var(--pastel-yellow)"></div><span>パステルイエロー <code>#fffde7</code> - タネ系</span></div>
+    <section id="ui-ux" class="card mb-8">
+      <div class="card-header">
+        <h2 class="section-title">6. UI/UX 仕様 <span>UI/UX Specifications</span></h2>
+      </div>
+      <div class="card-body">
+
+        <div class="grid-2 mb-8">
+          <div class="card p-4">
+            <h3 class="font-semibold text-gray-900 mb-3">カラーパレット</h3>
+            <div class="space-y-2 text-sm">
+              <div class="flex items-center gap-3"><div class="w-8 h-8 rounded border" style="background: var(--bg-elevated)"></div><span>ベース背景 <span class="inline-code">#fafafa</span></span></div>
+              <div class="flex items-center gap-3"><div class="w-8 h-8 rounded border" style="background: var(--bg)"></div><span>セクション背景 <span class="inline-code">#fafafa</span></span></div>
+              <div class="flex items-center gap-3"><div class="w-8 h-8 rounded" style="background: var(--primary)"></div><span>プライマリ <span class="inline-code">#166534</span></span></div>
+              <div class="flex items-center gap-3"><div class="w-8 h-8 rounded" style="background: var(--primary-light)"></div><span>プライマリライト <span class="inline-code">#dcfce7</span></span></div>
+              <div class="flex items-center gap-3"><div class="w-8 h-8 rounded" style="background: var(--accent)"></div><span>アクセント <span class="inline-code">#2563eb</span></span></div>
+              <div class="flex items-center gap-3"><div class="w-8 h-8 rounded" style="background: var(--warning)"></div><span>警告 <span class="inline-code">#b45309</span></span></div>
+              <div class="flex items-center gap-3"><div class="w-8 h-8 rounded" style="background: var(--danger)"></div><span>危険 <span class="inline-code">#b91c1c</span></span></div>
+              <div class="flex items-center gap-3"><div class="w-8 h-8 rounded border" style="background: var(--border)"></div><span>ボーダー <span class="inline-code">#e5e5e5</span></span></div>
+            </div>
+          </div>
+          <div class="card p-4">
+            <h3 class="font-semibold text-gray-900 mb-3">タイポグラフィ</h3>
+            <ul class="text-sm text-gray-600 space-y-2">
+              <li><strong>見出し</strong>: Inter (Weight 600/700)</li>
+              <li><strong>本文</strong>: Inter (Weight 400/500/600)</li>
+              <li><strong>コード</strong>: JetBrains Mono (Weight 400/500)</li>
+              <li><strong>ベースサイズ</strong>: 16px (1rem)</li>
+              <li><strong>行間</strong>: 1.6 (leading-relaxed)</li>
+            </ul>
           </div>
         </div>
-        <div class="p-4 bg-white/50 rounded-lg border border-forest/20">
-          <h3 class="font-rounded font-bold text-forest mb-3">🔤 タイポグラフィ</h3>
-          <ul class="space-y-2 text-sm text-forest/90">
-            <li><strong>見出し</strong>: M PLUS Rounded 1c (Weight 700/900)</li>
-            <li><strong>本文</strong>: Noto Sans JP (Weight 400/500/700)</li>
-            <li><strong>ベースサイズ</strong>: 16px (1rem)</li>
-            <li><strong>行間</strong>: 1.7 (leading-relaxed)</li>
-            <li><strong>丸み</strong>: 全角・半角ともに柔らかい印象</li>
-          </ul>
+
+        <div class="card p-4 mb-6">
+          <h3 class="font-semibold text-gray-900 mb-3">コンポーネント共通スタイル (tailwind.config.js / index.css)</h3>
+          <div class="code-block">/* カスタムコンポーネントクラス */
+.btn-primary { @apply bg-primary text-white font-semibold px-6 py-3 rounded-full
+  transition-all hover:bg-primary-hover; }
+.btn-secondary { @apply bg-white border border-gray-300 text-gray-700 font-semibold px-6 py-3 rounded-full
+  transition-all hover:bg-gray-50; }
+.input-field { @apply w-full px-4 py-3 border border-gray-300 rounded-lg
+  focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20; }
+.card-base { @apply bg-white border border-gray-200 rounded-xl shadow-sm; }
+.modal-overlay { @apply fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4; }
+.modal-content { @apply bg-white rounded-xl border border-gray-200 p-6 max-w-md w-full
+  shadow-lg animate-pop-in; }</div>
         </div>
-      </div>
 
-      <div class="p-4 bg-white/50 rounded-lg border border-forest/20 mb-6">
-        <h3 class="font-rounded font-bold text-forest mb-3">🧩 コンポーネント共通スタイル (tailwind.config.js / index.css)</h3>
-        <div class="code-block">
-/* カスタムコンポーネントクラス */<br>
-.btn-primary { @apply bg-forest text-white font-bold px-6 py-3 rounded-full<br>
-&nbsp;&nbsp;transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_0_var(--forest)]; }<br>
-.btn-secondary { @apply bg-white border-2 border-forest text-forest font-bold px-6 py-3 rounded-full<br>
-&nbsp;&nbsp;transition-all hover:bg-forest/10; }<br>
-.input-field { @apply w-full px-4 py-3 border-2 border-forest/30 rounded-xl<br>
-&nbsp;&nbsp;focus:outline-none focus:border-forest focus:ring-2 focus:ring-forest/20; }<br>
-.card-base { @apply bg-white border-2 border-forest rounded-2xl shadow-[0_4px_0_var(--forest)]; }<br>
-.modal-overlay { @apply fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4; }<br>
-.modal-content { @apply bg-white rounded-2xl border-2 border-forest p-6 max-w-md w-full<br>
-&nbsp;&nbsp;shadow-[0_8px_0_var(--forest)] animate-pop-in; }
+        <h3 class="subsection-title">6.1 画面構成・タブナビゲーション</h3>
+        <div class="table-container scrollbar-thin">
+          <table>
+            <thead><tr><th>タブ</th><th>アイコン</th><th>主要コンポーネント</th><th>役割</th></tr></thead>
+            <tbody>
+              <tr><td>メイン</td><td>🏠</td><td>PlantDisplay, TaskList</td><td>植物表示・元気バー・クエスト完了操作</td></tr>
+              <tr><td>クエスト</td><td>📋</td><td>Quest</td><td>統計・テンプレート・カテゴリ・作成・ルール</td></tr>
+              <tr><td>ショップ</td><td>🛍️</td><td>Shop</td><td>コイン確認・アイテム購入</td></tr>
+              <tr><td>バックパック</td><td>🎒</td><td>Backpack</td><td>所持アイテム確認・使用 (エフェクト発火)</td></tr>
+              <tr><td>ガーデン</td><td>🌿</td><td>Garden</td><td>複数植物管理・切替・名前変更・新規迎え入れ</td></tr>
+            </tbody>
+          </table>
         </div>
-      </div>
 
-      <h3 class="font-rounded text-xl font-bold text-forest mb-4">6.1 画面構成・タブナビゲーション</h3>
-      <div class="table-container">
-        <table>
-          <thead><tr><th>タブ</th><th>アイコン</th><th>主要コンポーネント</th><th>役割</th></tr></thead>
-          <tbody>
-            <tr><td>メイン</td><td>🏠</td><td>PlantDisplay, TaskList</td><td>植物表示・元気バー・クエスト完了操作</td></tr>
-            <tr><td>クエスト</td><td>📋</td><td>Quest</td><td>統計・テンプレート・カテゴリ・作成・ルール</td></tr>
-            <tr><td>ショップ</td><td>🛍️</td><td>Shop</td><td>コイン確認・アイテム購入</td></tr>
-            <tr><td>バックパック</td><td>🎒</td><td>Backpack</td><td>所持アイテム確認・使用 (エフェクト発火)</td></tr>
-            <tr><td>ガーデン</td><td>🌿</td><td>Garden</td><td>複数植物管理・切替・名前変更・新規迎え入れ</td></tr>
-          </tbody>
-        </table>
-      </div>
+        <h3 class="subsection-title mt-8">6.2 アニメーション・インタラクション</h3>
+        <div class="table-container scrollbar-thin">
+          <table>
+            <thead><tr><th>アニメーション</th><th>実装場所</th><th>仕様</th></tr></thead>
+            <tbody>
+              <tr><td>植物バウンス</td><td>PlantDisplay.tsx</td><td><span class="inline-code">animate-bounce-gentle</span> + <span class="inline-code">wiggle</span> (2秒、アイテム使用時)</td></tr>
+              <tr><td>キラキラエフェクト</td><td>PlantDisplay.tsx</td><td>8個の ✨ がランダム位置に <span class="inline-code">animate-sparkle</span> (2秒)</td></tr>
+              <tr><td>ポップイン</td><td>PlantDisplay, MorningGreeting</td><td><span class="inline-code">animate-pop-in</span> (scale 0→1, 300ms ease-out)</td></tr>
+              <tr><td>プログレスバー</td><td>PlantDisplay, MorningGreeting</td><td><span class="inline-code">transition-all duration-500 ease-out</span> width 変化</td></tr>
+              <tr><td>孵化プログレス</td><td>MorningGreeting.tsx</td><td><span class="inline-code">requestAnimationFrame</span> で 0→100% (約 3秒、ease-out)</td></tr>
+              <tr><td>モーダル表示</td><td>全モーダル共通</td><td><span class="inline-code">animate-pop-in</span> + オーバーレイフェードイン</td></tr>
+              <tr><td>タブ切替</td><td>TabBar.tsx</td><td>インジケータースライド (CSS transition)</td></tr>
+            </tbody>
+          </table>
+        </div>
 
-      <h3 class="font-rounded text-xl font-bold text-forest mt-8 mb-4">6.2 アニメーション・インタラクション</h3>
-      <div class="table-container">
-        <table>
-          <thead><tr><th>アニメーション</th><th>実装場所</th><th>仕様</th></tr></thead>
-          <tbody>
-            <tr><td>植物バウンス</td><td>PlantDisplay.tsx</td><td><code>animate-bounce-gentle</code> + <code>wiggle</code> (2秒、アイテム使用時)</td></tr>
-            <tr><td>キラキラエフェクト</td><td>PlantDisplay.tsx</td><td>8個の ✨ がランダム位置に <code>animate-sparkle</code> (2秒)</td></tr>
-            <tr><td>ポップイン</td><td>PlantDisplay, MorningGreeting</td><td><code>animate-pop-in</code> (scale 0→1, 300ms ease-out)</td></tr>
-            <tr><td>プログレスバー</td><td>PlantDisplay, MorningGreeting</td><td><code>transition-all duration-500 ease-out</code> width 変化</td></tr>
-            <tr><td>孵化プログレス</td><td>MorningGreeting.tsx</td><td><code>requestAnimationFrame</code> で 0→100% (約 3秒、ease-out)</td></tr>
-            <tr><td>モーダル表示</td><td>全モーダル共通</td><td><code>animate-pop-in</code> + オーバーレイフェードイン</td></tr>
-            <tr><td>タブ切替</td><td>TabBar.tsx</td><td>インジケータースライド (CSS transition)</td></tr>
-          </tbody>
-        </table>
+        <h3 class="subsection-title mt-8">6.3 レスポンシブ・アクセシビリティ</h3>
+        <ul class="text-gray-600 space-y-2">
+          <li>📱 <strong>モバイルファースト</strong>: 320px〜 対応、固定ボトムバーで親指操作最適化</li>
+          <li>🖥 <strong>デスクトップ</strong>: 最大幅 640px で中央寄せ、余白活かしたレイアウト</li>
+          <li>♿ <strong>ARIA 対応</strong>: role="img" (植物絵文字), role="progressbar" (進捗バー), aria-label 完全付与</li>
+          <li>⌨️ <strong>キーボード操作</strong>: フォーカス可視化、モーダル内 Tab トラップ、Enter で確定</li>
+          <li>🎨 <strong>減らされた動き</strong>: <span class="inline-code">@media (prefers-reduced-motion)</span> でアニメーション無効化対応済み</li>
+        </ul>
       </div>
-
-      <h3 class="font-rounded text-xl font-bold text-forest mt-8 mb-4">6.3 レスポンシブ・アクセシビリティ</h3>
-      <ul class="space-y-2 text-forest/90">
-        <li>📱 <strong>モバイルファースト</strong>: 320px〜 対応、固定ボトムバーで親指操作最適化</li>
-        <li>🖥 <strong>デスクトップ</strong>: 最大幅 640px で中央寄せ、余白活かしたレイアウト</li>
-        <li>♿ <strong>ARIA 対応</strong>: role="img" (植物絵文字), role="progressbar" (進捗バー), aria-label 完全付与</li>
-        <li>⌨️ <strong>キーボード操作</strong>: フォーカス可視化、モーダル内 Tab トラップ、Enter で確定</li>
-        <li>🎨 <strong>減らされた動き</strong>: <code>@media (prefers-reduced-motion)</code> でアニメーション無効化対応済み</li>
-      </ul>
     </section>
 
     <!-- 7. Deployment -->
-    <section id="deployment" class="card p-6 mb-8">
-      <h2 class="font-rounded text-2xl font-bold text-forest mb-4 flex items-center gap-2">7. デプロイ・運用 <span class="text-base font-normal text-forest/70">Deployment & Operations</span></h2>
-      
-      <div class="grid md:grid-cols-2 gap-6 mb-6">
-        <div class="p-4 bg-white/50 rounded-lg border border-forest/20">
-          <h3 class="font-rounded font-bold text-forest mb-3">☁️ Cloudflare Pages デプロイ手順</h3>
-          <ol class="space-y-2 text-forest/90 list-decimal list-inside">
-            <li>GitHub リポジトリ <code>ryotagtagtag-wq/schoolsync</code> を連携</li>
-            <li>Build command: <code>npm run build</code></li>
-            <li>Output directory: <code>dist</code></li>
-            <li>Root directory: <code>/</code> (サブディレクトリなし)</li>
-            <li>Deploy → <code>https://<project>.pages.dev</code> で即公開</li>
-            <li>カスタムドメイン設定: <code>quest.ryopc.org</code></li>
-          </ol>
-        </div>
-        <div class="p-4 bg-white/50 rounded-lg border border-forest/20">
-          <h3 class="font-rounded font-bold text-forest mb-3">📦 ビルド成果物 (実測値)</h3>
-          <ul class="space-y-2 text-forest/90">
-            <li><code>dist/index.html</code>: 0.94 kB (gzip: 0.60 kB)</li>
-            <li><code>dist/assets/index-*.css</code>: 16.76 kB (gzip: 3.87 kB)</li>
-            <li><code>dist/assets/index-*.js</code>: 157.27 kB (gzip: 51.12 kB)</li>
-            <li>ビルド時間: 約 700ms (Vite 5)</li>
-            <li>TypeScript 型チェック: <code>tsc</code> パス込み</li>
-          </ul>
-        </div>
+    <section id="deployment" class="card mb-8">
+      <div class="card-header">
+        <h2 class="section-title">7. デプロイ・運用 <span>Deployment & Operations</span></h2>
       </div>
+      <div class="card-body">
 
-      <div class="p-4 bg-white/50 rounded-lg border border-forest/20">
-        <h3 class="font-rounded font-bold text-forest mb-3">🔧 環境変数・設定ファイル</h3>
-        <div class="code-block">
-# .env.example (本番では Cloudflare Pages 環境変数で設定)<br>
-VITE_APP_TITLE=Questra<br>
-VITE_APP_URL=https://quest.ryopc.org<br>
-# API キー等は不要 (localStorage 完結のため)
+        <div class="grid-2 mb-6">
+          <div class="card p-4">
+            <h3 class="font-semibold text-gray-900 mb-3">Cloudflare Pages デプロイ手順</h3>
+            <ol class="text-gray-600 space-y-2 list-decimal list-inside">
+              <li>GitHub リポジトリ <span class="inline-code">ryotagtagtag-wq/schoolsync</span> を連携</li>
+              <li>Build command: <span class="inline-code">npm run build</span></li>
+              <li>Output directory: <span class="inline-code">dist</span></li>
+              <li>Root directory: <span class="inline-code">/</span> (サブディレクトリなし)</li>
+              <li>Deploy → <span class="inline-code">https://<project>.pages.dev</span> で即公開</li>
+              <li>カスタムドメイン設定: <span class="inline-code">quest.ryopc.org</span></li>
+            </ol>
+          </div>
+          <div class="card p-4">
+            <h3 class="font-semibold text-gray-900 mb-3">ビルド成果物 (実測値)</h3>
+            <ul class="text-gray-600 space-y-2">
+              <li><span class="inline-code">dist/index.html</span>: 0.94 kB (gzip: 0.60 kB)</li>
+              <li><span class="inline-code">dist/assets/index-*.css</span>: 16.76 kB (gzip: 3.87 kB)</li>
+              <li><span class="inline-code">dist/assets/index-*.js</span>: 157.27 kB (gzip: 51.12 kB)</li>
+              <li>ビルド時間: 約 700ms (Vite 5)</li>
+              <li>TypeScript 型チェック: <span class="inline-code">tsc</span> パス込み</li>
+            </ul>
+          </div>
         </div>
-        <p class="text-forest/80 mt-3 text-sm">※ バックエンド・API キー・データベース接続情報は一切不要</p>
+
+        <div class="card p-4">
+          <h3 class="font-semibold text-gray-900 mb-3">環境変数・設定ファイル</h3>
+          <div class="code-block"># .env.example (本番では Cloudflare Pages 環境変数で設定)
+VITE_APP_TITLE=Questra
+VITE_APP_URL=https://quest.ryopc.org
+# API キー等は不要 (localStorage 完結のため)</div>
+          <p class="text-gray-500 text-sm mt-3">※ バックエンド・API キー・データベース接続情報は一切不要</p>
+        </div>
       </div>
     </section>
 
     <!-- 8. Future -->
-    <section id="future" class="card p-6 mb-8">
-      <h2 class="font-rounded text-2xl font-bold text-forest mb-4 flex items-center gap-2">8. 今後の拡張計画 <span class="text-base font-normal text-forest/70">Future Roadmap</span></h2>
-      <div class="grid md:grid-cols-2 gap-4">
-        <div class="p-4 bg-white/50 rounded-lg border border-forest/20">
-          <h3 class="font-rounded font-bold text-forest mb-3">🎯 短期 (v1.1〜v1.2)</h3>
-          <ul class="space-y-2 text-sm text-forest/90">
-            <li>🌙 ダークモード対応 (OS 設定連動 + 手動切替)</li>
-            <li>🌐 多言語化 (i18n: 英語/中国語/韓国語)</li>
-            <li>📱 PWA 対応 (manifest.json, Service Worker, インストールプロンプト)</li>
-            <li>📊 週次/月次レポート (完了率推移グラフ、成長履歴)</li>
-            <li>📤 データエクスポート/インポート (JSON バックアップ)</li>
-          </ul>
-        </div>
-        <div class="p-4 bg-white/50 rounded-lg border border-forest/20">
-          <h3 class="font-rounded font-bold text-forest mb-3">🚀 中期 (v2.0)</h3>
-          <ul class="space-y-2 text-sm text-forest/90">
-            <li>🌱 新植物追加 (桜/盆栽/食虫植物/多肉/観葉植物...)</li>
-            <li>🐉 ドラゴン種類拡張 (属性別: 火/水/風/土/光/闇)</li>
-            <li>🎭 季節イベント (桜/夏祭り/紅葉/雪、限定植物・アイテム)</li>
-            <li>👥 フレンド機能 (匿名ID交換で相手の庭を見守り・応援)</li>
-            <li>🏆 実績/バッジシステム (連続日数、総タスク数、ドラゴン数等)</li>
-          </ul>
-        </div>
-        <div class="p-4 bg-white/50 rounded-lg border border-forest/20">
-          <h3 class="font-rounded font-bold text-forest mb-3">🔮 長期・構造的拡張</h3>
-          <ul class="space-y-2 text-sm text-forest/90">
-            <li>🔌 プラグイン API (独自クエストタイプ・アイテム・植物・ドラゴン定義)</li>
-            <li>☁️ クラウド同期オプション (任意・E2E暗号化、Firebase/Supabase 等)</li>
-            <li>🤖 AI 連携 (タスク提案、先生セリフ動的生成、成長予測)</li>
-            <li>📚 開発者向け SDK (外部アプリから Questra 状態参照/操作)</li>
-            <li>🎮 ミニゲーム要素 (植物と遊ぶ、ドラゴンと冒険)</li>
-          </ul>
-        </div>
-        <div class="p-4 bg-white/50 rounded-lg border border-forest/20">
-          <h3 class="font-rounded font-bold text-forest mb-3">🛠 技術的負債解消・品質向上</h3>
-          <ul class="space-y-2 text-sm text-forest/90">
-            <li>✅ 単体テスト導入 (Vitest + React Testing Library)</li>
-            <li>✅ E2E テスト (Playwright: 朝の挨拶→卵孵化→命名フロー)</li>
-            <li>✅ Storybook でコンポーネントカタログ化</li>
-            <li>✅ CI/CD パイプライン (GitHub Actions: lint → test → build → deploy)</li>
-            <li>✅ パフォーマンス監視 (Web Vitals, bundle size 監視)</li>
-          </ul>
+    <section id="future" class="card mb-8">
+      <div class="card-header">
+        <h2 class="section-title">8. 今後の拡張計画 <span>Future Roadmap</span></h2>
+      </div>
+      <div class="card-body">
+        <div class="grid-4">
+          <div class="card p-4">
+            <h3 class="font-semibold text-gray-900 mb-3">短期 (v1.1〜v1.2)</h3>
+            <ul class="text-sm text-gray-600 space-y-2">
+              <li>🌙 ダークモード対応 (OS 設定連動 + 手動切替)</li>
+              <li>🌐 多言語化 (i18n: 英語/中国語/韓国語)</li>
+              <li>📱 PWA 対応 (manifest.json, Service Worker, インストールプロンプト)</li>
+              <li>📊 週次/月次レポート (完了率推移グラフ、成長履歴)</li>
+              <li>📤 データエクスポート/インポート (JSON バックアップ)</li>
+            </ul>
+          </div>
+          <div class="card p-4">
+            <h3 class="font-semibold text-gray-900 mb-3">中期 (v2.0)</h3>
+            <ul class="text-sm text-gray-600 space-y-2">
+              <li>🌱 新植物追加 (桜/盆栽/食虫植物/多肉/観葉植物...)</li>
+              <li>🐉 ドラゴン種類拡張 (属性別: 火/水/風/土/光/闇)</li>
+              <li>🎭 季節イベント (桜/夏祭り/紅葉/雪、限定植物・アイテム)</li>
+              <li>👥 フレンド機能 (匿名ID交換で相手の庭を見守り・応援)</li>
+              <li>🏆 実績/バッジシステム (連続日数、総タスク数、ドラゴン数等)</li>
+            </ul>
+          </div>
+          <div class="card p-4">
+            <h3 class="font-semibold text-gray-900 mb-3">長期・構造的拡張</h3>
+            <ul class="text-sm text-gray-600 space-y-2">
+              <li>🔌 プラグイン API (独自クエストタイプ・アイテム・植物・ドラゴン定義)</li>
+              <li>☁️ クラウド同期オプション (任意・E2E暗号化、Firebase/Supabase 等)</li>
+              <li>🤖 AI 連携 (タスク提案、先生セリフ動的生成、成長予測)</li>
+              <li>📚 開発者向け SDK (外部アプリから Questra 状態参照/操作)</li>
+              <li>🎮 ミニゲーム要素 (植物と遊ぶ、ドラゴンと冒険)</li>
+            </ul>
+          </div>
+          <div class="card p-4">
+            <h3 class="font-semibold text-gray-900 mb-3">技術的負債解消・品質向上</h3>
+            <ul class="text-sm text-gray-600 space-y-2">
+              <li>✅ 単体テスト導入 (Vitest + React Testing Library)</li>
+              <li>✅ E2E テスト (Playwright: 朝の挨拶→卵孵化→命名フロー)</li>
+              <li>✅ Storybook でコンポーネントカタログ化</li>
+              <li>✅ CI/CD パイプライン (GitHub Actions: lint → test → build → deploy)</li>
+              <li>✅ パフォーマンス監視 (Web Vitals, bundle size 監視)</li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- Footer -->
-    <footer class="text-center py-8 text-forest/60 no-print">
-      <p class="font-rounded font-medium">Questra SPEC v1.0</p>
-      <p class="text-sm mt-1">作成者: <strong>game_ryo</strong> | Repository: <a href="https://github.com/ryotagtagtag-wq/schoolsync" target="_blank" class="underline">GitHub</a> | Live: <a href="https://quest.ryopc.org" target="_blank" class="underline">https://quest.ryopc.org</a></p>
-      <p class="text-xs mt-2">Generated from source code analysis | Last updated: 2026-09-14</p>
+    <footer class="text-center py-8 text-gray-500 no-print border-t border-gray-200">
+      <p class="font-medium">Questra SPEC v1.0</p>
+      <p class="text-sm mt-1">作成者: <strong>game_ryo</strong> | Repository: <a href="https://github.com/ryotagtagtag-wq/schoolsync" target="_blank" class="text-accent underline">GitHub</a> | Live: <a href="https://quest.ryopc.org" target="_blank" class="text-accent underline">https://quest.ryopc.org</a></p>
+      <p class="text-xs mt-2 text-gray-400">Generated from source code analysis | Last updated: 2026-09-14</p>
     </footer>
 
     <!-- Print Button -->
     <div class="fixed bottom-6 right-6 no-print">
-      <button onclick="window.print()" class="btn-primary shadow-lg px-6 py-3 flex items-center gap-2">
+      <button onclick="window.print()" class="px-5 py-2.5 bg-primary text-white font-semibold rounded-full shadow-lg hover:bg-primary-hover transition-colors flex items-center gap-2">
         🖨️ PDF として保存
       </button>
     </div>
@@ -703,8 +743,8 @@ VITE_APP_URL=https://quest.ryopc.org<br>
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           tocLinks.forEach(link => {
-            link.classList.toggle('bg-forest/10', link.getAttribute('href') === '#' + entry.target.id);
-            link.classList.toggle('font-bold', link.getAttribute('href') === '#' + entry.target.id);
+            const isActive = link.getAttribute('href') === '#' + entry.target.id;
+            link.classList.toggle('active', isActive);
           });
         }
       });
