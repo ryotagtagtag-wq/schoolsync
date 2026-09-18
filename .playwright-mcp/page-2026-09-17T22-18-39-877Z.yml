@@ -1,0 +1,63 @@
+- generic [ref=f6e3]:
+  - banner [ref=f6e4]:
+    - generic [ref=f6e6]:
+      - heading "Questra" [level=1] [ref=f6e7]:
+        - generic [aria-hidden] [ref=f6e8]: 🌱
+        - text: Questra
+      - generic [ref=f6e9]:
+        - generic [ref=f6e10]: "EXP: 0"
+        - generic [ref=f6e11]:
+          - generic [aria-hidden] [ref=f6e12]: 💰
+          - generic [ref=f6e13]: "0"
+  - main [ref=f6e14]:
+    - tabpanel "メイン" [ref=f6e15]:
+      - generic [ref=f6e16]:
+        - generic [ref=f6e17]:
+          - generic [ref=f6e18]: "元気: 100% 😊"
+          - progressbar "植物の元気" [ref=f6e21]
+        - generic [ref=f6e22]:
+          - generic: ✨
+          - generic: ✨
+          - generic: ✨
+          - generic: ✨
+          - generic: ✨
+          - generic: ✨
+          - generic: ✨
+          - generic: ✨
+          - 'img "植物: ふたば" [ref=f6e25]': 🌱
+          - generic [ref=f6e26]: わーい！💕
+        - generic [ref=f6e27]:
+          - heading "ふたば" [level=2] [ref=f6e28]
+          - paragraph [ref=f6e29]: ちいさな芽が ひょっこり顔を出したよ！
+        - generic [ref=f6e30]:
+          - generic [ref=f6e31]:
+            - generic [ref=f6e32]: "EXP: 0"
+            - generic [ref=f6e33]: "次の段階まで: 50 EXP"
+          - generic [ref=f6e34]:
+            - progressbar "植物の成長進捗"
+        - button "植物をなでて喜ばせる（元気少し回復）" [ref=f6e35] [cursor=pointer]: 💚 なでなでして喜ばせる
+      - region [ref=f6e36]:
+        - heading "今日のクエスト" [level=2] [ref=f6e37]:
+          - generic [aria-hidden] [ref=f6e38]: 📝
+          - text: 今日のクエスト
+        - generic [ref=f6e40]:
+          - generic [ref=f6e41]: 📝
+          - paragraph [ref=f6e42]: クエストがありません
+          - paragraph [ref=f6e43]: 「クエスト」タブで追加しよう！
+  - tablist "メインナビゲーション" [ref=f6e44]:
+    - generic [ref=f6e45]:
+      - tab "メインタブ" [selected] [ref=f6e46] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f6e47]: 🏠
+        - generic [ref=f6e48]: メイン
+      - tab "クエストタブ" [ref=f6e49] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f6e50]: 📝
+        - generic [ref=f6e51]: クエスト
+      - tab "ショップタブ" [ref=f6e52] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f6e53]: 🛍️
+        - generic [ref=f6e54]: ショップ
+      - tab "バックパックタブ" [ref=f6e55] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f6e56]: 🎒
+        - generic [ref=f6e57]: バックパック
+      - tab "ガーデンタブ" [ref=f6e58] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f6e59]: 🌿
+        - generic [ref=f6e60]: ガーデン

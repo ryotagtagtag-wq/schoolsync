@@ -1,0 +1,53 @@
+- generic [ref=f5e3]:
+  - banner [ref=f5e4]:
+    - generic [ref=f5e6]:
+      - heading "Questra" [level=1] [ref=f5e7]:
+        - generic [aria-hidden] [ref=f5e8]: 🌱
+        - text: Questra
+      - generic [ref=f5e9]:
+        - generic [ref=f5e10]: "EXP: 0"
+        - generic [ref=f5e11]:
+          - generic [aria-hidden] [ref=f5e12]: 💰
+          - generic [ref=f5e13]: "0"
+  - main [ref=f5e14]:
+    - tabpanel "メイン" [ref=f5e15]:
+      - generic [ref=f5e16]:
+        - generic [ref=f5e17]:
+          - generic [ref=f5e18]: "元気: 100% 😊"
+          - progressbar "植物の元気" [ref=f5e21]
+        - 'img "植物: ふたば" [ref=f5e25]': 🌱
+        - generic [ref=f5e26]:
+          - heading "ふたば" [level=2] [ref=f5e27]
+          - paragraph [ref=f5e28]: ちいさな芽が ひょっこり顔を出したよ！
+        - generic [ref=f5e29]:
+          - generic [ref=f5e30]:
+            - generic [ref=f5e31]: "EXP: 0"
+            - generic [ref=f5e32]: "次の段階まで: 50 EXP"
+          - generic [ref=f5e33]:
+            - progressbar "植物の成長進捗"
+        - button "植物をなでて喜ばせる（元気少し回復）" [ref=f5e34] [cursor=pointer]: 💚 なでなでして喜ばせる
+      - region [ref=f5e35]:
+        - heading "今日のクエスト" [level=2] [ref=f5e36]:
+          - generic [aria-hidden] [ref=f5e37]: 📝
+          - text: 今日のクエスト
+        - generic [ref=f5e39]:
+          - generic [ref=f5e40]: 📝
+          - paragraph [ref=f5e41]: クエストがありません
+          - paragraph [ref=f5e42]: 「クエスト」タブで追加しよう！
+  - tablist "メインナビゲーション" [ref=f5e43]:
+    - generic [ref=f5e44]:
+      - tab "メインタブ" [selected] [ref=f5e45] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f5e46]: 🏠
+        - generic [ref=f5e47]: メイン
+      - tab "クエストタブ" [ref=f5e48] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f5e49]: 📝
+        - generic [ref=f5e50]: クエスト
+      - tab "ショップタブ" [ref=f5e51] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f5e52]: 🛍️
+        - generic [ref=f5e53]: ショップ
+      - tab "バックパックタブ" [ref=f5e54] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f5e55]: 🎒
+        - generic [ref=f5e56]: バックパック
+      - tab "ガーデンタブ" [ref=f5e57] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f5e58]: 🌿
+        - generic [ref=f5e59]: ガーデン

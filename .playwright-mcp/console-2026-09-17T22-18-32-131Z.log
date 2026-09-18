@@ -1,0 +1,105 @@
+[      15ms] [ERROR] Not allowed to navigate top frame to data URL: data:text/html,<script>window.localStorage.removeItem('morningGreetingLastShown');window.location.reload();</script> @ http://localhost:5174/:0
+[   73987ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-373CG7ZK.js?v=0c4ba20d:21548
+[   74002ms] [ERROR] Warning: Received `%s` for a non-boolean attribute `%s`.
+
+If you want to write it to the DOM, pass a string instead: %s="%s" or %s={value.toString()}.%s true font-medium font-medium true font-medium 
+    at span
+    at div
+    at div
+    at div
+    at http://localhost:5174/src/components/PlantDisplay.tsx:21:3
+    at div
+    at main
+    at div
+    at App (http://localhost:5174/src/App.tsx:39:37) @ http://localhost:5174/node_modules/.vite/deps/chunk-373CG7ZK.js?v=0c4ba20d:518
+[   74105ms] Access to storage is not allowed from this context.
+[   74105ms] Access to storage is not allowed from this context.
+[   74105ms] Access to storage is not allowed from this context.
+[   74105ms] Access to storage is not allowed from this context.
+[   84913ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-373CG7ZK.js?v=0c4ba20d:21548
+[   84929ms] [ERROR] Warning: Received `%s` for a non-boolean attribute `%s`.
+
+If you want to write it to the DOM, pass a string instead: %s="%s" or %s={value.toString()}.%s true font-medium font-medium true font-medium 
+    at span
+    at div
+    at div
+    at div
+    at http://localhost:5174/src/components/PlantDisplay.tsx:21:3
+    at div
+    at main
+    at div
+    at App (http://localhost:5174/src/App.tsx:39:37) @ http://localhost:5174/node_modules/.vite/deps/chunk-373CG7ZK.js?v=0c4ba20d:518
+[   85013ms] Access to storage is not allowed from this context.
+[   85013ms] Access to storage is not allowed from this context.
+[   85013ms] Access to storage is not allowed from this context.
+[   85014ms] Access to storage is not allowed from this context.
+[  102268ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-373CG7ZK.js?v=0c4ba20d:21548
+[  102279ms] [ERROR] Warning: Received `%s` for a non-boolean attribute `%s`.
+
+If you want to write it to the DOM, pass a string instead: %s="%s" or %s={value.toString()}.%s true font-medium font-medium true font-medium 
+    at span
+    at div
+    at div
+    at div
+    at http://localhost:5174/src/components/PlantDisplay.tsx:21:3
+    at div
+    at main
+    at div
+    at App (http://localhost:5174/src/App.tsx:39:37) @ http://localhost:5174/node_modules/.vite/deps/chunk-373CG7ZK.js?v=0c4ba20d:518
+[  102377ms] Access to storage is not allowed from this context.
+[  102378ms] Access to storage is not allowed from this context.
+[  102378ms] Access to storage is not allowed from this context.
+[  102378ms] Access to storage is not allowed from this context.
+[  104565ms] [LOG] Egg found! {hasEgg: true, plantType: default} @ http://localhost:5174/src/App.tsx:76
+[  148205ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-373CG7ZK.js?v=0c4ba20d:21548
+[  148218ms] [ERROR] Warning: Received `%s` for a non-boolean attribute `%s`.
+
+If you want to write it to the DOM, pass a string instead: %s="%s" or %s={value.toString()}.%s true font-medium font-medium true font-medium 
+    at span
+    at div
+    at div
+    at div
+    at http://localhost:5174/src/components/PlantDisplay.tsx:21:3
+    at div
+    at main
+    at div
+    at App (http://localhost:5174/src/App.tsx:39:37) @ http://localhost:5174/node_modules/.vite/deps/chunk-373CG7ZK.js?v=0c4ba20d:518
+[  148316ms] Access to storage is not allowed from this context.
+[  148316ms] Access to storage is not allowed from this context.
+[  148316ms] Access to storage is not allowed from this context.
+[  148317ms] Access to storage is not allowed from this context.
+[  150580ms] [LOG] Egg found! {hasEgg: true, plantType: default} @ http://localhost:5174/src/App.tsx:76
+[  187535ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-373CG7ZK.js?v=0c4ba20d:21548
+[  187551ms] [ERROR] Warning: Received `%s` for a non-boolean attribute `%s`.
+
+If you want to write it to the DOM, pass a string instead: %s="%s" or %s={value.toString()}.%s true font-medium font-medium true font-medium 
+    at span
+    at div
+    at div
+    at div
+    at http://localhost:5174/src/components/PlantDisplay.tsx:21:3
+    at div
+    at main
+    at div
+    at App (http://localhost:5174/src/App.tsx:39:37) @ http://localhost:5174/node_modules/.vite/deps/chunk-373CG7ZK.js?v=0c4ba20d:518
+[  187636ms] Access to storage is not allowed from this context.
+[  187637ms] Access to storage is not allowed from this context.
+[  187637ms] Access to storage is not allowed from this context.
+[  187638ms] Access to storage is not allowed from this context.
+[  376404ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-373CG7ZK.js?v=0c4ba20d:21548
+[  376421ms] [ERROR] Warning: Received `%s` for a non-boolean attribute `%s`.
+
+If you want to write it to the DOM, pass a string instead: %s="%s" or %s={value.toString()}.%s true font-medium font-medium true font-medium 
+    at span
+    at div
+    at div
+    at div
+    at http://localhost:5174/src/components/PlantDisplay.tsx:21:3
+    at div
+    at main
+    at div
+    at App (http://localhost:5174/src/App.tsx:39:37) @ http://localhost:5174/node_modules/.vite/deps/chunk-373CG7ZK.js?v=0c4ba20d:518
+[  376594ms] Access to storage is not allowed from this context.
+[  376595ms] Access to storage is not allowed from this context.
+[  376595ms] Access to storage is not allowed from this context.
+[  376595ms] Access to storage is not allowed from this context.

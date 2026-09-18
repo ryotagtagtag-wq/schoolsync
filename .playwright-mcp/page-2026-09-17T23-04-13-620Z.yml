@@ -1,0 +1,52 @@
+- generic [ref=f2e3]:
+  - banner [ref=f2e4]:
+    - generic [ref=f2e6]:
+      - heading "Questra" [level=1] [ref=f2e7]:
+        - generic [aria-hidden] [ref=f2e8]: 🌱
+        - text: Questra
+      - generic [ref=f2e9]:
+        - generic [ref=f2e10]: "EXP: 10"
+        - generic [ref=f2e11]:
+          - generic [aria-hidden] [ref=f2e12]: 💰
+          - generic [ref=f2e13]: "10"
+  - main [ref=f2e14]:
+    - tabpanel "メイン" [ref=f2e15]:
+      - generic [ref=f2e16]:
+        - generic [ref=f2e17]:
+          - generic [ref=f2e18]: "元気: 82% 😊"
+          - progressbar "植物の元気" [ref=f2e21]
+        - 'img "植物: ふたば" [ref=f2e25]': 🌱
+        - generic [ref=f2e26]:
+          - heading "ふたば" [level=2] [ref=f2e27]
+          - paragraph [ref=f2e28]: ちいさな芽が ひょっこり顔を出したよ！
+        - generic [ref=f2e29]:
+          - generic [ref=f2e30]:
+            - generic [ref=f2e31]: "EXP: 10"
+            - generic [ref=f2e32]: "次の段階まで: 40 EXP"
+          - progressbar "植物の成長進捗" [ref=f2e34]
+        - button "植物をなでて喜ばせる（元気少し回復）" [ref=f2e35] [cursor=pointer]: 💚 なでなでして喜ばせる
+      - region [ref=f2e36]:
+        - heading "今日のクエスト" [level=2] [ref=f2e37]:
+          - generic [aria-hidden] [ref=f2e38]: 📝
+          - text: 今日のクエスト
+        - generic [ref=f2e40]:
+          - generic [ref=f2e41]: 📝
+          - paragraph [ref=f2e42]: クエストがありません
+          - paragraph [ref=f2e43]: 「クエスト」タブで追加しよう！
+  - tablist "メインナビゲーション" [ref=f2e44]:
+    - generic [ref=f2e45]:
+      - tab "メインタブ" [selected] [ref=f2e46] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f2e47]: 🏠
+        - generic [ref=f2e48]: メイン
+      - tab "クエストタブ" [ref=f2e49] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f2e50]: 📝
+        - generic [ref=f2e51]: クエスト
+      - tab "ショップタブ（10コイン所持）" [ref=f2e52] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f2e53]: 🛍️
+        - generic [ref=f2e54]: ショップ
+      - tab "バックパックタブ" [ref=f2e55] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f2e56]: 🎒
+        - generic [ref=f2e57]: バックパック
+      - tab "ガーデンタブ" [ref=f2e58] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f2e59]: 🌿
+        - generic [ref=f2e60]: ガーデン

@@ -1,0 +1,17 @@
+[     465ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-373CG7ZK.js?v=0c4ba20d:21548
+[     501ms] [ERROR] Warning: Received `%s` for a non-boolean attribute `%s`.
+
+If you want to write it to the DOM, pass a string instead: %s="%s" or %s={value.toString()}.%s true font-medium font-medium true font-medium 
+    at span
+    at div
+    at div
+    at div
+    at http://localhost:5174/src/components/PlantDisplay.tsx:21:3
+    at div
+    at main
+    at div
+    at App (http://localhost:5174/src/App.tsx:39:37) @ http://localhost:5174/node_modules/.vite/deps/chunk-373CG7ZK.js?v=0c4ba20d:518
+[     546ms] Access to storage is not allowed from this context.
+[     546ms] Access to storage is not allowed from this context.
+[     547ms] Access to storage is not allowed from this context.
+[     547ms] Access to storage is not allowed from this context.
