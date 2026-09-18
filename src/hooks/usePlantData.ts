@@ -119,7 +119,7 @@ export function usePlantData() {
           
           let newEgg = p.egg;
           
-          if (p.egg && !p.egg.dragonBorn) {
+          if (p.egg if (p.egg && !p.egg.dragonBorn) {if (p.egg && !p.egg.dragonBorn) { p.egg.hasEgg if (p.egg && !p.egg.dragonBorn) {if (p.egg && !p.egg.dragonBorn) { !p.egg.dragonBorn) {
             // 卵がある場合：成長させる
             const newGrowth = Math.min(100, (p.egg.growth || 0) + 15);
             const hatched = newGrowth >= 100 && !p.egg.dragonBorn;
