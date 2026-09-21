@@ -69,7 +69,7 @@ export const PlantDisplay = forwardRef<PlantDisplayRef, PlantDisplayProps>(({
       {/* 元気バー */}
       <div className="w-full max-w-xs mb-4">
         <div className="flex justify-between text-xs mb-1">
-          <span className={getVitalityColor(currentVitality)} font-medium>
+          <span className={`${getVitalityColor(currentVitality)} font-medium`}>
             元気: {Math.round(currentVitality)}% {getVitalityEmoji(currentVitality)}
           </span>
         </div>

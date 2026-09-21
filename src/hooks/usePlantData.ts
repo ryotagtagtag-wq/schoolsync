@@ -72,7 +72,7 @@ export function usePlantData() {
     
     updateData(prev => {
       const newStats = prev.dailyStats.date === today ? prev.dailyStats : { 
-        date: new Date().toISOString().split('T')[0], questsCreated: 0, questsCompleted: 0, questsDeleted: 0, 
+        date: today, questsCreated: 0, questsCompleted: 0, questsDeleted: 0, 
         streakDays: prev.dailyStats.streakDays 
       };
       return {
@@ -89,10 +89,9 @@ export function usePlantData() {
       const task = prev.tasks.find(t => t.id === taskId);
       if (!task) return prev;
       
-      const newCompleted = !task.completed;
-      let expChange = 0;
-      let coinChange = 0;
-      let newStreak = prev.dailyStats.streakDays;
+const newCompleted = !task.completed;
+    let expChange = 0;
+    let coinChange = 0;
       
       if (newCompleted) {
         const minutesSpent = (Date.now() - task.createdAt) / 60000;
@@ -119,7 +118,7 @@ export function usePlantData() {
           
           let newEgg = p.egg;
           
-          if (p.egg if (p.egg && !p.egg.dragonBorn) {if (p.egg && !p.egg.dragonBorn) { p.egg.hasEgg if (p.egg && !p.egg.dragonBorn) {if (p.egg && !p.egg.dragonBorn) { !p.egg.dragonBorn) {
+          if (p.egg && !p.egg.dragonBorn) {
             // 卵がある場合：成長させる
             const newGrowth = Math.min(100, (p.egg.growth || 0) + 15);
             const hatched = newGrowth >= 100 && !p.egg.dragonBorn;
@@ -141,11 +140,13 @@ export function usePlantData() {
         });
         
         const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-        if (prev.dailyStats.lastCompletedDate === today) {
-        } else if (prev.dailyStats.lastCompletedDate === yesterday) {
-          newStreak = prev.dailyStats.streakDays + 1;
-        } else {
-          newStreak = 1;
+        let newStreak = prev.dailyStats.streakDays;
+        if (prev.dailyStats.lastCompletedDate !== today) {
+          if (prev.dailyStats.lastCompletedDate === yesterday) {
+            newStreak = prev.dailyStats.streakDays + 1;
+          } else {
+            newStreak = 1;
+          }
         }
         
         return {
@@ -265,14 +266,15 @@ export function usePlantData() {
   const nextStageExp = getExpToNextStage(activePlant);
   const progress = getGrowthProgress(activePlant);
   
-  return {
-    data, isReady, activePlant, plantStage, nextStageExp, progress, currentVitality,
-    addTask, deleteTask, toggleTask, buyItem, useItem, petPlant,
-    setActivePlant, addPlant, deletePlant, renamePlant,
-    SHOP_ITEMS, PLANT_TYPES,
-    dailyStats: stats,
-    DAILY_QUEST_CREATE_LIMIT: 5, 
-    DAILY_QUEST_COMPLETE_LIMIT: 10, 
-    MIN_COMPLETION_MINUTES: 5,
-  };
+return {
+     data, isReady, activePlant, plantStage, nextStageExp, progress, currentVitality,
+     addTask, deleteTask, toggleTask, buyItem, useItem, petPlant,
+     updateData,
+     setActivePlant, addPlant, deletePlant, renamePlant,
+     SHOP_ITEMS, PLANT_TYPES,
+     dailyStats: stats,
+     DAILY_QUEST_CREATE_LIMIT: 5, 
+     DAILY_QUEST_COMPLETE_LIMIT: 10, 
+     MIN_COMPLETION_MINUTES: 5,
+   };
 }

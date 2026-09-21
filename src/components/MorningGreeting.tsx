@@ -21,20 +21,25 @@ export const MorningGreeting: React.FC<MorningGreetingProps> = ({
 
   const teacherType = getTeacherType(plant.plantTypeId);
 
-  useEffect(() => {
+useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
-    const lastShown = localStorage.getItem('morningGreetingLastShown');
+    let lastShown = null;
+    try {
+      lastShown = localStorage.getItem('morningGreetingLastShown');
+    } catch (e) {
+      console.warn('Unable to access localStorage for morning greeting:', e);
+    }
     
     if (lastShown === today) {
       onComplete();
       return;
     }
-
+    
     setShowModal(true);
     const greetingText = getRandomLine(teacherType, 'morning');
     setGreeting(greetingText);
     setPhase('greeting');
-
+    
     // 卵発見判定（25%）
     if (Math.random() < 0.25 && (!plant.egg || !plant.egg.hasEgg)) {
       setTimeout(() => {
@@ -44,8 +49,12 @@ export const MorningGreeting: React.FC<MorningGreetingProps> = ({
         onEggFound?.({ hasEgg: true, plantType: plant.plantTypeId });
       }, 2000);
     }
-
-    localStorage.setItem('morningGreetingLastShown', today);
+    
+    try {
+      localStorage.setItem('morningGreetingLastShown', today);
+    } catch (e) {
+      console.warn('Unable to save morning greeting timestamp to localStorage:', e);
+    }
   }, [plant.plantTypeId, onComplete]);
 
   // 孵化プログレス自動進行
@@ -112,6 +121,7 @@ export const MorningGreeting: React.FC<MorningGreetingProps> = ({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in">
       <div className="bg-white rounded-xl p-6 m-4 max-w-sm animate-pop-in relative">
+        {/* Close button (only for greeting phase?) */}
         {phase === 'greeting' && (
           <button
             onClick={handleComplete}
@@ -123,34 +133,31 @@ export const MorningGreeting: React.FC<MorningGreetingProps> = ({
         )}
 
         <div className="text-center">
-          <div className="mb-4">
-            {phase === 'eggFound' ? (
-              <img 
-                src="https://ik.imagekit.io/ryopc/%E5%8D%B5%E7%94%BB%E5%83%8F.png" 
-                alt="不思議な卵" 
-                className="w-32 h-32 mx-auto animate-bounce-gentle"
-              />
-            ) : phase === 'hatching' ? (
-              <img 
-                src="https://ik.imagekit.io/ryopc/%E5%8D%B5%E7%94%BB%E5%83%8F.png" 
-                alt="孵化中の卵" 
-                className="w-32 h-32 mx-auto animate-pulse"
-              />
-            ) : phase === 'dragonBorn' || phase === 'nameInput' ? (
-              <img 
-                src="https://ik.imagekit.io/ryopc/%E3%83%88%E3%82%99%E3%83%A9%E3%82%B3%E3%82%99%E3%83%B3%E5%AD%B5%E5%8C%96.png" 
-                alt="ドラゴン" 
-                className="w-40 h-40 mx-auto animate-bounce-gentle"
-              />
-            ) : (
-              <div className="text-6xl mb-4 animate-bounce-gentle" aria-hidden="true">🌱</div>
-            )}
-          </div>
+          {/* Image based on phase */}
+{phase === 'eggFound' || phase === 'hatching' ? (
+             <img
+               src="https://ik.imagekit.io/ryopc/%E5%8D%B5%E7%94%BB%E5%83%8F.png"
+               alt={phase === 'eggFound' ? '不思議な卵' : '孵化中の卵'}
+               className={`w-32 h-32 mx-auto ${phase === 'eggFound' ? 'animate-bounce-gentle' : 'animate-pulse'}`}
+             />
+           ) : phase === 'dragonBorn' || phase === 'nameInput' ? (
+            <img
+              src="https://ik.imagekit.io/ryopc/%E3%83%88%E3%82%99%E3%83%A9%E3%82%B3%E3%82%99%E3%83%B3%E5%AD%B5%E5%8C%96.png"
+              alt="ドラゴン"
+              className="w-40 h-40 mx-auto animate-bounce-gentle"
+            />
+          ) : (
+            <div className="text-6xl mb-4 animate-bounce-gentle" aria-hidden="true">
+              🌱
+            </div>
+          )}
 
+          {/* Greeting text */}
           <p className="text-forest-green text-lg font-medium mb-6 whitespace-pre-line">
             {greeting}
           </p>
 
+          {/* Hatching progress bar */}
           {phase === 'hatching' && (
             <div className="mb-4">
               <div className="h-3 bg-forest-green/10 rounded-full overflow-hidden">
@@ -165,6 +172,7 @@ export const MorningGreeting: React.FC<MorningGreetingProps> = ({
             </div>
           )}
 
+          {/* Name input form */}
           {phase === 'nameInput' && (
             <form onSubmit={handleNameSubmit} className="mt-4">
               <input
@@ -182,6 +190,7 @@ export const MorningGreeting: React.FC<MorningGreetingProps> = ({
             </form>
           )}
 
+          {/* Buttons based on phase */}
           {phase === 'greeting' && (
             <button
               onClick={handleComplete}
@@ -190,7 +199,6 @@ export const MorningGreeting: React.FC<MorningGreetingProps> = ({
               わかった！ 💚
             </button>
           )}
-
           {phase === 'eggFound' && (
             <button
               onClick={handleComplete}
@@ -199,7 +207,6 @@ export const MorningGreeting: React.FC<MorningGreetingProps> = ({
               見守る 🥚
             </button>
           )}
-
           {phase === 'dragonBorn' && !dragonName && (
             <button
               onClick={handleComplete}
@@ -208,24 +215,6 @@ export const MorningGreeting: React.FC<MorningGreetingProps> = ({
               会えた！ 🐉
             </button>
           )}
-
-          {phase === 'nameInput' && (
-            <form onSubmit={handleNameSubmit} className="mt-4">
-              <input
-                type="text"
-                value={dragonName}
-                onChange={e => setDragonName(e.target.value)}
-                placeholder="ドラゴンの名前をつけてね"
-                className="w-full p-3 border border-forest-green/30 rounded-lg text-forest-green placeholder-forest-green/40 mb-3"
-                maxLength={10}
-                autoFocus
-              />
-              <button type="submit" className="w-full btn-primary">
-                名前をつける 🐉
-              </button>
-            </form>
-          )}
-
           {(phase === 'dragonBorn' && dragonName) && (
             <button
               onClick={handleComplete}
