@@ -40,79 +40,84 @@ const App: React.FC = () => {
     updateData,
 } = usePlantData();
 
-    // Debug functions (development only)
-    if (import.meta.env.DEV) {
-      useEffect(() => {
-        window.__QUESTRA_DEBUG = {
-          forceEggFound: () => {
-            updateData(prev => {
-              const plant = prev.plants.find(p => p.id === prev.activePlantId);
-              if (!plant) return prev;
-              const newEgg: EggState = {
-                hasEgg: true,
-                discoveredAt: Date.now(),
-                growth: 0,
-                hatchedAt: undefined,
-                dragonBorn: false,
-                dragonName: undefined,
-                dragonExp: undefined
-              };
-              return {
-                ...prev,
-                plants: prev.plants.map(p =>
-                  p.id === prev.activePlantId ? { ...p, egg: newEgg } : p
-                )
-              };
-            });
-          },
-          forceHatch: () => {
-            updateData(prev => {
-              const plant = prev.plants.find(p => p.id === prev.activePlantId);
-              if (!plant || !plant.egg?.hasEgg) return prev;
-              const hatchedAt = Date.now();
-              return {
-                ...prev,
-                plants: prev.plants.map(p =>
-                  p.id === prev.activePlantId
-                    ? {
-                        ...p,
-                        egg: {
-                          ...plant.egg,
-                          hatchedAt,
-                          dragonBorn: true,
-                          growth: 100
-                        }
-                      }
-                    : p
-                )
-              };
-            });
-          },
-          setDragonName: (name: string) => {
-            updateData(prev => {
-              const plant = prev.plants.find(p => p.id === prev.activePlantId);
-              if (!plant || !plant.egg?.hasEgg) return prev;
-              return {
-                ...prev,
-                plants: prev.plants.map(p =>
-                  p.id === prev.activePlantId
-                    ? {
-                        ...p,
-                        egg: {
-                          ...plant.egg,
-                          dragonName: name.trim() || undefined,
-                          dragonExp: Math.floor(Math.random() * 50) + 50
-                        }
-                      }
-                    : p
-                )
-              };
-            });
-          },
-          getState: () => data
-        };
-      }, [data, updateData]);
-    }
+// Debug functions (development only)
+     if (import.meta.env.DEV) {
+       useEffect(() => {
+         (window as any).__QUESTRA_DEBUG = {
+           forceEggFound: () => {
+             updateData(prev => {
+               const plant = prev.plants.find(p => p.id === prev.activePlantId);
+               if (!plant) return prev;
+               const newEgg: EggState = {
+                 hasEgg: true,
+                 discoveredAt: Date.now(),
+                 growth: 0,
+                 hatchedAt: undefined,
+                 dragonBorn: false,
+                 dragonName: undefined,
+                 dragonExp: undefined
+               };
+               return {
+                 ...prev,
+                 plants: prev.plants.map(p =>
+                   p.id === prev.activePlantId
+                     ? {
+                         ...p,
+                         egg: newEgg
+                       }
+                     : p
+                 )
+               };
+             });
+           },
+           forceHatch: () => {
+             updateData(prev => {
+               const plant = prev.plants.find(p => p.id === prev.activePlantId);
+               if (!plant || !plant.egg?.hasEgg) return prev;
+               const hatchedAt = Date.now();
+               return {
+                 ...prev,
+                 plants: prev.plants.map(p =>
+                   p.id === prev.activePlantId
+                     ? {
+                         ...p,
+                         egg: {
+                           ...plant.egg,
+                           hatchedAt,
+                           dragonBorn: true,
+                           growth: 100
+                         } as EggState
+                       }
+                     : p
+                 )
+               };
+             });
+           },
+           setDragonName: (name: string) => {
+             updateData(prev => {
+               const plant = prev.plants.find(p => p.id === prev.activePlantId);
+               if (!plant || !plant.egg?.hasEgg) return prev;
+               return {
+                 ...prev,
+                 plants: prev.plants.map(p =>
+                   p.id === prev.activePlantId
+                     ? {
+                         ...p,
+                         egg: {
+                           ...plant.egg,
+                           dragonName: name.trim() || undefined,
+                           dragonExp: Math.floor(Math.random() * 50) + 50
+                         } as EggState
+                       }
+                     : p
+                 )
+               };
+             });
+           },
+           getState: () => data
+         };
+       }, [data, updateData]);
+     }
 
     // 朝の挨拶表示制御
   useEffect(() => {

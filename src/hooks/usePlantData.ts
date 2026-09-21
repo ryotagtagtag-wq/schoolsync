@@ -9,29 +9,50 @@ export function usePlantData() {
   
   useEffect(() => { setIsReady(true); }, []);
   
-  // 元気自動再計算（1分ごと）
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setData(prev => {
-        const updatedPlants = prev.plants.map(plant => ({ ...plant, vitality: calculateVitality(plant) }));
-        if (updatedPlants.some((p, i) => p.vitality !== prev.plants[i].vitality)) {
-          return { ...prev, plants: updatedPlants };
-        }
-        return prev;
-      });
-    }, 60000);
-    return () => clearInterval(interval);
-  }, []);
+// 元気自動再計算（1分ごと）
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setData(prev => {
+          const updatedPlants = prev.plants.map(plant => ({ ...plant, vitality: calculateVitality(plant) }));
+          if (updatedPlants.some((p, i) => p.vitality !== prev.plants[i].vitality)) {
+            return { ...prev, plants: updatedPlants };
+          }
+          return prev;
+        });
+      }, 60000);
+      return () => clearInterval(interval);
+    }, []);
   
-  const updateData = useCallback((updater: (prev: PlantData) => PlantData) => {
-    setData(prev => {
-      const next = updater(prev);
-      savePlantData(next);
-      return next;
-    });
-  }, []);
-  
-  const today = new Date().toISOString().split('T')[0];
+const updateData = useCallback((updater: (prev: PlantData) => PlantData) => {
+     setData(prev => {
+       const next = updater(prev);
+       savePlantData(next);
+       return next;
+     });
+   }, []);
+
+   // 日付が変わったら dailyStats をリセット（作成上限など）
+   useEffect(() => {
+     const interval = setInterval(() => {
+       const today = new Date().toISOString().split('T')[0];
+       if (data.dailyStats.date !== today) {
+         updateData(prev => ({
+           ...prev,
+           dailyStats: {
+             date: today,
+             questsCreated: 0,
+             questsCompleted: 0,
+             questsDeleted: 0,
+             streakDays: prev.dailyStats.streakDays,
+             lastCompletedDate: prev.dailyStats.lastCompletedDate
+           }
+         }));
+       }
+     }, 60000);
+     return () => clearInterval(interval);
+   }, [data, updateData]);
+
+   const today = new Date().toISOString().split('T')[0];
   
   const stats = data.dailyStats.date === today ? data.dailyStats : { 
     date: today, questsCreated: 0, questsCompleted: 0, questsDeleted: 0, 
