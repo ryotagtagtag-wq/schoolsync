@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { PlantData, SHOP_ITEMS, PLANT_TYPES } from '../types';
 import { loadPlantData, savePlantData, generateId } from '../utils/storage';
-import { getPlantStage, getExpToNextStage, getGrowthProgress, calculateVitality, applyItemEffect, createPlantInstance } from '../utils/plantLogic';
+import { getPlantStage, getExpToNextStage, getGrowthProgress, calculateVitality, applyItemEffect, createPlantInstance, getPlantType } from '../utils/plantLogic';
 
 export function usePlantData() {
   const [data, setData] = useState<PlantData>(() => loadPlantData());
@@ -9,27 +9,29 @@ export function usePlantData() {
   
   useEffect(() => { setIsReady(true); }, []);
   
-// 元気自動再計算（1分ごと）
-    useEffect(() => {
-      const interval = setInterval(() => {
-        setData(prev => {
-          const updatedPlants = prev.plants.map(plant => ({ ...plant, vitality: calculateVitality(plant) }));
-          if (updatedPlants.some((p, i) => p.vitality !== prev.plants[i].vitality)) {
-            return { ...prev, plants: updatedPlants };
-          }
-          return prev;
+// 元気自動減衰（1分ごと）
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setData(prev => {
+        const updatedPlants = prev.plants.map(plant => {
+          const plantType = getPlantType(plant.plantTypeId);
+          const decayPerMinute = plantType.baseVitalityDecayPerHour / 60;
+          const newVitality = Math.max(0, plant.vitality - decayPerMinute);
+          return { ...plant, vitality: newVitality };
         });
-      }, 60000);
-      return () => clearInterval(interval);
-    }, []);
+        return { ...prev, plants: updatedPlants };
+      });
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
   
-const updateData = useCallback((updater: (prev: PlantData) => PlantData) => {
-     setData(prev => {
-       const next = updater(prev);
-       savePlantData(next);
-       return next;
-     });
-   }, []);
+  const updateData = useCallback((updater: (prev: PlantData) => PlantData) => {
+    setData(prev => {
+      const next = updater(prev);
+      savePlantData(next);
+      return next;
+    });
+  }, []);
 
    // 日付が変わったら dailyStats をリセット（作成上限など）
    useEffect(() => {
@@ -157,7 +159,7 @@ const newCompleted = !task.completed;
             }
           }
           
-          return { ...p, exp: p.exp + expChange, vitality: Math.min(100, calculateVitality(p) + 5), egg: newEgg };
+          return { ...p, exp: p.exp + expChange, vitality: Math.min(100, p.vitality + 5), egg: newEgg };
         });
         
         const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
@@ -240,7 +242,7 @@ const newCompleted = !task.completed;
           return { 
             ...p, 
             exp: p.exp + expGain, 
-            vitality: Math.min(100, calculateVitality(p) + vitalityGain), 
+            vitality: Math.min(100, p.vitality + vitalityGain),
             lastWateredAt: vitalityGain > 0 ? Date.now() : p.lastWateredAt 
           };
         }),
@@ -259,7 +261,7 @@ const newCompleted = !task.completed;
       return {
         ...prev,
         plants: prev.plants.map(p => 
-          p.id === prev.activePlantId ? { ...p, vitality: Math.min(100, calculateVitality(p) + 5) } : p
+          p.id === prev.activePlantId ? { ...p, vitality: Math.min(100, p.vitality + 5) } : p
         ),
       };
     });

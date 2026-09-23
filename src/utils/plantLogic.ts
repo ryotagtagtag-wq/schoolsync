@@ -27,12 +27,9 @@ export function getGrowthProgress(plant: PlantInstance): number {
   return Math.max(0, Math.min(100, progress));
 }
 
-/** 元気の自然減衰を計算して適用（最終水やりからの経過時間ベース） */
+/** 元気の現在値を取得（スタミナは直接保存されている値を返す） */
 export function calculateVitality(plant: PlantInstance): number {
-  const plantType = getPlantType(plant.plantTypeId);
-  const hoursSinceWatered = (Date.now() - plant.lastWateredAt) / (1000 * 60 * 60);
-  const decay = hoursSinceWatered * plantType.baseVitalityDecayPerHour;
-  return Math.max(0, Math.min(100, plant.vitality - decay));
+  return plant.vitality;
 }
 
 /** 元気レベルに応じた状態メッセージを取得 */
