@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [19.x]
+        node-version: [20.x]
 
     steps:
       - uses: actions/checkout@v4
@@ -18,21 +18,17 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "19.x"
+          node-version: ${{ matrix.node-version }}
+          cache: npm
 
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+      - name: Install dependencies
+        run: npm ci --include=optional
 
-      - run: npm ci
-      - run: npm run build
+      - name: Build
+        run: npm run build
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.REACT_APP_TOKEN }}
-          publish_dir: ./build
+          publish_dir: ./dist
