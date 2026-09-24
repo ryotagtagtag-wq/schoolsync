@@ -57,6 +57,24 @@ const App: React.FC = () => {
   };
 
   const handleMorningEggFound = (eggState: any) => {
+    console.log('Egg found!', eggState);
+  };
+
+  if (!isReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-ivory">
+        <div className="text-center">
+          <div className="text-6xl mb-4 animate-bounce-gentle">🌱</div>
+          <p className="text-forest-green text-lg font-medium">Questra を読み込み中...</p>
+          <p className="text-forest-green/60 text-sm mt-2">小さな冒険の準備をしています</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen pb-24">
+      <header className="sticky top-0 z-40 bg-ivory/95 backdrop-blur-sm border-b border-forest-green/10">
         <div className="max-w-md mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-forest-green flex items-center gap-2">
